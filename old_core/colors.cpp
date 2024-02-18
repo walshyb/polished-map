@@ -4,7 +4,6 @@
 #include <cassert>
 
 #pragma warning(push, 0)
-#include <FL/Fl.H>
 #pragma warning(pop)
 
 #include "colors.h"
@@ -138,20 +137,10 @@ void Color::color(Palettes l, Palette p, Hue h, ColorArray v) {
 	}
 }
 
-void Color::color(Palettes l, Palette p, Hue h, Fl_Color f) {
-	uchar *cs = colors(l, p, h);
-	Fl::get_color(f, cs[0], cs[1], cs[2]);
-}
-
 void Color::color(Palettes l, Palette p, HueArray v) {
 	for (int i = 0; i < NUM_HUES; i++) {
 		color(l, p, (Hue)i, v[i]);
 	}
-}
-
-Fl_Color Color::fl_color(Palettes l, Palette p, Hue h) {
-	const uchar *rgb = color(l, p, h);
-	return fl_rgb_color(rgb[0], rgb[1], rgb[2]);
 }
 
 PalVec Color::parse_palettes(const char *f) {

@@ -1,8 +1,7 @@
 #include <algorithm>
 
+// TODO: is this needed?
 #pragma warning(push, 0)
-#include <FL/Fl_PNG_Image.H>
-#include <FL/fl_draw.H>
 #pragma warning(pop)
 
 #include "utils.h"

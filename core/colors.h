@@ -4,14 +4,14 @@
 #include <vector>
 #include <array>
 
+// TODO: is this needed?
 #pragma warning(push, 0)
-#include <FL/Enumerations.H>
 #pragma warning(pop)
 
 #include "utils.h"
 
-#define RGB5C(x) (uchar)((x) * 33 / 4) // 5-bit to 8-bit
-#define CRGB5(c) (uchar)((c) / 8)      // 8-bit to 5-bit
+#define RGB5C(x) (unsigned char)((x) * 33 / 4) // 5-bit to 8-bit
+#define CRGB5(c) (unsigned char)((c) / 8)      // 8-bit to 5-bit
 
 enum class Palettes { MORN, DAY, NITE, DARKNESS, INDOOR, CUSTOM };
 
@@ -30,7 +30,7 @@ enum class Roof_Palettes { ROOF_CUSTOM, ROOF_DAY_NITE, ROOF_MORN_DAY_NITE,
 #define NUM_CHANNELS 3
 #define NUM_ROOF_PALETTES 5
 
-typedef std::array<uchar, NUM_CHANNELS> ColorArray;
+typedef std::array<unsigned char, NUM_CHANNELS> ColorArray;
 typedef std::array<ColorArray, NUM_HUES> HueArray;
 typedef std::vector<HueArray> PalVec;
 
@@ -38,15 +38,13 @@ class Color {
 private:
 	static void color(Palettes l, Palette p, Hue h, ColorArray v);
 	static void color(Palettes l, Palette p, HueArray v);
-	static uchar *colors(Palettes l, Palette p, Hue h);
+	static unsigned char *colors(Palettes l, Palette p, Hue h);
 public:
-	static uchar desaturated(uchar r, uchar g, uchar b);
+	static unsigned char desaturated(unsigned char r, unsigned char g, unsigned char b);
 	static Hue ordered_hue(int i);
-	static uchar hue_mono(Hue h);
-	static Hue mono_hue(uchar c);
-	static const uchar *color(Palettes l, Palette p, Hue h);
-	static void color(Palettes l, Palette p, Hue h, Fl_Color f);
-	static Fl_Color fl_color(Palettes l, Palette p, Hue h);
+	static unsigned char hue_mono(Hue h);
+	static Hue mono_hue(unsigned char c);
+	static const unsigned char *color(Palettes l, Palette p, Hue h);
 	static PalVec parse_palettes(const char *f);
 	static Palettes read_palettes(const char *f, Palettes pals);
 	static bool read_roof_colors(const char *f, uint8_t map_group, Roof_Palettes roof_palettes);

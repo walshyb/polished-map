@@ -3,8 +3,8 @@
 
 #include <string>
 
+// Is this needed?
 #pragma warning(push, 0)
-#include <FL/fl_types.h>
 #pragma warning(pop)
 
 #include "tile.h"

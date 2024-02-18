@@ -4,8 +4,8 @@
 #include <cstdlib>
 #include <cstring>
 
+// TODO: Is this needed?
 #pragma warning(push, 0)
-#include <FL/fl_types.h>
 #pragma warning(pop)
 
 #include "utils.h"
@@ -29,7 +29,7 @@ protected:
 	uint8_t _id;
 	Palette _palette;
 	Hue _hues[TILE_AREA];
-	uchar _rgb[LINE_PX * LINE_PX * NUM_CHANNELS];
+	unsigned char _rgb[LINE_PX * LINE_PX * NUM_CHANNELS];
 public:
 	Tile(uint8_t id);
 	inline uint8_t id(void) const { return _id; }
@@ -37,12 +37,12 @@ public:
 	inline Palette palette(void) const { return _palette; }
 	inline void palette(Palette p) { _palette = p; }
 	inline bool priority(void) const { return _palette >= Palette::PRIORITY_GRAY; }
-	inline const uchar *rgb(void) const { return _rgb; }
+	inline const unsigned char *rgb(void) const { return _rgb; }
 	inline Hue hue(int x, int y) const { return _hues[y * TILE_SIZE + x]; }
-	inline uchar *pixel(int x, int y) { return _rgb + (y * LINE_BYTES + x * NUM_CHANNELS) * ZOOM_FACTOR; }
-	inline const uchar *const_pixel(int x, int y) const { return _rgb + (y * LINE_BYTES + x * NUM_CHANNELS) * ZOOM_FACTOR; }
+	inline unsigned char *pixel(int x, int y) { return _rgb + (y * LINE_BYTES + x * NUM_CHANNELS) * ZOOM_FACTOR; }
+	inline const unsigned char *const_pixel(int x, int y) const { return _rgb + (y * LINE_BYTES + x * NUM_CHANNELS) * ZOOM_FACTOR; }
 	bool is_blank(void) const;
-	void pixel(int x, int y, Hue h, uchar r, uchar g, uchar b);
+	void pixel(int x, int y, Hue h, unsigned char r, unsigned char g, unsigned char b);
 	void clear(void);
 	void copy(const Tile *t);
 	void update_palettes(Palettes l);

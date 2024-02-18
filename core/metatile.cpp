@@ -1,5 +1,7 @@
 #include "utils.h"
 #include "metatile.h"
+#include <emscripten.h>
+#include <emscripten/bind.h>
 
 Metatile::Metatile(uint8_t id) : _id(id), _tile_ids(), _collisions(), _bin_collisions() {}
 
