@@ -1,7 +1,6 @@
 #include <cstdio>
 
 #include "map.h"
-#include "parse-asm.h"
 
 void Map_Attributes::clear() {
 	group = 0;
@@ -101,8 +100,6 @@ void Map::redo() {
 }
 
 Map::Result Map::read_blocks(const char *f) {
-	if (ends_with_ignore_case(f, ".map")) { return read_asm_blocks(f); }
-
 	bool too_long = false;
 
 	FILE *file = fl_fopen(f, "rb");
@@ -124,34 +121,6 @@ Map::Result Map::read_blocks(const char *f) {
 	}
 
 	delete [] data;
-	return (_result = too_long ? Result::MAP_TOO_LONG : Result::MAP_OK);
-}
-
-Map::Result Map::read_asm_blocks(const char *f) {
-	Parsed_Asm data(f);
-	if (data.result() != Parsed_Asm::Result::ASM_OK) {
-		return (_result = Result::MAP_BAD_FILE); // cannot parse file
-	}
-
-	bool too_long = false;
-	size_t c = data.size();
-	if (c < size()) { return (_result = Result::MAP_TOO_SHORT); } // too-short CHR
-	if (c > size()) { too_long = true; }
-
-	FILE *file = fl_fopen(f, "rb");
-	if (file == NULL) { return (_result = Result::MAP_BAD_FILE); } // cannot load file
-
-	for (uint8_t y = 0; y < (size_t)_height; y++) {
-		for (uint8_t x = 0; x < (size_t)_width; x++) {
-			size_t i = (size_t)y * _width + (size_t)x;
-			uint8_t id = data.get(i);
-			_blocks[i] = new Block(y, x, id);
-		}
-	}
-
-	fclose(file);
-	_mod_time = file_modified(f);
-
 	return (_result = too_long ? Result::MAP_TOO_LONG : Result::MAP_OK);
 }
 
@@ -177,9 +146,9 @@ const char *Map::error_message(Result result) {
 	case Result::MAP_TOO_SHORT:
 		return "File ends too early.";
 	case Result::MAP_TOO_LONG:
-		return "The .blk file is larger than the specified size.";
+		return "The .ablk/.blk file is larger than the specified size.";
 	case Result::MAP_NULL:
-		return "No *.blk file chosen.";
+		return "No .ablk/.blk file chosen.";
 	default:
 		return "Unspecified error.";
 	}

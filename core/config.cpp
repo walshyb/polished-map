@@ -4,6 +4,8 @@
 #include "utils.h"
 #include "config.h"
 
+#define 	FL_PATH_MAX   2048
+
 bool Config::_512_tiles = false, Config::_0_before_1 = false, Config::_drag_and_drop = true;
 bool Config::_print_grid = false, Config::_print_ids = false, Config::_print_priority = false, Config::_print_events = false,
 	Config::_print_warp_ids = false;
@@ -21,7 +23,7 @@ const char *Config::gfx_roof_dir() {
 
 bool Config::project_path_from_blk_path(const char *blk_path, char *project_path) {
 	char scratch_path[FL_PATH_MAX] = {};
-	fl_filename_absolute(scratch_path, blk_path);
+	//fl_filename_absolute(scratch_path, blk_path);
 	char main_asm[FL_PATH_MAX] = {};
 	for (;;) {
 		char *pivot = strrchr(scratch_path, *DIR_SEP);
@@ -219,7 +221,7 @@ void Config::special_pal_path(char *dest, const char *root, const char *filename
 	// try unique map palette
 	if (filename) {
 		strcpy(dest, filename);
-		fl_filename_setext(dest, FL_PATH_MAX, ".pal");
+		//fl_filename_setext(dest, FL_PATH_MAX, ".pal");
 		if (file_exists(dest)) { return; }
 	}
 	// try unique landmark palette

@@ -13,13 +13,13 @@
 static const Hue hue_order[NUM_HUES] = {Hue::WHITE, Hue::LIGHT, Hue::DARK, Hue::BLACK};
 
 // Canonical hue color channels
-static const uchar hue_monos[NUM_HUES] = {0xFF, 0x55, 0xAA, 0x00}; // WHITE, DARK, LIGHT, BLACK
+static const unsigned char hue_monos[NUM_HUES] = {0xFF, 0x55, 0xAA, 0x00}; // WHITE, DARK, LIGHT, BLACK
 
 // Monochrome-color-to-hue conversion
 static const Hue mono_hues[NUM_HUES] = {Hue::BLACK, Hue::DARK, Hue::LIGHT, Hue::WHITE}; // 00-3F, 40-7F, 80-BF, C0-FF
 
 // Palettes x Palette x Hue x RGB
-static uchar tileset_colors[NUM_PALETTE_SETS][NUM_PALETTES][NUM_HUES][NUM_CHANNELS] = {
+static unsigned char tileset_colors[NUM_PALETTE_SETS][NUM_PALETTES][NUM_HUES][NUM_CHANNELS] = {
 	{ // MORN
 		// WHITE, DARK, LIGHT, BLACK
 		{RGB5(28,31,16), RGB5(13,13,13), RGB5(21,21,21), RGB5( 7, 7, 7)}, // GRAY
@@ -88,47 +88,47 @@ static uchar tileset_colors[NUM_PALETTE_SETS][NUM_PALETTES][NUM_HUES][NUM_CHANNE
 	},
 };
 
-static const uchar monochrome_colors[NUM_HUES][NUM_CHANNELS] = {
+static const unsigned char monochrome_colors[NUM_HUES][NUM_CHANNELS] = {
 	// WHITE, DARK, LIGHT, BLACK
 	RGBX(0xFFFFFF), RGBX(0x555555), RGBX(0xAAAAAA), RGBX(0x000000)
 };
 
-static const uchar undefined_colors[NUM_HUES][NUM_CHANNELS] = {
+static const unsigned char undefined_colors[NUM_HUES][NUM_CHANNELS] = {
 	// WHITE, DARK, LIGHT, BLACK
 	RGBX(0xABCDEF), RGBX(0x456789), RGBX(0x789ABC), RGBX(0x123456)
 };
 
-uchar Color::desaturated(uchar r, uchar g, uchar b) {
+unsigned char Color::desaturated(unsigned char r, unsigned char g, unsigned char b) {
 	// Same formula as Fl_Image::desaturate()
-	return (uchar)((r * 31 + g * 61 + b * 8) / 100);
+	return (unsigned char)((r * 31 + g * 61 + b * 8) / 100);
 }
 
 Hue Color::ordered_hue(int i) {
 	return hue_order[i];
 }
 
-uchar Color::hue_mono(Hue h) {
+unsigned char Color::hue_mono(Hue h) {
 	return hue_monos[(int)h];
 }
 
-Hue Color::mono_hue(uchar c) {
+Hue Color::mono_hue(unsigned char c) {
 	return mono_hues[c / (0x100 / NUM_HUES)]; // [0, 255] -> [0, 3]
 }
 
-const uchar *Color::monochrome_color(Hue h) {
+const unsigned char *Color::monochrome_color(Hue h) {
 	return monochrome_colors[(int)h];
 }
 
-const uchar *Color::undefined_color(Hue h) {
+const unsigned char *Color::undefined_color(Hue h) {
 	return undefined_colors[(int)h];
 }
 
-const uchar *Color::color(Palettes l, Palette p, Hue h) {
+const unsigned char *Color::color(Palettes l, Palette p, Hue h) {
 	return tileset_colors[(int)l][(int)p][(int)h];
 }
 
 void Color::color(Palettes l, Palette p, Hue h, ColorArray v) {
-	uchar *cs = tileset_colors[(int)l][(int)p][(int)h];
+	unsigned char *cs = tileset_colors[(int)l][(int)p][(int)h];
 	for (int i = 0; i < NUM_CHANNELS; i++) {
 		cs[i] = RGB5C(v[i]);
 	}
@@ -137,7 +137,7 @@ void Color::color(Palettes l, Palette p, Hue h, ColorArray v) {
 /*
 // TODO: save this 
 void Color::color(Palettes l, Palette p, Hue h, Fl_Color f) {
-	uchar *cs = tileset_colors[(int)l][(int)p][(int)h];
+	unsigned char *cs = tileset_colors[(int)l][(int)p][(int)h];
 	Fl::get_color(f, cs[0], cs[1], cs[2]);
 }*/
 
@@ -166,7 +166,7 @@ PalVec Color::parse_palettes(const char *f) {
 			if (hue == 0 && channel == 0) {
 				colors.emplace_back();
 			}
-			colors[palette][(int)ordered_hue(hue)][channel] = (uchar)v;
+			colors[palette][(int)ordered_hue(hue)][channel] = (unsigned char)v;
 			if (++channel == NUM_CHANNELS) {
 				channel = 0;
 				if (++hue == NUM_HUES) {
@@ -330,17 +330,28 @@ bool Color::read_roof_colors(const char *f, uint8_t map_group, Roof_Palettes roo
 		color(palettes[k], Palette::ROOF, Hue::LIGHT, roof_colors[ps[k*2]][(int)ordered_hue(hs[k*2])]);
 		color(palettes[k], Palette::ROOF, Hue::DARK,  roof_colors[ps[k*2+1]][(int)ordered_hue(hs[k*2+1])]);
 	}
+
+
+  // TODO: save this
+  /*
 	if (roof_palettes == Roof_Palettes::ROOF_DAY_NITE || roof_palettes == Roof_Palettes::ROOF_DAY_NITE_CUSTOM) {
 		color(Palettes::MORN, Palette::ROOF, Hue::LIGHT, fl_color(Palettes::DAY, Palette::ROOF, Hue::LIGHT));
 		color(Palettes::MORN, Palette::ROOF, Hue::DARK,  fl_color(Palettes::DAY, Palette::ROOF, Hue::DARK));
-	}
+	}*/
 	return true;
 }
 
 static const char *palettes_names[NUM_PALETTE_SETS] = {"morn", "day", "nite", "indoor", "custom"};
 static const char *palette_names[NUM_PALETTES] = {"gray", "red", "green", "water", "yellow", "brown", "roof", "text"};
 
+/**
+ * Write palettes to a file.
+ * @param f the file to write to
+ * @return true if the file was written successfully
+ */
 bool Color::write_palettes(const char *f) {
+  // TODO save
+  /*
 	FILE *file = fl_fopen(f, "wb");
 	if (!file) { return false; }
 	for (int l = 0; l < NUM_PALETTE_SETS; l++) {
@@ -348,7 +359,7 @@ bool Color::write_palettes(const char *f) {
 		for (int p = 0; p < NUM_PALETTES; p++) {
 			fprintf(file, "\tRGB ");
 			for (int h = 0; h < NUM_HUES; h++) {
-				const uchar *rgb = color((Palettes)l, (Palette)p, ordered_hue(h));
+				const unsigned char *rgb = color((Palettes)l, (Palette)p, ordered_hue(h));
 				if (h > 0) {
 					fprintf(file, ", ");
 				}
@@ -358,6 +369,7 @@ bool Color::write_palettes(const char *f) {
 		}
 	}
 	fclose(file);
+  */
 	return true;
 }
 
