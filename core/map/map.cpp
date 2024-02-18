@@ -153,3 +153,4 @@ const char *Map::error_message(Result result) {
 		return "Unspecified error.";
 	}
 }
+

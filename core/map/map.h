@@ -31,7 +31,6 @@ public:
 private:
 	Map_Attributes _attributes;
 	uint8_t _width, _height;
-	Block **_blocks;
 	Result _result;
 	bool _modified;
 	std::deque<Map_State> _history, _future;
@@ -54,10 +53,6 @@ public:
 	inline bool is_outside(void) const { return _attributes.environment == "TOWN" || _attributes.environment == "ROUTE"; }
 	void size(uint8_t w, uint8_t h);
 	inline size_t size(void) const { return (size_t)_width * (size_t)_height; }
-	inline Block *block(uint8_t x, uint8_t y) const { return _blocks[(size_t)y * _width + (size_t)x]; }
-	inline Block *block(size_t i) const { return _blocks[i]; }
-	Block *block_under(Event *e);
-	void block(uint8_t x, uint8_t y, Block *b);
 	inline Result result(void) const { return _result; }
 	inline bool modified(void) const { return _modified; }
 	inline void modified(bool m) { _modified = m; }
