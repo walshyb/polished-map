@@ -5,10 +5,16 @@
 
 extern "C" {
   EMSCRIPTEN_KEEPALIVE
-  void processFile(const char* fileData, size_t size, const char* filename) {
+  void processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
     // Process file data here
     // Example: Printing the first 10 characters
     std::cout << "File: " << filename << std::endl; 
-    std::cout << "Size: " << size << std::endl; 
+    std::cout << "File Size: " << bufferSize << std::endl; 
+
+    for(size_t i = 0; i < bufferSize; i++) {
+      // Access buffer element
+      uint8_t value = *(fileDataPtr + i);
+      std::cout << value << std::endl;
+    }
   }
 }
