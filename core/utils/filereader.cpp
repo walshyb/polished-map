@@ -1,13 +1,13 @@
 #include <emscripten.h>
 #include <stdio.h>
+#include <iostream>
+
 
 extern "C" {
   EMSCRIPTEN_KEEPALIVE
-  void processFile(const char* fileData, size_t size) {
+  void processFile(const char* fileData, size_t size, const char* filename) {
     // Process file data here
     // Example: Printing the first 10 characters
-    for (int i = 0; i < 10; ++i) {
-      printf("%c", fileData[i]);
-    }
+    std::cout << "File: " << filename << std::endl; 
   }
 }

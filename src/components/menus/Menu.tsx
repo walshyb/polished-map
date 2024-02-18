@@ -1,3 +1,5 @@
+import { processFile } from '../../utils/wasm-funcs';
+
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget;
 }
@@ -13,8 +15,8 @@ export default function Menu() {
       console.log(file.name);
 
       // Pass arrayBuffer to WebAssembly module
-      //window._processFile(arrayBuffer, arrayBuffer.byteLength, 'junk');
-      window._processFile('junk');
+      processFile(arrayBuffer, arrayBuffer.byteLength, 'junk');
+      //window._processFile('junk');
 
 
       console.log('done');
