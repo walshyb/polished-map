@@ -20,3 +20,5 @@ include/FL/
 *.cppcheck
 
 .DS_Store
+
+node_modules/
