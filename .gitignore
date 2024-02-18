@@ -18,3 +18,5 @@ include/FL/
 
 # no static analysis files
 *.cppcheck
+
+.DS_Store
