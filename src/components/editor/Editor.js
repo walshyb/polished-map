@@ -1,5 +1,5 @@
 import SpriteViewer from "./SpriteViewer";
-import Map from "./Map";
+import Map from "./map/Map";
 
 export default function Editor() {
   return (
