@@ -12,14 +12,7 @@
 #include <fstream>
 #include <sstream>
 
-#pragma warning(push, 0)
-#pragma warning(pop)
-
-#ifdef _WIN32
-#define DIR_SEP "\\"
-#else
 #define DIR_SEP "/"
-#endif
 
 #ifndef _countof
 #define _countof(a) (sizeof(a) / sizeof(a[0]))
