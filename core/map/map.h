@@ -4,7 +4,8 @@
 #include <deque>
 #include <vector>
 
-#include "utils.h"
+#include "../utils.h"
+#include "block.h"
 
 #define MAX_HISTORY_SIZE 100
 

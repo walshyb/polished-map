@@ -1,3 +1,5 @@
+#include "../utils.h"
+
 class Block {
 private:
 	uint8_t _row, _col;
@@ -8,6 +10,6 @@ public:
 	inline uint8_t col(void) const { return _col; }
 	inline void coords(uint8_t row, uint8_t col) { _row = row; _col = col; }
 	inline uint8_t id(void) const { return _id; }
-	inline void id(uint8_t id) { _id = id; update_label(); }
+	inline void id(uint8_t id) { _id = id; }
 };
 
