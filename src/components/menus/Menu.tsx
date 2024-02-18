@@ -7,19 +7,13 @@ export default function Menu() {
   
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file: any = event?.target.files && event.target.files[0];
-    console.log(file);
     
     if (file) {
       // Convert file to ArrayBuffer
-      const arrayBuffer = await file.arrayBuffer();
-      console.log(file.name);
+      const arrayBuffer: ArrayBuffer = await file.arrayBuffer();
 
       // Pass arrayBuffer to WebAssembly module
-      processFile(arrayBuffer, arrayBuffer.byteLength, 'junk');
-      //window._processFile('junk');
-
-
-      console.log('done');
+      processFile(arrayBuffer, arrayBuffer.byteLength, file.name);
     }
   };
 

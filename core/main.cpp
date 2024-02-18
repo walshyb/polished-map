@@ -15,5 +15,7 @@ int main(int argc, char **argv) {
   // Initialize blocks
   Map map = Map();
 
+  return 0;
+
 }
 

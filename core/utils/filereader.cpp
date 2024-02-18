@@ -9,5 +9,6 @@ extern "C" {
     // Process file data here
     // Example: Printing the first 10 characters
     std::cout << "File: " << filename << std::endl; 
+    std::cout << "Size: " << size << std::endl; 
   }
 }
