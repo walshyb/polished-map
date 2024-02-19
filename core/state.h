@@ -13,7 +13,6 @@ public:
   }
 
   Map *getMap();
-
 private:
   AppState();
   ~AppState();
