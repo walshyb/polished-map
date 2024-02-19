@@ -14,6 +14,7 @@
 #include "widgets.h"
 #include "utils.h"
 #include "option-dialogs.h"
+#include "parse-asm.h"
 
 Option_Dialog::Option_Dialog(int w, const char *t) : _width(w), _title(t), _canceled(false),
 	_dialog(NULL), _content(NULL), _ok_button(NULL), _cancel_button(NULL) {}
@@ -162,12 +163,16 @@ bool Map_Options_Dialog::guess_map_size(const char *filename, const char *direct
 	_map_header->copy_label(buffer);
 
 	size_t fs = file_size(filename);
+	if (ends_with_ignore_case(filename, ".map")) {
+		Parsed_Asm data(filename);
+		fs = data.size();
+	}
 	sprintf(buffer, "(%zu B)", fs);
 	_map_size->copy_label(buffer);
 	add_valid_sizes(fs);
 
 	std::cmatch cm;
-	std::regex rx(".+\\.([0-9]+)x([0-9]+)(?:\\.[A-Za-z0-9_-]+)?\\.[Aa]?[Bb][Ll][Kk]");
+	std::regex rx(".+\\.([0-9]+)x([0-9]+)(?:\\.[A-Za-z0-9_-]+)?\\.[Bb][Ll][Kk]");
 	std::regex_match(filename, cm, rx);
 	size_t n = cm.size();
 	if (n == 3) {
@@ -201,6 +206,7 @@ bool Map_Options_Dialog::guess_map_size(const char *filename, const char *direct
 		}
 		if (macro != "map_const"   // "map_const": pokecrystal
 			&& macro != "mapgroup" // "mapgroup": pokecrystal pre-2018
+			&& macro != "mapconst" // "mapconst": pokered
 		) { continue; }
 		bool w_x_h = macro == "map_const";
 
@@ -233,7 +239,7 @@ std::string Map_Options_Dialog::guess_map_tileset(const char *filename, const ch
 	if (!filename) { return ""; }
 
 	std::cmatch cm;
-	std::regex rx(".+\\.([A-Za-z0-9_-]+)\\.[Aa]?[Bb][Ll][Kk]");
+	std::regex rx(".+\\.([A-Za-z0-9_-]+)\\.[Bb][Ll][Kk]");
 	std::regex_match(filename, cm, rx);
 	size_t n = cm.size();
 	if (n == 2) {
@@ -244,27 +250,28 @@ std::string Map_Options_Dialog::guess_map_tileset(const char *filename, const ch
 	remove_dot_ext(filename, map_name);
 
 	char map_headers[FL_PATH_MAX] = {};
-	Config::map_headers_path(map_headers, directory);
+	bool map_headers_exist = Config::map_headers_path(map_headers, directory);
 
-	std::ifstream ifs;
-	open_ifstream(ifs, map_headers);
-	if (!ifs.good()) { return ""; }
+	if (map_headers_exist) {
+		std::ifstream ifs;
+		open_ifstream(ifs, map_headers);
+		if (!ifs.good()) { return ""; }
 
-	while (ifs.good()) {
-		std::string line;
-		std::getline(ifs, line);
-		remove_comment(line);
-		trim(line);
+		while (ifs.good()) {
+			std::string line;
+			std::getline(ifs, line);
+			remove_comment(line);
+			trim(line);
 
-		std::istringstream lss(line);
+			std::istringstream lss(line);
 
-		std::string macro;
-		lss >> macro;
-		if (macro != "map_header" && macro != "map") { continue; }
+			std::string macro;
+			lss >> macro;
+			if (macro != "map_header" && macro != "map") { continue; }
 
-		std::string map_label;
-		std::getline(lss, map_label, ',');
-		trim(map_label);
+			std::string map_label;
+			std::getline(lss, map_label, ',');
+			trim(map_label);
 #ifdef _WIN32
 			// Windows filenames are case-insensitive
 			if (!equals_ignore_case(map_label, map_name)) { continue; }
@@ -272,44 +279,82 @@ std::string Map_Options_Dialog::guess_map_tileset(const char *filename, const ch
 			if (map_label != map_name) { continue; }
 #endif
 
-		std::string tileset_name;
-		std::getline(lss, tileset_name, ',');
-		trim(tileset_name);
-		if (starts_with(tileset_name, "TILESET_")) {
-			tileset_name.erase(0, strlen("TILESET_"));
-			lowercase(tileset_name);
+			std::string tileset_name;
+			std::getline(lss, tileset_name, ',');
+			trim(tileset_name);
+			if (starts_with(tileset_name, "TILESET_")) {
+				tileset_name.erase(0, strlen("TILESET_"));
+				lowercase(tileset_name);
+			}
+			else if (starts_with(tileset_name, "$")) {
+				tileset_name.erase(0, strlen("$"));
+				int ti = strtol(tileset_name.c_str(), NULL, 16);
+				char tileset_num[16] = {};
+				sprintf(tileset_num, "%02d", ti);
+				tileset_name = tileset_num;
+			}
+			else if (std::all_of(RANGE(tileset_name), isdigit)) {
+				if (tileset_name.length() == 1) {
+					tileset_name = "0" + tileset_name;
+				}
+			}
+			else {
+				tileset_name.erase();
+			}
+
+			std::getline(lss, attrs.environment, ',');
+			trim(attrs.environment);
+
+			std::getline(lss, attrs.landmark, ',');
+			trim(attrs.landmark);
+			lowercase(attrs.landmark);
+
+			std::string skip_token;
+			std::getline(lss, skip_token, ','); // music
+			std::getline(lss, skip_token, ','); // phone service flag
+
+			std::getline(lss, attrs.palette, ',');
+			trim(attrs.palette);
+
+			return tileset_name;
 		}
-		else if (starts_with(tileset_name, "$")) {
-			tileset_name.erase(0, strlen("$"));
-			int ti = strtol(tileset_name.c_str(), NULL, 16);
-			char tileset_num[16] = {};
-			sprintf(tileset_num, "%02d", ti);
-			tileset_name = tileset_num;
-		}
-		else if (std::all_of(tileset_name.begin(), tileset_name.end(), isdigit)) {
-			if (tileset_name.length() == 1) {
-				tileset_name = "0" + tileset_name;
+	}
+	else {
+		char map_header[FL_PATH_MAX] = {};
+		Config::map_header_path(map_header, directory, map_name);
+
+		std::ifstream ifs;
+		open_ifstream(ifs, map_header);
+		if (!ifs.good()) { return ""; }
+
+		while (ifs.good()) {
+			std::string line;
+			std::getline(ifs, line);
+			remove_comment(line);
+			trim(line);
+
+			std::istringstream lss(line);
+
+			std::string macro;
+			lss >> macro;
+			if (macro == "map_header") {
+				std::string skip_token;
+				std::getline(lss, skip_token, ','); // map name
+				std::getline(lss, skip_token, ','); // map ID
+
+				std::string tileset_name;
+				std::getline(lss, tileset_name, ',');
+				trim(tileset_name);
+				lowercase(tileset_name);
+				return tileset_name;
+			}
+			else if (macro == "db") {
+				std::string tileset_name;
+				lss >> tileset_name;
+				lowercase(tileset_name);
+				return tileset_name;
 			}
 		}
-		else {
-			tileset_name.erase();
-		}
-
-		std::getline(lss, attrs.environment, ',');
-		trim(attrs.environment);
-
-		std::getline(lss, attrs.landmark, ',');
-		trim(attrs.landmark);
-		lowercase(attrs.landmark);
-
-		std::string skip_token;
-		std::getline(lss, skip_token, ','); // music
-		std::getline(lss, skip_token, ','); // phone service flag
-
-		std::getline(lss, attrs.palette, ',');
-		trim(attrs.palette);
-
-		return tileset_name;
 	}
 
 	return "";
@@ -392,8 +437,7 @@ bool Map_Options_Dialog::limit_blk_options(const char *filename, const char *dir
 	_max_tileset_name_length = 0;
 
 	char tileset_directory[FL_PATH_MAX] = {};
-	strcpy(tileset_directory, directory);
-	strcat(tileset_directory, Config::gfx_tileset_dir());
+	Config::gfx_tileset_dir(tileset_directory, directory);
 
 	dirent **list;
 	int n = fl_filename_list(tileset_directory, &list);
@@ -407,9 +451,10 @@ bool Map_Options_Dialog::limit_blk_options(const char *filename, const char *dir
 		const char *name = list[i]->d_name;
 		if (ends_with_ignore_case(name, ".colored.png")) { continue; } // ignore utils/metatiles.py renders
 		int ext_len = ends_with_ignore_case(name, ".2bpp.lz") ? strlen(".2bpp.lz") :
-			          ends_with_ignore_case(name, ".2bpp.unique.lz") ? strlen(".2bpp.unique.lz") : // for Red++ 3.0's unique tilesets
-			          ends_with_ignore_case(name, ".2bpp") ? strlen(".2bpp") :
-			          ends_with_ignore_case(name, ".png") ? strlen(".png") : 0;
+			ends_with_ignore_case(name, ".2bpp.unique.lz") ? strlen(".2bpp.unique.lz") : // for Red++ 3.0's unique tilesets
+			ends_with_ignore_case(name, ".2bpp") ? strlen(".2bpp") :
+			ends_with_ignore_case(name, ".chr") ? strlen(".chr") :
+			ends_with_ignore_case(name, ".png") ? strlen(".png") : 0;
 		if (ext_len) {
 			std::string tileset_filename = add_tileset(name, ext_len, pretty_names);
 			char guessable_trimmed[FL_PATH_MAX] = {};
@@ -435,16 +480,16 @@ bool Map_Options_Dialog::limit_blk_options(const char *filename, const char *dir
 	_max_roof_name_length = text_width("(none)", 6);
 
 	char roof_directory[FL_PATH_MAX] = {};
-	strcpy(roof_directory, directory);
-	strcat(roof_directory, Config::gfx_roof_dir());
+	Config::gfx_roof_dir(roof_directory, directory);
 
 	n = fl_filename_list(roof_directory, &list);
 	if (n >= 0) {
 		for (int i = 0; i < n; i++) {
 			const char *name = list[i]->d_name;
-			int ext_len = ends_with(name, ".2bpp.lz") ? strlen(".2bpp.lz") :
-			              ends_with(name, ".2bpp") ? strlen(".2bpp") :
-			              ends_with(name, ".png") ? strlen(".png") : 0;
+			int ext_len = ends_with_ignore_case(name, ".2bpp.lz") ? strlen(".2bpp.lz") :
+			              ends_with_ignore_case(name, ".2bpp") ? strlen(".2bpp") :
+			              ends_with_ignore_case(name, ".chr") ? strlen(".chr") :
+			              ends_with_ignore_case(name, ".png") ? strlen(".png") : 0;
 			if (ext_len) {
 				add_roof(name, ext_len);
 			}

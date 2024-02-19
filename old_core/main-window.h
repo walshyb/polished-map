@@ -54,11 +54,11 @@ private:
 	Fl_Menu_Item *_morn_mi = NULL, *_day_mi = NULL, *_night_mi = NULL, *_darkness_mi = NULL, *_indoor_mi = NULL,
 		*_custom_mi = NULL;
 	Fl_Menu_Item *_blocks_mode_mi = NULL, *_events_mode_mi = NULL;
-	Fl_Menu_Item *_allow_512_tiles_mi = NULL, *_arrange_0_before_1_mi = NULL, *_auto_events_mi = NULL, *_special_palettes_mi = NULL,
-		*_roof_colors_mi = NULL, *_drag_and_drop_mi = NULL, *_overworld_map_size_mi = NULL;
+	Fl_Menu_Item *_monochrome_mi = NULL, *_allow_priority_mi = NULL, *_allow_256_tiles_mi = NULL, *_auto_events_mi = NULL,
+		*_special_palettes_mi = NULL, *_roof_colors_mi = NULL, *_drag_and_drop_mi = NULL, *_overworld_map_size_mi = NULL;
 	Fl_Menu_Item *_roof_custom_mi = NULL, *_roof_day_nite_mi = NULL, *_roof_morn_day_nite_mi = NULL,
 		*_roof_day_nite_custom_mi = NULL, *_roof_morn_day_nite_custom_mi = NULL;
-	Toolbar_Button *_new_tb, *_open_tb, *_load_event_script_tb, *_reload_event_script_tb = NULL, *_save_tb, *_print_tb,
+	Toolbar_Button *_new_tb, *_open_tb, *_load_event_script_tb, *_reload_event_script_tb, *_save_tb, *_print_tb,
 		*_undo_tb, *_redo_tb, *_add_sub_tb, *_resize_tb, *_change_tileset_tb, *_change_roof_tb, *_edit_tileset_tb,
 		*_edit_roof_tb, *_load_palettes_tb, *_edit_current_palettes_tb;
 	Toolbar_Toggle_Button *_grid_tb, *_rulers_tb, *_zoom_tb, *_ids_tb, *_hex_tb, *_show_events_tb, *_show_warp_ids_tb,
@@ -94,6 +94,7 @@ private:
 	Tileset_Window *_tileset_window;
 	Roof_Window *_roof_window;
 	Palette_Window *_palette_window;
+	Monochrome_Palette_Window *_monochrome_palette_window;
 	// Data
 	std::string _directory, _blk_file, _asm_file;
 	std::string _recent[NUM_RECENT];
@@ -138,8 +139,9 @@ public:
 	inline bool full_screen(void) const { return _full_screen_mi && !!_full_screen_mi->value(); }
 	inline Palettes palettes(void) const { return (Palettes)_palettes->value(); }
 	inline Mode mode(void) const { return _mode; }
-	inline bool allow_512_tiles(void) const { return _allow_512_tiles_mi && !!_allow_512_tiles_mi->value(); }
-	inline bool arrange_0_before_1(void) const { return _arrange_0_before_1_mi && !!_arrange_0_before_1_mi->value(); }
+	inline bool monochrome(void) const { return _monochrome_mi && !!_monochrome_mi->value(); }
+	inline bool allow_priority(void) const { return _allow_priority_mi && !!_allow_priority_mi->value(); }
+	inline bool allow_256_tiles(void) const { return _allow_256_tiles_mi && !!_allow_256_tiles_mi->value(); }
 	inline bool auto_load_events(void) const { return _auto_events_mi && !!_auto_events_mi->value(); }
 	inline bool auto_load_special_palettes(void) const { return _special_palettes_mi && !!_special_palettes_mi->value(); }
 	inline bool auto_load_roof_colors(void) const { return _roof_colors_mi && !!_roof_colors_mi->value(); }
@@ -178,7 +180,8 @@ private:
 	inline void mode(Mode m) { _mode = m; }
 	int handle_hotkey(int key);
 	void update_active_controls(void);
-	void update_512_tile_controls(void);
+	void update_priority_controls(void);
+	void update_monochrome_controls(void);
 	void store_recent_map(void);
 	void update_recent_maps(void);
 	void open_map(const char *directory, const char *filename);
@@ -282,8 +285,9 @@ private:
 	static void edit_roof_cb(Fl_Widget *w, Main_Window *mw);
 	static void edit_current_palettes_cb(Fl_Widget *w, Main_Window *mw);
 	// Options menu
-	static void allow_512_tiles_cb(Fl_Menu_ *m, Main_Window *mw);
-	static void arrange_0_before_1_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void monochrome_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void allow_priority_cb(Fl_Menu_ *m, Main_Window *mw);
+	static void allow_256_tiles_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void roof_custom_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void roof_day_nite_cb(Fl_Menu_ *m, Main_Window *mw);
 	static void roof_morn_day_nite_cb(Fl_Menu_ *m, Main_Window *mw);

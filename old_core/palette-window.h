@@ -8,6 +8,7 @@
 
 #include "tileset.h"
 #include "map-buttons.h"
+#include "palette-map.h"
 #include "metatile.h"
 #include "widgets.h"
 
@@ -66,11 +67,25 @@ protected:
 class Palette_Window : public Abstract_Palette_Window {
 private:
 	Fl_Group *_palette_heading_group;
-	Label *_palette_headings[NUM_PALETTES];
-	Color_Button *_color_buttons[NUM_PALETTES][NUM_HUES];
+	Label *_palette_headings[NUM_GAME_PALETTES];
+	Color_Button *_color_buttons[NUM_GAME_PALETTES][NUM_HUES];
 public:
 	Palette_Window(int x, int y);
 	~Palette_Window();
+private:
+	void initial_setup(void);
+	void refresh(void);
+public:
+	void apply_modifications(void);
+};
+
+class Monochrome_Palette_Window : public Abstract_Palette_Window {
+private:
+	Label *_palette_heading;
+	Color_Button *_color_buttons[NUM_HUES];
+public:
+	Monochrome_Palette_Window(int x, int y);
+	~Monochrome_Palette_Window();
 private:
 	void initial_setup(void);
 	void refresh(void);

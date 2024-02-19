@@ -1,5 +1,4 @@
 #pragma warning(push, 0)
-#include <FL/Fl_PNG_Image.H>
 #include <FL/fl_draw.H>
 #pragma warning(pop)
 
@@ -8,23 +7,6 @@
 #include "block-window.h"
 #include "map-buttons.h"
 #include "utils.h"
-
-// 32x32 translucent zigzag pattern for tile priority
-static uchar chip_priority_png_buffer[] = {
-	0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
-	0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x20, 0x02, 0x03, 0x00, 0x00, 0x00, 0x0e, 0x14, 0x92,
-	0x67, 0x00, 0x00, 0x00, 0x0c, 0x50, 0x4c, 0x54, 0x45, 0x20, 0x60, 0x60, 0x32, 0x7e, 0x7e, 0x56,
-	0xba, 0xba, 0x68, 0xd8, 0xd8, 0xdc, 0xe3, 0x64, 0x6e, 0x00, 0x00, 0x00, 0x04, 0x74, 0x52, 0x4e,
-	0x53, 0x60, 0x60, 0x60, 0x60, 0xe8, 0x2d, 0x50, 0x46, 0x00, 0x00, 0x00, 0x45, 0x49, 0x44, 0x41,
-	0x54, 0x78, 0x5e, 0xcd, 0xce, 0x3b, 0x11, 0x00, 0x20, 0x0c, 0x04, 0xd1, 0xa5, 0x42, 0x06, 0x52,
-	0x13, 0xa9, 0xc8, 0xa0, 0xe2, 0x98, 0x75, 0x41, 0xf1, 0x26, 0x45, 0x7e, 0x47, 0x6e, 0x45, 0xe4,
-	0xac, 0x88, 0xec, 0x19, 0x91, 0x1e, 0x11, 0x17, 0x4a, 0x1c, 0x58, 0x62, 0xc3, 0x14, 0x0d, 0x43,
-	0x16, 0x61, 0x43, 0x38, 0x2a, 0x5c, 0x16, 0x78, 0x4e, 0xf8, 0x40, 0xf8, 0x52, 0x18, 0x42, 0xbf,
-	0xe5, 0x79, 0xbd, 0x49, 0x7f, 0x81, 0xfb, 0xa8, 0x04, 0xb5, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45,
-	0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
-};
-
-static Fl_PNG_Image chip_priority_png(NULL, chip_priority_png_buffer, sizeof(chip_priority_png_buffer));
 
 static void draw_selection_border(int x, int y, int rs, bool zoom) {
 	fl_rect(x, y, rs, rs, FL_BLACK);
@@ -57,6 +39,16 @@ static void draw_map_button(Fl_Widget *wgt, uint8_t id, bool border) {
 	fl_font(FL_COURIER_BOLD, 14);
 	draw_outlined_text(l, x+z+2, y+z, wgt->w(), wgt->h(), FL_ALIGN_TOP_LEFT | FL_ALIGN_INSIDE,
 		border ? wgt->labelcolor() : FL_WHITE, FL_BLACK);
+}
+
+static void draw_tileset_button(Fl_Widget *wgt, uint8_t id, bool border, bool zoom) {
+	Block_Window *bw = (Block_Window *)wgt->user_data();
+	int x = wgt->x(), y = wgt->y();
+	int s = zoom ? CHIP_PX_SIZE : TILE_PX_SIZE;
+	bw->draw_tile(id, x, y, s);
+	if (border) {
+		draw_selection_border(x, y, s, false);
+	}
 }
 
 Metatile_Button *Metatile_Button::dragging = NULL;
@@ -203,7 +195,7 @@ int Block::handle(int event) {
 	return Fl_Box::handle(event);
 }
 
-Tile_Button::Tile_Button(int x, int y, int s, int idx) : Fl_Radio_Button(x, y, s, s), _index(idx), _palette() {
+Tile_Button::Tile_Button(int x, int y, int s, uint8_t id) : Fl_Radio_Button(x, y, s, s), _id(id) {
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);
@@ -211,65 +203,18 @@ Tile_Button::Tile_Button(int x, int y, int s, int idx) : Fl_Radio_Button(x, y, s
 }
 
 void Tile_Button::draw() {
-	Block_Window *bw = (Block_Window *)user_data();
-	const Tileset *tileset = bw->tileset();
-	const Deep_Tile *dt = tileset->const_tile_or_roof(index());
-	fl_draw_image(dt->rgb(_palette), x(), y(), TILE_PX_SIZE, TILE_PX_SIZE, NUM_CHANNELS, LINE_BYTES);
-	if (value()) {
-		draw_selection_border(x(), y(), TILE_PX_SIZE, false);
-	}
+	draw_tileset_button(this, _id, !!value(), false);
 }
 
-Chip::Chip(int x, int y, int s, uint8_t row, uint8_t col) : Fl_Box(x, y, s, s), _row(row), _col(col),
-	_index(), _palette(), _x_flip(), _y_flip(), _priority() {
+Chip::Chip(int x, int y, int s, uint8_t row, uint8_t col) : Fl_Box(x, y, s, s), _row(row), _col(col), _id(0) {
 	user_data(NULL);
 	box(FL_NO_BOX);
 	labeltype(FL_NO_LABEL);
 	labelcolor(FL_YELLOW);
 }
 
-void Chip::copy(const Tile *t) {
-	_index = t->index();
-	_palette = t->palette();
-	_x_flip = t->x_flip();
-	_y_flip = t->y_flip();
-	_priority = t->priority();
-}
-
-void Chip::copy(const Tile_Button *tb) {
-	_index = tb->index();
-	_palette = tb->palette();
-}
-
 void Chip::draw() {
-	Block_Window *bw = (Block_Window *)user_data();
-	const Tileset *tileset = bw->tileset();
-	const Deep_Tile *dt = tileset->const_tile_or_roof(index());
-	const uchar *rgb = dt->rgb(_palette);
-	uchar chip[CHIP_PX_SIZE * CHIP_PX_SIZE * NUM_CHANNELS] = {};
-	for (int ty = 0; ty < TILE_SIZE; ty++) {
-		int my = _y_flip ? TILE_SIZE - ty - 1 : ty;
-		for (int tx = 0; tx < TILE_SIZE; tx++) {
-			int mx = _x_flip ? TILE_SIZE - tx - 1 : tx;
-			int ti = (my * LINE_BYTES + mx * NUM_CHANNELS) * ZOOM_FACTOR;
-			int ci = (ty * CHIP_LINE_BYTES + tx * NUM_CHANNELS) * CHIP_ZOOM_FACTOR;
-			for (int c = 0; c < NUM_CHANNELS; c++) {
-				uchar v = rgb[ti + c];
-				for (int row = 0; row < CHIP_ZOOM_FACTOR; row++) {
-					for (int col = 0; col < CHIP_ZOOM_FACTOR; col++) {
-						chip[ci + CHIP_LINE_BYTES * row + NUM_CHANNELS * col + c] = v;
-					}
-				}
-			}
-		}
-	}
-	fl_draw_image(chip, x(), y(), CHIP_PX_SIZE, CHIP_PX_SIZE, NUM_CHANNELS, CHIP_LINE_BYTES);
-	if (_priority) {
-		chip_priority_png.draw(x(), y(), CHIP_PX_SIZE, CHIP_PX_SIZE);
-	}
-	if (active() && Fl::belowmouse() == this) {
-		draw_selection_border(x(), y(), CHIP_PX_SIZE, false);
-	}
+	draw_tileset_button(this, _id, Fl::belowmouse() == this, true);
 }
 
 int Chip::handle(int event) {
@@ -280,15 +225,11 @@ int Chip::handle(int event) {
 			Fl::pushed(this);
 			do_callback();
 		}
-		if (active()) {
-			bw->update_status(this);
-		}
+		bw->update_status(this);
 		redraw();
 		return 1;
 	case FL_LEAVE:
-		if (active()) {
-			bw->update_status(NULL);
-		}
+		bw->update_status(NULL);
 		redraw();
 		return 1;
 	case FL_MOVE:
@@ -310,15 +251,22 @@ int Chip::handle(int event) {
 
 Deep_Tile_Button *Deep_Tile_Button::_dragging = NULL;
 
-Deep_Tile_Button::Deep_Tile_Button(int x, int y, int s, int idx) : Fl_Radio_Button(x, y, s, s), Deep_Tile(idx),
+Deep_Tile_Button::Deep_Tile_Button(int x, int y, int s, uint8_t id) : Fl_Radio_Button(x, y, s, s), Tile(id),
 	_for_clipboard(false) {
 	user_data(NULL);
 	when(FL_WHEN_RELEASE);
 }
 
-void Deep_Tile_Button::copy_pixels(Pixel_Button **pbs, Palettes l) {
+void Deep_Tile_Button::copy_pixel(const Pixel_Button *pb) {
+	_palette = pb->palette();
+	uchar r, g, b;
+	Fl::get_color(pb->color(), r, g, b);
+	pixel(pb->col(), pb->row(), pb->hue(), r, g, b);
+}
+
+void Deep_Tile_Button::copy_pixels(Pixel_Button **pbs) {
 	for (int i = 0; i < TILE_AREA; i++) {
-		copy_pixel(pbs[i], l);
+		copy_pixel(pbs[i]);
 	}
 }
 
@@ -331,7 +279,7 @@ void Deep_Tile_Button::drag_to_swap_or_copy() {
 		}
 		else {
 			// Drag to swap
-			Deep_Tile temp(0);
+			Tile temp(0);
 			temp.copy(this);
 			copy(_dragging);
 			_dragging->copy(&temp);
@@ -345,8 +293,8 @@ void Deep_Tile_Button::draw() {
 		draw_for_clipboard(x(), y());
 		return;
 	}
-	const uchar *rgb = _undefined ? _undefined_rgb : _monochrome_rgb;
-	fl_draw_image(rgb, x(), y(), TILE_PX_SIZE, TILE_PX_SIZE, NUM_CHANNELS, LINE_BYTES);
+	Tileset_Window *tw = (Tileset_Window *)user_data();
+	draw_with_priority(x(), y(), TILE_PX_SIZE, tw->show_priority());
 	if (value() || (_dragging && (this == _dragging || this == Fl::belowmouse()))) {
 		draw_selection_border(x(), y(), TILE_PX_SIZE, false);
 	}
@@ -380,13 +328,16 @@ int Deep_Tile_Button::handle(int event) {
 	return Fl_Radio_Button::handle(event);
 }
 
-Pixel_Button::Pixel_Button(int x, int y, int s) : Fl_Box(x, y, s, s), _x(), _y(), _hue() {
+Pixel_Button::Pixel_Button(int x, int y, int s) : Fl_Box(x, y, s, s), _x(), _y(), _palettes(), _palette(), _hue() {
 	user_data(NULL);
 	box(FL_FLAT_BOX);
 }
 
-void Pixel_Button::coloring() {
-	const uchar *rgb = Color::monochrome_color(_hue);
+void Pixel_Button::coloring(Palettes l, Palette p, Hue h) {
+	_palettes = l;
+	_palette = p;
+	_hue = h;
+	const uchar *rgb = Color::color(l, p, h);
 	color(fl_rgb_color(rgb[0], rgb[1], rgb[2]));
 }
 
@@ -431,8 +382,9 @@ Swatch::Swatch(int x, int y, int s, const char *l) : Fl_Radio_Button(x, y, s, s,
 	box(OS_SWATCH_BOX);
 }
 
-void Swatch::coloring() {
-	const uchar *rgb = Color::monochrome_color(_hue);
+void Swatch::coloring(Palettes l, Palette p, Hue h) {
+	_hue = h;
+	const uchar *rgb = Color::color(l, p, h);
 	color(fl_rgb_color(rgb[0], rgb[1], rgb[2]));
 }
 

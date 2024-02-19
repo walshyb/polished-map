@@ -53,7 +53,10 @@ public:
 	inline void landmark(const std::string &l) { _attributes.landmark = l; }
 	inline std::string palette(void) const { return _attributes.palette; }
 	inline void palette(const std::string &p) { _attributes.palette = p; }
-	inline bool is_outside(void) const { return _attributes.environment == "TOWN" || _attributes.environment == "ROUTE"; }
+	inline bool is_outside(void) const {
+		return _attributes.environment == "TOWN" || _attributes.environment == "ROUTE" ||
+			_attributes.environment == "1" || _attributes.environment == "2"; // TPP:AC uses numbers
+	}
 	inline int16_t max_event_x(void) const {
 		return _width <= (uint8_t)((MAX_EVENT_COORD - EVENT_MARGIN + 1) / 2) ? (int16_t)_width * 2 + EVENT_MARGIN - 1 : MAX_EVENT_COORD;
 	}
@@ -79,6 +82,8 @@ public:
 	void redo(void);
 	Result read_blocks(const char *f);
 	bool write_blocks(const char *f);
+private:
+	Result read_asm_blocks(const char *f);
 public:
 	static const char *error_message(Result result);
 };
