@@ -3,10 +3,6 @@
 
 #include <vector>
 
-#pragma warning(push, 0)
-#include <FL/fl_ask.H>
-#pragma warning(pop)
-
 #include "deep-tile.h"
 
 #define BYTES_PER_2BPP_TILE (TILE_AREA / 4)
