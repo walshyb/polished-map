@@ -54,7 +54,14 @@ Map::Result Map::read_blocks(const uint8_t* fileDataPtr, size_t bufferSize, cons
   }
 }*/
 
+void Map::addBlock(uint8_t index, Block * block) {
+  _blocks[index] = block;
+}
+
 void Map::size(uint8_t width, uint8_t height) {
   _width = width;
   _height = height;
+
+  // Create space for new blocks
+  _blocks = new Block *[size()]();
 }

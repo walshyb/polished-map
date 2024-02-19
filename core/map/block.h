@@ -1,3 +1,5 @@
+#ifndef BLOCK_H
+#define BLOCK_H
 #include "../utils.h"
 
 class Block {
@@ -13,3 +15,4 @@ public:
 	inline void id(uint8_t id) { _id = id; }
 };
 
+#endif

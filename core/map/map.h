@@ -40,6 +40,7 @@ private:
 public:
 	Map();
 	~Map();
+  void addBlock(uint8_t index, Block * block);
 	inline uint8_t width(void) const { return _width; }
 	inline uint8_t height(void) const { return _height; }
 	inline Map_Attributes attributes(void) const { return _attributes; }
