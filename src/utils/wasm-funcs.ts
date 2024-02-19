@@ -1,5 +1,6 @@
 export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: string) {
   const filenamePtr: number = allocateUTF8(filename);
+  const fn = UTF8ToString(filenamePtr);
   // @ts-ignore
   const bufferPtr: number = window._malloc(size);
 
@@ -8,7 +9,7 @@ export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: st
   Module.HEAPU8.set(new Uint8Array(arrayBuffer), bufferPtr);
 
   // @ts-ignore
-  window.__ZN13FileProcessor11processFileEPKhmPKc(bufferPtr, size, filenamePtr);
+  window._processFile(bufferPtr, size, filenamePtr);
 
   // @ts-ignore
   window._free(filenamePtr);

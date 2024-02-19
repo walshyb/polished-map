@@ -5,17 +5,31 @@
 #include <iomanip>
 #include "filereader.h"
 #include "../state.h"
+#include <emscripten/bind.h>
 
-extern "C" {
-  EMSCRIPTEN_KEEPALIVE
-  void FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
-    std::string fn = std::string(filename);
-    if (fn.substr(fn.find_last_of(".") + 1) == "ablk") {
-      processAblk(fileDataPtr, bufferSize, filename);
-    }
+/**
+ * Process a file
+ * 
+ * @param fileDataPtr Pointer to the file data
+ * @param bufferSize Size of the file data
+ * @param filename Point to the name of the file
+ */
+void FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
+  std::string fn = std::string(filename);
+
+  // If ending in .ablk, process as ablk
+  if (fn.substr(fn.find_last_of(".") + 1) == "ablk") {
+    processAblk(fileDataPtr, bufferSize, filename);
   }
 }
 
+/**
+ * Process an ablk file
+ * 
+ * @param fileDataPtr Pointer to the file data
+ * @param bufferSize Size of the file data
+ * @param filename Point to the name of the file
+ */
 void FileProcessor::processAblk(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
   // Process file data here
   // Example: Printing the first 10 characters
@@ -23,8 +37,9 @@ void FileProcessor::processAblk(const uint8_t* fileDataPtr, size_t bufferSize, c
   std::cout << "File Size: " << bufferSize << std::endl; 
   int _width = 28;
   int _height = 18;
+
   // open violetCity
-    AppState *state = &AppState::getInstance();
+  AppState *state = &AppState::getInstance();
 
   for (uint8_t y = 0; y < (size_t)_height; y++) {
     for (uint8_t x = 0; x < (size_t)_width; x++) {
@@ -39,5 +54,14 @@ void FileProcessor::processAblk(const uint8_t* fileDataPtr, size_t bufferSize, c
     // Access buffer element
    // uint8_t value = *(fileDataPtr + i);
     //std::cout << value << std::endl;
+  }
+}
+
+// Export the function to JavaScript
+extern "C" {
+  FileProcessor fileProcessor;
+
+  void processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
+    fileProcessor.processFile(fileDataPtr, bufferSize, filename);
   }
 }
