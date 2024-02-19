@@ -3,22 +3,26 @@ import React, { Component } from 'react'
 import { MenuItem, Menu, Dropdown } from 'semantic-ui-react'
 import { useState } from 'react';
 
-
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget;
 }
-export default function TopBar() {
+export default function TopBar(
+  { fileProcessed, setFileProcessed }: { fileProcessed: boolean; setFileProcessed: (fileProcessed: boolean) => void }
+) {
   const [activeItem, setActiveItem] = useState<string>('');
   
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file: any = event?.target.files && event.target.files[0];
     
     if (file) {
+      setFileProcessed(false);
       // Convert file to ArrayBuffer
       const arrayBuffer: ArrayBuffer = await file.arrayBuffer();
 
       // Pass arrayBuffer to WebAssembly module
-      processFile(arrayBuffer, arrayBuffer.byteLength, file.name);
+      const result: boolean = processFile(arrayBuffer, arrayBuffer.byteLength, file.name);
+
+      setFileProcessed(result);
     }
   };
 

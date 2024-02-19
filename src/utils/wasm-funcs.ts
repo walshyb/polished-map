@@ -1,4 +1,4 @@
-export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: string) {
+export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: string): boolean {
   const filenamePtr: number = allocateUTF8(filename);
   const fn = UTF8ToString(filenamePtr);
   // @ts-ignore
@@ -9,10 +9,23 @@ export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: st
   Module.HEAPU8.set(new Uint8Array(arrayBuffer), bufferPtr);
 
   // @ts-ignore
-  window._processFile(bufferPtr, size, filenamePtr);
+  const result: number = window._processFile(bufferPtr, size, filenamePtr);
+
+  console.log('_processFile', result, fn);
 
   // @ts-ignore
   window._free(filenamePtr);
   // @ts-ignore
   window._free(bufferPtr);
+
+  return Boolean(result);
+}
+
+export function getBlocks() {
+  // @ts-ignore
+  const result: number[] = window._getBlocks();
+  // @ts-ignore
+  window.blocks = result;
+  console.log(result);
+  return result;
 }

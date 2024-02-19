@@ -1,16 +1,18 @@
 #include <cstdio>
 
 #include "map.h"
+#include "block.h"
 
 void Map_Attributes::clear() {
 	group = 0;
 }
 
-Map::Map() : _attributes(), _width(0), _height(0), _blocks(NULL), _result(Result::MAP_NULL), _modified(false), _mod_time(0),
+Map::Map() : _attributes(), _numBlocks(0), _width(0), _height(0), _blocks(NULL), _result(Result::MAP_NULL), _modified(false), _mod_time(0),
 	_history(), _future() {}
 
 void Map::clear() {
   delete [] _blocks;
+  _numBlocks = 0;
   _blocks = NULL;
   _width = _height = 0;
   _result = Result::MAP_NULL;
@@ -56,6 +58,7 @@ Map::Result Map::read_blocks(const uint8_t* fileDataPtr, size_t bufferSize, cons
 
 void Map::addBlock(uint8_t index, Block * block) {
   _blocks[index] = block;
+  _numBlocks++;
 }
 
 void Map::size(uint8_t width, uint8_t height) {
@@ -64,4 +67,8 @@ void Map::size(uint8_t width, uint8_t height) {
 
   // Create space for new blocks
   _blocks = new Block *[size()]();
+}
+
+Block * Map::getBlocks() {
+  return *_blocks;
 }

@@ -1,11 +1,17 @@
 import SpriteViewer from "./SpriteViewer";
 import Map from "./map/Map";
 
-export default function Editor() {
+export default function Editor(
+  { fileProcessed }: { fileProcessed: boolean }
+) {
   return (
     <div>
-      <SpriteViewer />
-      <Map />
+      <SpriteViewer
+        fileProcessed={fileProcessed}
+      />
+      <Map
+        fileProcessed={fileProcessed}
+      />
     </div>
   );
 }

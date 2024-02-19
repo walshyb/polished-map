@@ -961,7 +961,7 @@ function dbg(text) {
 // === Body ===
 
 var ASM_CONSTS = {
-  81388: () => { Module['print'] = function(text) { console.log(text); }; }
+  81436: () => { Module['print'] = function(text) { console.log(text); }; }
 };
 
 
@@ -5373,6 +5373,7 @@ var wasmExports = createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors');
 var _main = Module['_main'] = createExportWrapper('__main_argc_argv');
 var _processFile = Module['_processFile'] = createExportWrapper('processFile');
+var _getBlocks = Module['_getBlocks'] = createExportWrapper('getBlocks');
 var ___errno_location = createExportWrapper('__errno_location');
 var _fflush = Module['_fflush'] = createExportWrapper('fflush');
 var _malloc = createExportWrapper('malloc');

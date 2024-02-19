@@ -15,13 +15,16 @@
  * @param bufferSize Size of the file data
  * @param filename Point to the name of the file
  */
-void FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
+bool FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
   std::string fn = std::string(filename);
 
   // If ending in .ablk, process as ablk
   if (fn.substr(fn.find_last_of(".") + 1) == "ablk") {
     processAblk(fileDataPtr, bufferSize, filename);
+    return true;
   }
+
+  return false;
 }
 
 /**
@@ -32,6 +35,7 @@ void FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, c
  * @param filename Point to the name of the file
  */
 // TODO: maybe have this call Map::read_blocks
+// TODO: send OK flag
 void FileProcessor::processAblk(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
   int _width = 28;
   int _height = 18;
@@ -52,13 +56,14 @@ void FileProcessor::processAblk(const uint8_t* fileDataPtr, size_t bufferSize, c
       // std::cout << "Index: " << i << ", val: " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(id) << std::endl; // Print ID
     }
   }
+  std::cout << "File processed" << std::endl; // Print ID
 }
 
 // Export the function to JavaScript
 extern "C" {
   FileProcessor fileProcessor;
 
-  void processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
-    fileProcessor.processFile(fileDataPtr, bufferSize, filename);
+  bool processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
+    return fileProcessor.processFile(fileDataPtr, bufferSize, filename);
   }
 }

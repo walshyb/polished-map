@@ -35,9 +35,10 @@ private:
 	Result _result;
 	bool _modified;
 	std::deque<Map_State> _history, _future;
-  Block ** _blocks;
 	int64_t _mod_time;
 public:
+  Block ** _blocks;
+  int _numBlocks;
 	Map();
 	~Map();
   void addBlock(uint8_t index, Block * block);
@@ -69,6 +70,7 @@ public:
 	void redo(void);
 	Result read_blocks(const char *f);
 	bool write_blocks(const char *f);
+  Block * getBlocks();
 public:
 	static const char *error_message(Result result);
 };
