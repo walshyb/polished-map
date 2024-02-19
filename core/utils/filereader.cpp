@@ -3,12 +3,21 @@
 #include <iostream>
 #include <cstdio>
 #include <iomanip>
-
-
+#include "filereader.h"
 
 extern "C" {
   EMSCRIPTEN_KEEPALIVE
   void processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
+    switch(.substr(fn.find_last_of(".") + 1)) {
+      case 'albk':
+        processAblk(fileDataPtr, bufferSize, filename);
+        break;
+      default:
+        break;
+    }
+  }
+
+  void processAlbk(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
     // Process file data here
     // Example: Printing the first 10 characters
     std::cout << "File: " << filename << std::endl; 
