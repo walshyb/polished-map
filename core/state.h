@@ -2,6 +2,8 @@
 #define APPSTATE
 
 #include "map/map.h"
+#include "map/tiles/metatileset.h"
+
 class AppState {
 
 public:
@@ -11,10 +13,12 @@ public:
   }
 
   Map *getMap();
+
 private:
   AppState();
   ~AppState();
   Map *map;
+  Metatileset *metaTileSet;
 };
 
 #endif

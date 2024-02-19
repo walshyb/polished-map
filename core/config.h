@@ -5,14 +5,14 @@
 
 class Config {
 private:
-	static bool _512_tiles, _0_before_1, _drag_and_drop;
+	static bool _monochrome, _priority, _256_tiles, _drag_and_drop;
 	static bool _print_grid, _print_ids, _print_priority, _print_events, _print_warp_ids;
 	static size_t _overworld_map_size;
 public:
-	static const char *gfx_tileset_dir(void);
-	static const char *gfx_roof_dir(void);
+	static void gfx_tileset_dir(char *dest, const char *root);
+	static void gfx_roof_dir(char *dest, const char *root);
 	static bool project_path_from_blk_path(const char *blk_path, char *project_path);
-	static void attributes_path(char *dest, const char *root, const char *tileset);
+	static void palette_map_path(char *dest, const char *root, const char *tileset);
 	static void tileset_path(char *dest, const char *root, const char *tileset);
 	static bool tileset_before_path(char *dest, const char *root, const char *tileset);
 	static bool tileset_after_path(char *dest, const char *root, const char *tileset);
@@ -23,15 +23,18 @@ public:
 	static bool collisions_path(char *dest, const char *root, const char *tileset);
 	static void map_constants_path(char *dest, const char *root);
 	static void tileset_constants_path(char *dest, const char *root);
-	static void map_headers_path(char *dest, const char *root);
+	static bool map_headers_path(char *dest, const char *root);
+	static void map_header_path(char *dest, const char *root, const char *map_name);
 	static void event_script_path(char *dest, const char *root, const char *map_name);
 	static void bg_tiles_pal_path(char *dest, const char *root);
 	static void roofs_pal_path(char *dest, const char *root);
 	static void special_pal_path(char *dest, const char *root, const char *filename, const char *landmark, const char *tileset);
-	inline static bool allow_512_tiles(void) { return _512_tiles; }
-	inline static void allow_512_tiles(bool t) { _512_tiles = t; }
-	inline static bool arrange_0_before_1(void) { return _0_before_1; }
-	inline static void arrange_0_before_1(bool b) { _0_before_1 = b; }
+	inline static bool monochrome(void) { return _monochrome; }
+	inline static void monochrome(bool m) { _monochrome = m; }
+	inline static bool allow_priority(void) { return _priority; }
+	inline static void allow_priority(bool p) { _priority = p; }
+	inline static bool allow_256_tiles(void) { return _256_tiles; }
+	inline static void allow_256_tiles(bool t) { _256_tiles = t; }
 	inline static bool drag_and_drop(void) { return _drag_and_drop; }
 	inline static void drag_and_drop(bool d) { _drag_and_drop = d; }
 	inline static bool print_grid(void) { return _print_grid; }

@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include "metatileset.h"
-#include "parse-asm.h"
+#include "../../parse-asm.h"
 
 Metatileset::Metatileset() : _tileset(), _metatiles(), _num_metatiles(0), _result(Result::META_NULL), _modified(false),
 	_bin_collisions(false), _mod_time(0), _mod_time_coll(0) {
@@ -70,73 +70,13 @@ void Metatileset::draw_metatile(int x, int y, uint8_t id, bool zoom, bool show_p
 				int ax = x + tx * s;
 				uint8_t tid = mt->tile_id(tx, ty);
 				const Tile *t = _tileset.const_tile_or_roof(tid);
-				//t->draw_with_priority(ax, ay, zoom ? TILE_PX_SIZE : TILE_SIZE, show_priority);
+				t->draw_with_priority(ax, ay, zoom ? TILE_PX_SIZE : TILE_SIZE, show_priority);
 			}
 		}
 	}
 	else {
 		int s = TILE_SIZE * METATILE_SIZE * (zoom ? ZOOM_FACTOR : 1);
 	}
-}
-
-uchar *Metatileset::print_rgb(const Map &map) const {
-	int w = map.width(), h = map.height();
-	int bw = w * METATILE_PX_SIZE, bh = h * METATILE_PX_SIZE;
-	uchar *buffer = new uchar[bw * bh * NUM_CHANNELS]();
-	for (int y = 0; y < h; y++) {
-		for (int x = 0; x < w; x++) {
-			Block *b = map.block((uint8_t)x, (uint8_t)y);
-			const Metatile *m = _metatiles[b->id()];
-			for (int ty = 0; ty < METATILE_SIZE; ty++) {
-				for (int tx = 0; tx < METATILE_SIZE; tx++) {
-					uint8_t tid = m->tile_id(tx, ty);
-					const Tile *t = _tileset.const_tile_or_roof(tid);
-					size_t o = ((y * METATILE_SIZE + ty) * bw + x * METATILE_SIZE + tx) * TILE_SIZE * NUM_CHANNELS;
-					for (int py = 0; py < TILE_SIZE; py++) {
-						for (int px = 0; px < TILE_SIZE; px++) {
-							const uchar *rgb = t->const_pixel(px, py);
-							size_t j = o + (py * bw + px) * NUM_CHANNELS;
-							buffer[j++] = rgb[0];
-							buffer[j++] = rgb[1];
-							buffer[j] = rgb[2];
-						}
-					}
-				}
-			}
-		}
-	}
-	return buffer;
-}
-
-Metatileset::Result Metatileset::read_asm_collisions(const char *f) {
-	if (!_tileset.num_tiles()) { return (_result = Result::META_NO_GFX); } // no graphics
-
-	std::ifstream ifs;
-	open_ifstream(ifs, f);
-	if (!ifs.is_open()) { return (_result = Result::META_BAD_FILE); } // cannot load file
-
-	size_t i = 0;
-	while (ifs.good()) {
-		std::string line;
-		std::getline(ifs, line);
-		std::istringstream lss(line);
-		std::string token;
-		if (!leading_macro(lss, token, "tilecoll")) { continue; }
-		std::string c1, c2, c3, c4;
-		std::getline(lss, c1, ','); trim(c1);
-		std::getline(lss, c2, ','); trim(c2);
-		std::getline(lss, c3, ','); trim(c3);
-		std::getline(lss, c4, ';'); trim(c4);
-		_metatiles[i]->collision(Quadrant::TOP_LEFT, c1);
-		_metatiles[i]->collision(Quadrant::TOP_RIGHT, c2);
-		_metatiles[i]->collision(Quadrant::BOTTOM_LEFT, c3);
-		_metatiles[i]->collision(Quadrant::BOTTOM_RIGHT, c4);
-		if (++i == _num_metatiles) { break; }
-	}
-
-	_bin_collisions = false;
-	_mod_time_coll = file_modified(f);
-	return (_result = Result::META_OK);
 }
 
 const char *Metatileset::error_message(Result result) {
@@ -157,3 +97,4 @@ const char *Metatileset::error_message(Result result) {
 		return "Unspecified error.";
 	}
 }
+

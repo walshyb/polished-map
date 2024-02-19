@@ -9,6 +9,7 @@ AppState::~AppState() {
 
 AppState::AppState() {
   map = new Map();
+  metaTileSet = new Metatileset();
 }
 
 Map* AppState::getMap() {

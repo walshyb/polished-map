@@ -65,6 +65,7 @@ public:
 	inline bool can_redo(void) const { return !_future.empty(); }
 	void clear();
 	void resize_blocks(int x, int y, int s) const;
+	void block(uint8_t x, uint8_t y, Block *b);
 	void remember(void);
 	void undo(void);
 	void redo(void);
