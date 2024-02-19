@@ -5,17 +5,16 @@
 #include <iomanip>
 #include "filereader.h"
 
-extern "C" {
-  EMSCRIPTEN_KEEPALIVE
-  void processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
-    std::string fn = std::string(filename);
-    if (fn.substr(fn.find_last_of(".") + 1) == "ablk") {
-      processAblk(fileDataPtr, bufferSize, filename);
-    }
+void FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
+  std::string fn = std::string(filename);
+  if (fn.substr(fn.find_last_of(".") + 1) == "ablk") {
+    processAblk(fileDataPtr, bufferSize, filename);
   }
 }
 
-void processAblk(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
+extern "C" { 
+  EMSCRIPTEN_KEEPALIVE
+void FileProcessor::processAblk(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
   // Process file data here
   // Example: Printing the first 10 characters
   std::cout << "File: " << filename << std::endl; 
@@ -38,4 +37,5 @@ void processAblk(const uint8_t* fileDataPtr, size_t bufferSize, const char* file
    // uint8_t value = *(fileDataPtr + i);
     //std::cout << value << std::endl;
   }
+}
 }
