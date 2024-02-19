@@ -1,2 +1,4 @@
-void processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename);
-void processAlbk(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename);
+extern "C" {
+  void processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename);
+}
+void processAblk(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename);
