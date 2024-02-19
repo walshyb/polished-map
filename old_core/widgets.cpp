@@ -447,8 +447,8 @@ int Workspace::handle(int event) {
 	case FL_DRAG:
 		int dx = Fl::event_x(), dy = Fl::event_y();
 		int nx = _ox + (_cx - dx), ny = _oy + (_cy - dy);
-		int max_x = std::max(_content_w - w() + (scrollbar.visible() ? Fl::scrollbar_size() : 0), 0);
-		int max_y = std::max(_content_h - h() + (hscrollbar.visible() ? Fl::scrollbar_size() : 0), 0);
+		int max_x = std::max(_content_w - w() + (scrollbar.visible() ? Fl::scrollbar_size() : 0) + Fl::box_dw(box()), 0);
+		int max_y = std::max(_content_h - h() + (hscrollbar.visible() ? Fl::scrollbar_size() : 0) + Fl::box_dh(box()), 0);
 		scroll_to(std::clamp(nx, 0, max_x), std::clamp(ny, 0, max_y));
 		return 1;
 	}

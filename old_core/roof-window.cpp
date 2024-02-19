@@ -69,7 +69,7 @@ void Roof_Window::initialize() {
 	Fl_Group::current(NULL);
 	// Populate window
 	_window = new Roof_Tile_Window(_dx, _dy, 226, 228, "Edit Roof");
-	int thw = text_width("Tile: $FFF", 2);
+	int thw = text_width("Tile: $A:AA", 4);
 	_roof_heading = new Label(10, 10, 206-thw, 22);
 	_tile_heading = new Label(216-thw, 10, thw, 22);
 	_roof_group = new Fl_Group(10, 36, 50, 50);
@@ -98,9 +98,9 @@ void Roof_Window::initialize() {
 		for (int x = 0; x < ROOF_TILES_PER_ROW; x++) {
 			int bx = _roof_group->x() + 1 + x * TILE_PX_SIZE,
 				by = _roof_group->y() + 1 + (ROOF_TILES_PER_COL - y - 1) * TILE_PX_SIZE;
-			uint8_t i = (uint8_t)(y * ROOF_TILES_PER_ROW + x);
-			uint8_t id = i + FIRST_ROOF_TILE_ID;
-			Deep_Tile_Button *dtb = new Deep_Tile_Button(bx, by, TILE_PX_SIZE, id);
+			int i = y * ROOF_TILES_PER_ROW + x;
+			int idx = i + FIRST_ROOF_TILE_IDX;
+			Deep_Tile_Button *dtb = new Deep_Tile_Button(bx, by, TILE_PX_SIZE, idx);
 			dtb->callback((Fl_Callback *)select_tile_cb, this);
 			_deep_tile_buttons[i] = dtb;
 		}
@@ -125,12 +125,16 @@ void Roof_Window::initialize() {
 	// Initialize window's children
 	_roof_group->box(OS_SPACER_THIN_DOWN_FRAME);
 	_tile_group->box(OS_SPACER_THIN_DOWN_FRAME);
+	_swatch1->hue(Hue::WHITE);
 	_swatch1->shortcut('1');
 	_swatch1->callback((Fl_Callback *)choose_swatch_cb, this);
+	_swatch2->hue(Hue::LIGHT);
 	_swatch2->shortcut('2');
 	_swatch2->callback((Fl_Callback *)choose_swatch_cb, this);
+	_swatch3->hue(Hue::DARK);
 	_swatch3->shortcut('3');
 	_swatch3->callback((Fl_Callback *)choose_swatch_cb, this);
+	_swatch4->hue(Hue::BLACK);
 	_swatch4->shortcut('4');
 	_swatch4->callback((Fl_Callback *)choose_swatch_cb, this);
 	_copy_tb->tooltip("Copy (Ctrl+Shift+C)");
@@ -172,11 +176,11 @@ void Roof_Window::tileset(Tileset *t) {
 	std::string label("Roof: ");
 	label = label + t->roof_name();
 	_roof_heading->copy_label(label.c_str());
-	for (uint8_t i = 0; i < NUM_ROOF_TILES; i++) {
-		uint8_t id = i + FIRST_ROOF_TILE_ID;
-		const Tile *ti = _tileset->const_roof_tile(id);
+	for (int i = 0; i < NUM_ROOF_TILES; i++) {
+		int idx = i + FIRST_ROOF_TILE_IDX;
+		const Deep_Tile *dt = _tileset->const_roof_tile(idx);
 		Deep_Tile_Button *dtb = _deep_tile_buttons[i];
-		dtb->copy(ti);
+		dtb->copy(dt);
 		dtb->activate();
 	}
 }
@@ -193,9 +197,9 @@ void Roof_Window::show(const Fl_Widget *p) {
 }
 
 void Roof_Window::apply_modifications() {
-	for (const Tile *t : _deep_tile_buttons) {
-		uint8_t id = t->id();
-		_tileset->roof_tile(id)->copy(t);
+	for (const Deep_Tile_Button *dt : _deep_tile_buttons) {
+		int idx = dt->index();
+		_tileset->roof_tile(idx)->copy(dt);
 	}
 	_tileset->modified_roof(true);
 }
@@ -204,23 +208,20 @@ void Roof_Window::select(Deep_Tile_Button *dtb) {
 	_selected = dtb;
 	_selected->setonly();
 
+	bool bank1;
+	uint8_t offset;
+	Tile::bank_offset(_selected->index(), bank1, offset);
 	char buffer[32];
-	sprintf(buffer, "Tile: $%02X", _selected->id());
+	sprintf(buffer, "Tile: $%d:%02X", bank1, offset);
 	_tile_heading->copy_label(buffer);
 
-	Palettes l = _tileset->palettes();
-	Palette p = _selected->palette();
 	for (int y = 0; y < TILE_SIZE; y++) {
 		for (int x = 0; x < TILE_SIZE; x++) {
 			Pixel_Button *pb = _pixels[y * TILE_SIZE + x];
 			Hue h = _selected->hue(x, y);
-			pb->coloring(l, p, h);
+			pb->hue(h);
 		}
 	}
-	_swatch1->coloring(l, p, Hue::WHITE);
-	_swatch2->coloring(l, p, Hue::LIGHT);
-	_swatch3->coloring(l, p, Hue::DARK);
-	_swatch4->coloring(l, p, Hue::BLACK);
 }
 
 void Roof_Window::choose(Swatch *swatch) {
@@ -292,25 +293,26 @@ void Roof_Window::choose_swatch_cb(Swatch *s, Roof_Window *rw) {
 void Roof_Window::change_pixel_cb(Pixel_Button *pb, Roof_Window *rw) {
 	if (Fl::event_button() == FL_LEFT_MOUSE) {
 		if (!rw->_chosen) { return; }
+		rw->_selected->undefined(false);
 		if (Fl::event_shift()) {
 			// Shift+left-click to flood fill
 			rw->flood_fill(pb, pb->hue(), rw->_chosen->hue());
 			rw->_tile_group->redraw();
-			rw->_selected->copy_pixels(rw->_pixels);
+			rw->_selected->copy_pixels(rw->_pixels, rw->_tileset->palettes());
 			rw->_selected->redraw();
 		}
 		else if (Fl::event_ctrl()) {
 			// Ctrl+left-click to replace
 			rw->substitute_hue(pb->hue(), rw->_chosen->hue());
 			rw->_tile_group->redraw();
-			rw->_selected->copy_pixels(rw->_pixels);
+			rw->_selected->copy_pixels(rw->_pixels, rw->_tileset->palettes());
 			rw->_selected->redraw();
 		}
 		else if (Fl::event_alt()) {
 			// Alt+left-click to swap
 			rw->swap_hues(pb->hue(), rw->_chosen->hue());
 			rw->_tile_group->redraw();
-			rw->_selected->copy_pixels(rw->_pixels);
+			rw->_selected->copy_pixels(rw->_pixels, rw->_tileset->palettes());
 			rw->_selected->redraw();
 		}
 		else {
@@ -318,7 +320,7 @@ void Roof_Window::change_pixel_cb(Pixel_Button *pb, Roof_Window *rw) {
 			Hue h = rw->_chosen->hue();
 			pb->hue(h);
 			pb->damage(1);
-			rw->_selected->copy_pixel(pb);
+			rw->_selected->copy_pixel(pb, rw->_tileset->palettes());
 			rw->_selected->redraw();
 		}
 	}
@@ -344,7 +346,7 @@ void Roof_Window::change_pixel_cb(Pixel_Button *pb, Roof_Window *rw) {
 
 void Roof_Window::copy_tile_cb(Fl_Widget *, Roof_Window *rw) {
 	if (!rw->_selected) { return; }
-	rw->_clipboard.id(rw->_selected->id());
+	rw->_clipboard.index(rw->_selected->index());
 	rw->_clipboard.copy(rw->_selected);
 	rw->_copied = true;
 }
@@ -358,10 +360,10 @@ void Roof_Window::paste_tile_cb(Fl_Widget *, Roof_Window *rw) {
 
 void Roof_Window::swap_tiles_cb(Fl_Widget *, Roof_Window *rw) {
 	if (!rw->_copied || !rw->_selected) { return; }
-	uint8_t cid = rw->_clipboard.id();
-	uint8_t i = cid - FIRST_ROOF_TILE_ID;
-	Deep_Tile_Button *copied = rw->_deep_tile_buttons[i];
-	Tile temp(0);
+	int clip_idx = rw->_clipboard.index();
+	int idx = clip_idx - FIRST_ROOF_TILE_IDX;
+	Deep_Tile_Button *copied = rw->_deep_tile_buttons[idx];
+	Deep_Tile temp;
 	temp.copy(rw->_selected);
 	rw->_selected->copy(copied);
 	copied->copy(&temp);
@@ -391,8 +393,8 @@ void Roof_Window::paste_tile_graphics_cb(Toolbar_Button *tb, Roof_Window *rw) {
 		Fl::paste(*rw->_window, 1, Fl::clipboard_image);
 		return;
 	}
-	if (rw->_selected->palette() == Palette::UNDEFINED) {
-		rw->_selected->palette(Palette::GRAY);
+	if (rw->_selected->undefined()) {
+		rw->_selected->undefined(false);
 	}
 	Fl_Image *pasted = (Fl_Image *)Fl::event_clipboard();
 	int w = std::max(pasted->w(), TILE_SIZE), h = std::max(pasted->h(), TILE_SIZE);
@@ -401,8 +403,7 @@ void Roof_Window::paste_tile_graphics_cb(Toolbar_Button *tb, Roof_Window *rw) {
 			const char *p = *pasted->data() + (x + y * pasted->w()) * pasted->d();
 			uchar c = Color::desaturated((uchar)p[0], (uchar)p[1], (uchar)p[2]);
 			Hue e = Color::mono_hue(c);
-			const uchar *rgb = Color::color(rw->_tileset->palettes(), rw->_selected->palette(), e);
-			rw->_selected->pixel(x, y, e, rgb[0], rgb[1], rgb[2]);
+			rw->_selected->render_pixel(x, y, rw->_tileset->palettes(), e);
 		}
 	}
 	delete pasted;

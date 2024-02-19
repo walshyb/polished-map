@@ -3,14 +3,44 @@
 #include <sstream>
 
 #pragma warning(push, 0)
+#include <FL/Fl_PNG_Image.H>
 #include <FL/fl_draw.H>
 #pragma warning(pop)
 
+#include "config.h"
 #include "metatileset.h"
-#include "parse-asm.h"
+
+// 8x8 translucent zigzag pattern for tile priority
+static uchar small_priority_png_buffer[] = {
+	0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+	0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x08, 0x02, 0x03, 0x00, 0x00, 0x00, 0xb9, 0x61, 0x56,
+	0x18, 0x00, 0x00, 0x00, 0x0c, 0x50, 0x4c, 0x54, 0x45, 0x68, 0xd8, 0xd8, 0x56, 0xba, 0xba, 0x32,
+	0x7e, 0x7e, 0x20, 0x60, 0x60, 0xb4, 0x24, 0x6a, 0xe6, 0x00, 0x00, 0x00, 0x04, 0x74, 0x52, 0x4e,
+	0x53, 0x60, 0x60, 0x60, 0x60, 0xe8, 0x2d, 0x50, 0x46, 0x00, 0x00, 0x00, 0x16, 0x49, 0x44, 0x41,
+	0x54, 0x78, 0x5e, 0x63, 0x90, 0x90, 0x60, 0xa8, 0xab, 0x63, 0x78, 0xfe, 0x9c, 0xa1, 0xb1, 0x11,
+	0x99, 0x0d, 0x00, 0x55, 0xe0, 0x07, 0xf9, 0x01, 0x25, 0x72, 0xd2, 0x00, 0x00, 0x00, 0x00, 0x49,
+	0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
+};
+
+static Fl_PNG_Image small_priority_png(NULL, small_priority_png_buffer, sizeof(small_priority_png_buffer));
+
+// 16x16 translucent zigzag pattern for tile priority
+static uchar large_priority_png_buffer[] = {
+	0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+	0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x10, 0x02, 0x03, 0x00, 0x00, 0x00, 0x62, 0x9d, 0x17,
+	0xf2, 0x00, 0x00, 0x00, 0x0c, 0x50, 0x4c, 0x54, 0x45, 0x20, 0x60, 0x60, 0x32, 0x7e, 0x7e, 0x56,
+	0xba, 0xba, 0x68, 0xd8, 0xd8, 0xdc, 0xe3, 0x64, 0x6e, 0x00, 0x00, 0x00, 0x04, 0x74, 0x52, 0x4e,
+	0x53, 0x60, 0x60, 0x60, 0x60, 0xe8, 0x2d, 0x50, 0x46, 0x00, 0x00, 0x00, 0x2e, 0x49, 0x44, 0x41,
+	0x54, 0x78, 0x5e, 0x63, 0xf8, 0x57, 0xff, 0xaf, 0x9e, 0xe1, 0x87, 0xfc, 0x0f, 0x79, 0x86, 0x07,
+	0xec, 0x0f, 0xd8, 0x19, 0x1a, 0x18, 0x1b, 0x18, 0x19, 0x80, 0xb8, 0x81, 0x01, 0xc8, 0x7b, 0xc0,
+	0x20, 0x0f, 0x94, 0x61, 0x00, 0xaa, 0xf8, 0x47, 0xac, 0x3a, 0x00, 0xfb, 0x8c, 0x1f, 0xe1, 0x3f,
+	0x4c, 0xa1, 0xea, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
+};
+
+static Fl_PNG_Image large_priority_png(NULL, large_priority_png_buffer, sizeof(large_priority_png_buffer));
 
 Metatileset::Metatileset() : _tileset(), _metatiles(), _num_metatiles(0), _result(Result::META_NULL), _modified(false),
-	_bin_collisions(false), _mod_time(0), _mod_time_coll(0) {
+	_bin_collisions(false), _mod_time(0), _mod_time_attr(0), _mod_time_coll(0) {
 	for (size_t i = 0; i < MAX_NUM_METATILES; i++) {
 		_metatiles[i] = new Metatile((uint8_t)i);
 	}
@@ -32,7 +62,7 @@ void Metatileset::clear() {
 	_result = Result::META_NULL;
 	_modified = false;
 	_bin_collisions = false;
-	_mod_time = _mod_time_coll = 0;
+	_mod_time = _mod_time_attr = _mod_time_coll = 0;
 }
 
 void Metatileset::size(size_t n) {
@@ -44,9 +74,9 @@ void Metatileset::size(size_t n) {
 	_modified = true;
 }
 
-bool Metatileset::uses_tile(uint8_t id) const {
+bool Metatileset::uses_tile(int idx) const {
 	for (size_t i = 0; i < _num_metatiles; i++) {
-		if (_metatiles[i]->uses_tile(id)) {
+		if (_metatiles[i]->uses_tile(idx)) {
 			return true;
 		}
 	}
@@ -54,34 +84,42 @@ bool Metatileset::uses_tile(uint8_t id) const {
 }
 
 void Metatileset::trim_tileset() {
-	for (uint8_t i = MAX_NUM_TILES - 1; i > 0; i--) {
-		Tile *t = _tileset.tile(i);
-		if (t->palette() != Palette::UNDEFINED && (!t->is_blank() || uses_tile(i))) {
-			break;
+	for (int i = 0; i < MAX_NUM_TILES; i++) {
+		Deep_Tile *dt = _tileset.tile(i);
+		if (!dt->undefined() && dt->is_blank() && !uses_tile(i)) {
+			dt->undefined(true);
 		}
-		t->palette(Palette::UNDEFINED);
-		_tileset.palette_map().palette(i, Palette::UNDEFINED);
 	}
 }
 
 void Metatileset::draw_metatile(int x, int y, uint8_t id, bool zoom, bool show_priority) const {
-	if (id < size()) {
-		Metatile *mt = _metatiles[id];
-		int s = TILE_SIZE * (zoom ? ZOOM_FACTOR : 1);
-		for (int ty = 0; ty < METATILE_SIZE; ty++) {
-			int ay = y + ty * s;
-			for (int tx = 0; tx < METATILE_SIZE; tx++) {
-				int ax = x + tx * s;
-				uint8_t tid = mt->tile_id(tx, ty);
-				const Tile *t = _tileset.const_tile_or_roof(tid);
-				t->draw_with_priority(ax, ay, zoom ? TILE_PX_SIZE : TILE_SIZE, show_priority);
+	int s = TILE_SIZE * (zoom ? ZOOM_FACTOR : 1);
+	if (id >= size()) {
+		fl_color(EMPTY_RGB);
+		fl_rectf(x, y, METATILE_SIZE * s, METATILE_SIZE * s);
+		return;
+	}
+	int k = zoom ? 1 : ZOOM_FACTOR;
+	int d = NUM_CHANNELS * k;
+	int ld = LINE_BYTES * k;
+	Metatile *mt = _metatiles[id];
+	for (int ty = 0; ty < METATILE_SIZE; ty++) {
+		int ay = y + ty * s;
+		for (int tx = 0; tx < METATILE_SIZE; tx++) {
+			int ax = x + tx * s;
+			const Tile *t = mt->tile(tx, ty);
+			const Deep_Tile *dt = _tileset.const_tile_or_roof(t->index());
+			const uchar *buffer = dt->rgb(t->palette());
+			buffer += t->y_flip()
+				? t->x_flip() ? (LINE_PX * LINE_PX - k) * NUM_CHANNELS : LINE_BYTES * (LINE_PX - 1)
+				: t->x_flip() ? (LINE_PX - 1) * k * NUM_CHANNELS : 0;
+			int td = t->x_flip() ? -d : d;
+			int tld = t->y_flip() ? -ld : ld;
+			fl_draw_image(buffer, ax, ay, s, s, td, tld);
+			if (show_priority && t->priority()) {
+				(zoom ? large_priority_png : small_priority_png).draw(ax, ay, s, s);
 			}
 		}
-	}
-	else {
-		int s = TILE_SIZE * METATILE_SIZE * (zoom ? ZOOM_FACTOR : 1);
-		fl_color(EMPTY_RGB);
-		fl_rectf(x, y, s, s);
 	}
 }
 
@@ -92,15 +130,17 @@ uchar *Metatileset::print_rgb(const Map &map) const {
 	for (int y = 0; y < h; y++) {
 		for (int x = 0; x < w; x++) {
 			Block *b = map.block((uint8_t)x, (uint8_t)y);
-			const Metatile *m = _metatiles[b->id()];
+			const Metatile *mt = _metatiles[b->id()];
 			for (int ty = 0; ty < METATILE_SIZE; ty++) {
 				for (int tx = 0; tx < METATILE_SIZE; tx++) {
-					uint8_t tid = m->tile_id(tx, ty);
-					const Tile *t = _tileset.const_tile_or_roof(tid);
+					const Tile *t = mt->tile(tx, ty);
+					const Deep_Tile *dt = _tileset.const_tile_or_roof(t->index());
 					size_t o = ((y * METATILE_SIZE + ty) * bw + x * METATILE_SIZE + tx) * TILE_SIZE * NUM_CHANNELS;
 					for (int py = 0; py < TILE_SIZE; py++) {
+						int my = t->y_flip() ? TILE_SIZE - py - 1 : py;
 						for (int px = 0; px < TILE_SIZE; px++) {
-							const uchar *rgb = t->const_pixel(px, py);
+							int mx = t->x_flip() ? TILE_SIZE - px - 1 : px;
+							const uchar *rgb = dt->const_colored_pixel(t->palette(), mx, my);
 							size_t j = o + (py * bw + px) * NUM_CHANNELS;
 							buffer[j++] = rgb[0];
 							buffer[j++] = rgb[1];
@@ -117,8 +157,6 @@ uchar *Metatileset::print_rgb(const Map &map) const {
 Metatileset::Result Metatileset::read_metatiles(const char *f) {
 	if (!_tileset.num_tiles()) { return (_result = Result::META_NO_GFX); } // no graphics
 
-	if (ends_with_ignore_case(f, ".cel")) { return read_asm_metatiles(f); }
-
 	FILE *file = fl_fopen(f, "rb");
 	if (file == NULL) { return (_result = Result::META_BAD_FILE); } // cannot load file
 
@@ -131,40 +169,14 @@ Metatileset::Result Metatileset::read_metatiles(const char *f) {
 		Metatile *mt = _metatiles[_num_metatiles++];
 		for (int y = 0; y < METATILE_SIZE; y++) {
 			for (int x = 0; x < METATILE_SIZE; x++) {
-				mt->tile_id(x, y, data[y * METATILE_SIZE + x]);
+				uchar v = data[y * METATILE_SIZE + x];
+				mt->offset(x, y, v);
 			}
 		}
 	}
 
 	fclose(file);
 	_mod_time = file_modified(f);
-	return (_result = Result::META_OK);
-}
-
-Metatileset::Result Metatileset::read_asm_metatiles(const char *f) {
-	Parsed_Asm data(f);
-	if (data.result() != Parsed_Asm::Result::ASM_OK) {
-		return (_result = Result::META_BAD_FILE); // cannot parse file
-	}
-
-	size_t c = data.size();
-	size_t n = c / (METATILE_SIZE * METATILE_SIZE);
-	_num_metatiles = std::min(n, (size_t)MAX_NUM_METATILES);
-
-	for (size_t i = 0; i < _num_metatiles; i++) {
-		Metatile *mt = _metatiles[i];
-		int off = (int)i * METATILE_SIZE * METATILE_SIZE;
-		for (int y = 0; y < METATILE_SIZE; y++) {
-			for (int x = 0; x < METATILE_SIZE; x++) {
-				mt->tile_id(x, y, data.get(off  + y * METATILE_SIZE + x));
-			}
-		}
-	}
-
-	_mod_time = file_modified(f);
-
-	if (n > MAX_NUM_METATILES) { return (_result = Result::META_TOO_LONG); }
-	if (c % (METATILE_SIZE * METATILE_SIZE)) { return (_result = Result::META_TOO_SHORT); }
 	return (_result = Result::META_OK);
 }
 
@@ -175,13 +187,60 @@ bool Metatileset::write_metatiles(const char *f) {
 		Metatile *mt = _metatiles[i];
 		for (int y = 0; y < METATILE_SIZE; y++) {
 			for (int x = 0; x < METATILE_SIZE; x++) {
-				uint8_t id = mt->tile_id(x, y);
-				fputc(id, file);
+				uchar t = mt->offset(x, y);
+				fputc(t, file);
 			}
 		}
 	}
 	fclose(file);
 	_mod_time = file_modified(f);
+	return true;
+}
+
+Metatileset::Result Metatileset::read_attributes(const char *f) {
+	if (!_tileset.num_tiles()) { return (_result = Result::META_NO_GFX); } // no graphics
+
+	FILE *file = fl_fopen(f, "rb");
+	if (file == NULL) { return (_result = Result::META_BAD_FILE); } // cannot load file
+
+	uchar data[METATILE_SIZE * METATILE_SIZE] = {};
+	size_t i = 0;
+	while (!feof(file)) {
+		size_t c = fread(data, 1, METATILE_SIZE * METATILE_SIZE, file);
+		if (!c) { break; } // end of file
+		if (c < METATILE_SIZE * METATILE_SIZE) { fclose(file); return (_result = Result::META_TOO_SHORT); }
+		if (i >= _num_metatiles) { fclose(file); return (_result = Result::META_TOO_LONG); }
+		Metatile *mt = _metatiles[i++];
+		for (int y = 0; y < METATILE_SIZE; y++) {
+			for (int x = 0; x < METATILE_SIZE; x++) {
+				uchar a = data[y * METATILE_SIZE + x];
+				mt->attribute(x, y, a);
+				if (mt->index(x, y) > 0x100) {
+					Config::allow_512_tiles(true);
+				}
+			}
+		}
+	}
+
+	fclose(file);
+	_mod_time_attr = file_modified(f);
+	return (_result = Result::META_OK);
+}
+
+bool Metatileset::write_attributes(const char *f) {
+	FILE *file = fl_fopen(f, "wb");
+	if (!file) { return false; }
+	for (size_t i = 0; i < _num_metatiles; i++) {
+		Metatile *mt = _metatiles[i];
+		for (int y = 0; y < METATILE_SIZE; y++) {
+			for (int x = 0; x < METATILE_SIZE; x++) {
+				uchar a = mt->attribute(x, y);
+				fputc(a, file);
+			}
+		}
+	}
+	fclose(file);
+	_mod_time_attr = file_modified(f);
 	return true;
 }
 

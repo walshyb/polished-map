@@ -10,33 +10,37 @@
 #include "map-events.h"
 
 static const std::unordered_map<std::string, Event_Meta> events_meta = {
-	// pokered
-	{"warp",                  {EventTexture::TX_PURPLE, 'W', 0, false, true}},
-	{"sign",                  {EventTexture::TX_RED,    'S', 0, false, false}},
-	{"object",                {EventTexture::TX_BLUE,   'O', 1, false, false}},
-	{"warp_to",               {EventTexture::TX_ORANGE, 'T', 0, false, false}},
 	// pokecrystal
-	{"warp_event",            {EventTexture::TX_PURPLE, 'W', 0, false, false}},
-	{"coord_event",           {EventTexture::TX_GREEN,  'C', 0, false, false}},
-	{"bg_event",              {EventTexture::TX_RED,    'B', 0, false, false}},
-	{"object_event",          {EventTexture::TX_BLUE,   'O', 0, false, false}},
+	{"warp_event",             {EventTexture::TX_PURPLE, 'W', 0, false, false}},
+	{"coord_event",            {EventTexture::TX_GREEN,  'C', 0, false, false}},
+	{"bg_event",               {EventTexture::TX_RED,    'B', 0, false, false}},
+	{"object_event",           {EventTexture::TX_BLUE,   'O', 0, false, false}},
 	// old pokecrystal
-	{"warp_def",              {EventTexture::TX_PURPLE, 'W', 0, true,  true}},
-	{"xy_trigger",            {EventTexture::TX_GREEN,  'X', 1, true,  false}},
-	{"signpost",              {EventTexture::TX_RED,    'S', 0, true,  false}},
-	{"person_event",          {EventTexture::TX_BLUE,   'P', 1, true,  false}},
+	{"warp_def",               {EventTexture::TX_PURPLE, 'W', 0, true,  true}},
+	{"xy_trigger",             {EventTexture::TX_GREEN,  'X', 1, true,  false}},
+	{"signpost",               {EventTexture::TX_RED,    'S', 0, true,  false}},
+	{"person_event",           {EventTexture::TX_BLUE,   'P', 1, true,  false}},
 	// Prism
-	{"dummy_warp",            {EventTexture::TX_PURPLE, 'D', 0, true,  false}},
+	{"dummy_warp",             {EventTexture::TX_PURPLE, 'D', 0, true,  false}},
 	// Polished Crystal
-	{"itemball_event",        {EventTexture::TX_AZURE,  'I', 0, false, false}},
-	{"keyitemball_event",     {EventTexture::TX_AZURE,  'K', 0, false, false}},
-	{"tmhmball_event",        {EventTexture::TX_AZURE,  'T', 0, false, false}},
-	{"cuttree_event",         {EventTexture::TX_AZURE,  'C', 0, false, false}},
-	{"fruittree_event",       {EventTexture::TX_AZURE,  'F', 0, false, false}},
-	{"strengthboulder_event", {EventTexture::TX_AZURE,  'B', 0, false, false}},
-	{"smashrock_event",       {EventTexture::TX_AZURE,  'R', 0, false, false}},
-	{"pc_nurse_event",        {EventTexture::TX_AZURE,  'N', 0, false, false}},
-	{"mart_clerk_event",      {EventTexture::TX_AZURE,  'M', 0, false, false}},
+	{"itemball_event",         {EventTexture::TX_AZURE,  'I', 0, false, false}},
+	{"keyitemball_event",      {EventTexture::TX_AZURE,  'K', 0, false, false}},
+	{"tmhmball_event",         {EventTexture::TX_AZURE,  'T', 0, false, false}},
+	{"cuttree_event",          {EventTexture::TX_AZURE,  'C', 0, false, false}},
+	{"fruittree_event",        {EventTexture::TX_AZURE,  'F', 0, false, false}},
+	{"strengthboulder_event",  {EventTexture::TX_AZURE,  'B', 0, false, false}},
+	{"smashrock_event",        {EventTexture::TX_AZURE,  'R', 0, false, false}},
+	{"pokemon_event",          {EventTexture::TX_AZURE,  'P', 0, false, false}},
+	{"pc_nurse_event",         {EventTexture::TX_AZURE,  'N', 0, false, false}},
+	{"mart_clerk_event",       {EventTexture::TX_AZURE,  'M', 0, false, false}},
+	// Red++
+	{"pc_chansey_event",       {EventTexture::TX_ORANGE, 'C', 0, false, false}},
+	{"pc_blissey_event",       {EventTexture::TX_ORANGE, 'B', 0, false, false}},
+	{"cavebase_event",         {EventTexture::TX_ORANGE, 'V', 0, false, false}},
+	{"treebase_left_event_1",  {EventTexture::TX_ORANGE, '\xbf', 0, false, false}}, // U+00BF INVERTED QUESTION MARK
+	{"treebase_left_event_2",  {EventTexture::TX_ORANGE, '\xa1', 0, false, false}}, // U+00A1 INVERTED EXCLAMATION MARK
+	{"treebase_right_event_1", {EventTexture::TX_ORANGE, '?', 0, false, false}},
+	{"treebase_right_event_2", {EventTexture::TX_ORANGE, '!', 0, false, false}},
 };
 
 Map_Events::Map_Events() : _map_name(), _events(), _warps(), _result(Result::MAP_EVENTS_NULL),
@@ -93,16 +97,6 @@ Map_Events::Result Map_Events::read_events(const char *f) {
 		if (it == events_meta.end()) {
 			prelude += line + '\n';
 			continue;
-		}
-
-		if (token == "warp") {
-			// warp is a script command in pokecrystal, but with 2 commas, not 3
-			std::string tail(lss.str().substr((size_t)lss.tellg()));
-			remove_comment(tail);
-			if (std::count(RANGE(tail), ',') != 3) {
-				prelude += line + '\n';
-				continue;
-			}
 		}
 
 		bool is_warp = it->second.is_warp();

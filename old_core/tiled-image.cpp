@@ -7,16 +7,14 @@
 #pragma warning(pop)
 
 #include "utils.h"
-#include "palette-map.h"
+#include "tileset.h"
 #include "tiled-image.h"
-#include "parse-asm.h"
 
 Tiled_Image::Tiled_Image(const char *f) : _tile_hues(), _num_tiles(0), _result(Result::IMG_NULL) {
 	if (!f) { return; }
 	else if (ends_with_ignore_case(f, ".png")) { read_png_graphics(f); }
 	else if (ends_with_ignore_case(f, ".2bpp")) { read_2bpp_graphics(f); }
 	else if (ends_with_ignore_case(f, ".2bpp.lz")) { read_lz_graphics(f); }
-	else if (ends_with_ignore_case(f, ".chr")) { read_asm_graphics(f); }
 }
 
 Tiled_Image::~Tiled_Image() {}
@@ -216,32 +214,4 @@ Tiled_Image::Result Tiled_Image::parse_2bpp_data(const std::vector<uchar> &data)
 	}
 
 	return Result::IMG_OK;
-}
-
-Tiled_Image::Result Tiled_Image::read_asm_graphics(const char *f) {
-	Parsed_Asm data(f);
-	if (data.result() != Parsed_Asm::Result::ASM_OK) {
-		return (_result = Result::IMG_BAD_FILE); // cannot parse file
-	}
-
-	size_t n = data.size();
-	if (n % BYTES_PER_2BPP_TILE) { return (_result = Result::IMG_BAD_DIMS); }
-
-	// Copied from parse_2bpp_data
-
-	n /= BYTES_PER_2BPP_TILE;
-	if (n > MAX_NUM_TILES) { return (_result = Result::IMG_TOO_LARGE); }
-
-	_num_tiles = n;
-	_tile_hues.resize(_num_tiles * TILE_AREA);
-
-	for (size_t i = 0; i < _num_tiles; i++) {
-		for (int j = 0; j < TILE_SIZE; j++) {
-			uchar b1 = data.get(i * BYTES_PER_2BPP_TILE + j * 2);
-			uchar b2 = data.get(i * BYTES_PER_2BPP_TILE + j * 2 + 1);
-			convert_2bytes_to_8hues(b1, b2, _tile_hues.data() + (i * TILE_SIZE + j) * 8);
-		}
-	}
-
-	return (_result = Result::IMG_OK);
 }
