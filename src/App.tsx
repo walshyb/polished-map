@@ -1,11 +1,12 @@
 import './App.css';
 import Editor from './components/editor/Editor';
-import Menu from './components/menus/Menu';
+import TopBar from './components/menus/TopBar';
+import 'semantic-ui-css/semantic.min.css'
 
 function App() {
   return (
     <div className="App">
-      <Menu />
+      <TopBar />
       <Editor />
     </div>
   );
