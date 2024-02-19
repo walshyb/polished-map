@@ -1,9 +1,20 @@
+#ifndef APPSTATE
+#define APPSTATE
+
 #include "map/map.h"
 class AppState {
+
 public:
-  AppState() : map() {};
-  ~AppState();
-  Map getMap();
+  static AppState& getInstance() {
+    static AppState instance;
+    return instance;
+  }
+
+  Map *getMap();
 private:
-  Map map;
+  AppState();
+  ~AppState();
+  Map *map;
 };
+
+#endif

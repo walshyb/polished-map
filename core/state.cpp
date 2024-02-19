@@ -4,9 +4,14 @@
 #include "state.h"
 
 AppState::~AppState() {
-  map.clear();
+  map->clear();
 }
 
-Map AppState::getMap() {
+AppState::AppState() {
+  map = new Map();
+}
+
+Map* AppState::getMap() {
   return map;
 }
+

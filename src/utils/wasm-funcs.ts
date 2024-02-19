@@ -8,7 +8,7 @@ export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: st
   Module.HEAPU8.set(new Uint8Array(arrayBuffer), bufferPtr);
 
   // @ts-ignore
-  window._processFile(bufferPtr, size, filenamePtr);
+  window.__ZN13FileProcessor11processFileEPKhmPKc(bufferPtr, size, filenamePtr);
 
   // @ts-ignore
   window._free(filenamePtr);
