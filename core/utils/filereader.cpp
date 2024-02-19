@@ -37,7 +37,7 @@ bool FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, c
 // TODO: maybe have this call Map::read_blocks
 // TODO: send OK flag
 void FileProcessor::processAblk(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
-  int _width = 28;
+  int _width = 20;
   int _height = 18;
 
   AppState *state = &AppState::getInstance();
@@ -53,7 +53,7 @@ void FileProcessor::processAblk(const uint8_t* fileDataPtr, size_t bufferSize, c
         map->addBlock(i, new Block(y, x, id));
 
 
-      // std::cout << "Index: " << i << ", val: " << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(id) << std::endl; // Print ID
+      std::cout << "Index: " << (int)i << ", val: " << static_cast<int>(id) << ", row: " << static_cast<int>(y) << ", col: " << static_cast<int>(x) << std::endl; // Print ID
     }
   }
   std::cout << "File processed" << std::endl; // Print ID

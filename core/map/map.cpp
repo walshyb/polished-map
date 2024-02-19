@@ -56,7 +56,7 @@ Map::Result Map::read_blocks(const uint8_t* fileDataPtr, size_t bufferSize, cons
   }
 }*/
 
-void Map::addBlock(uint8_t index, Block * block) {
+void Map::addBlock(int index, Block * block) {
   _blocks[index] = block;
   _numBlocks++;
 }
