@@ -2,27 +2,23 @@ import Block from './Block';
 import { getBlocks } from '../../../utils/wasm-funcs';
 import { useAppSelector, useAppDispatch } from '../../../hooks';
 import { setBlocks } from '../../../store/editorSlice';
+import { getActiveFile } from '../../../store/fileSlice';
 
 export default function Map(
   { fileProcessed }: { fileProcessed: boolean }
 ) {
 
   const dispatch = useAppDispatch();
-  //dispatch(setBlocks(blocksArray));
+  const blocks = useAppSelector((state) => state.editor.blocks);
+  const file = useAppSelector(getActiveFile);
+  console.log('active file', file);
+  const rows = 18;
+  const cols = 20;
 
-  // Get blocks from wasm
-  if (fileProcessed) {
-    console.log('calling getBlocks');
-    // Load map
-    const blocks = getBlocks();
-  }
-  // Draw blocks
+
   
   return (
     <div>
-      <h1>Map</h1>
-      <div>
-      </div>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { processFile as processFileUtil } from '../utils/wasm-funcs';
 export interface File {
   name: string;
   size: number;
+  active: boolean;
 }
 
 interface FileSlice {
@@ -48,7 +49,8 @@ export const fileSlice = createSlice({
         if (action.payload.result) {
           state.files.push({
             name: action.payload.filename,
-            size: action.payload.size
+            size: action.payload.size,
+            active: true
           });
           state.state = 'idle';
           state.error = null;
@@ -64,6 +66,12 @@ export const fileSlice = createSlice({
   }
 })
 
+/**
+  * Selector func to get the active file
+  */
+export function getActiveFile(state: RootState): File | undefined {
+  return state.file.files.find(file => file.active);
+}
 export const { setState } = fileSlice.actions;
 export default fileSlice.reducer;
 

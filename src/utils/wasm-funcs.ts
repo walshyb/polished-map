@@ -2,6 +2,8 @@ import { Block } from '../store/editorSlice';
 
 /**
   * Takes array buffer and passes it the FileProcessor in C++.
+  *
+  * @return {boolean} - Whether the file was processed successfully
   */
 export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: string): boolean {
   const filenamePtr: number = allocateUTF8(filename);
@@ -25,9 +27,6 @@ export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: st
 }
 
 
-// temporary type def 
-// TODO move to a separate file
-
 /**
   * Get the Blocks to draw from wasm.
   * These Blocks represent the layout of the tilemap 
@@ -37,6 +36,7 @@ export function getBlocks(): Block[] {
   // @ts-ignore
   const blocksArrayPtr: number = window._getBlocks();
 
+  // Num blocks is the size of the file in bytes
   // TODO: hardcoded. find out length
   const blocksArrayLength: number = 360;
   let blocksArray: Block[] = [];

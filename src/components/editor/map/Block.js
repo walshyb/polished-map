@@ -1,3 +1,6 @@
 export default function Block() {
-  return null;
+  return (
+    <div className="block">
+    </div>
+  );
 }
