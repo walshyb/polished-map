@@ -7,7 +7,6 @@ import { useState } from 'react';
 import { Grid, Menu, GridColumn } from 'semantic-ui-react';
 import FileExplorer from './components/menus/FileExplorer';
 
-
 function App() {
   // Really this is a flag for .(a)blk processed
   const [fileProcessed, setFileProcessed] = useState(false);
