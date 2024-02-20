@@ -21,9 +21,14 @@ const initialState: FileSlice = {
 
 export const processFile = createAsyncThunk('file/processFile', async (data: any, { dispatch }) => {
   const result: boolean = processFileUtil(data.arrayBuffer, data.size, data.filename);
-  if (result) {
-    dispatch(setState('processed'));
-  }
+
+  // TODO:
+  // return result with information from C++
+  return {
+    result,
+    filename: data.filename,
+    size: data.size
+  };
 });
 
 export const fileSlice = createSlice({
@@ -33,6 +38,29 @@ export const fileSlice = createSlice({
     setState: (state, action: PayloadAction<string>) => {
       state.state = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(processFile.pending, (state) => {
+        state.state = 'loading';
+      })
+      .addCase(processFile.fulfilled, (state, action) => {
+        if (action.payload.result) {
+          state.files.push({
+            name: action.payload.filename,
+            size: action.payload.size
+          });
+          state.state = 'idle';
+          state.error = null;
+        } else {
+          state.state = 'error';
+          state.error = 'File processing failed';
+        }
+      })
+      .addCase(processFile.rejected, (state, action) => {
+        state.state = 'error';
+        state.error = 'File processing failed';
+      })
   }
 })
 

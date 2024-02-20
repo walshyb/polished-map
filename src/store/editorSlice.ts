@@ -25,6 +25,7 @@ export const editorSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // On file processing, fetch blocks
     builder.addCase('file/processFile/fulfilled', (state, action) => {
       state.blocks = getBlocks();
     })
