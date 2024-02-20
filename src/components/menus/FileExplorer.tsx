@@ -29,6 +29,17 @@ export default function FileExplorer(
             <RecursiveMenuItem fileNode={file} />
           );
         })}
+
+        { !files || files.length === 0 && (
+          <MenuItem
+            name='no files'
+            active={false}
+            inverted
+            style={{ display: 'flex', alignItems: 'baseline', width: '100%' }}
+          >
+            No files, try opening a project
+          </MenuItem>
+        )}
       </Sidebar>
     </div>
   );

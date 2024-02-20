@@ -21,6 +21,7 @@ export function calculateMapSizes(size: number): Size {
   return validSizes[Math.floor((validSizes.length - 1) / 2)];
 }
 
+const validFileTypes = ['.ablk', '.blk', '.map', '.tileset', '.metatileset', '.tilemap', '.bin', '.asm'];
 // Create a tree of files
 // We'll lazily fetch contents as needed
 export async function readFilesInDirectory(directoryHandler: FileSystemDirectoryHandle, recursive: boolean = false): Promise<FileNode[]> {
@@ -30,20 +31,31 @@ export async function readFilesInDirectory(directoryHandler: FileSystemDirectory
 
   // loop over entries iterator
   for await (const [filename, currentNode] of entries) {
+
     let fileNode: FileNode = {
       name: filename,
       isFile: currentNode.kind === 'file',
       active: false,
     };
 
-    if (!currentNode.isFile && recursive && currentNode.kind === 'directory') {
+    if (recursive && currentNode.kind === 'directory') {
       // If it's a directory, recursively call readFilesInDirectory
       const directoryResult = await readFilesInDirectory(currentNode, recursive);
       // Append the result of the recursive call to the current currentNode
       fileNode.children = directoryResult;
     }
+  
+    // Directory is valid if it has directory
+    const validDirectory = currentNode.kind === 'directory' && fileNode.children?.length;
 
-    result.push(fileNode);
+    // File is valid is it's extension is in validFileTypes
+    const extension: string | null = filename.substring(filename.lastIndexOf('.'));
+    const validFile = currentNode.kind === 'file' && extension && validFileTypes.includes(extension);
+
+    // Only save directories and valid files
+    if (validFile || validDirectory){
+      result.push(fileNode);
+    }
   }
   
 
