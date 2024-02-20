@@ -11,21 +11,21 @@ export default function Map(
   const dispatch = useAppDispatch();
   const blocks = useAppSelector((state) => state.editor.blocks);
   const file = useAppSelector(getActiveFile);
-  let width = 0, height = 0;
+  let cols = 0, rows = 0;
 
   if (file) {
-    width = calculateMapSizes(file.size).width;
-    height = calculateMapSizes(file.size).height;
+    cols = calculateMapSizes(file.size).width;
+    rows = calculateMapSizes(file.size).height;
   }
 
   let blockGrid = [];
 
-  for (let i = 0; i < width; i++) {
+  for (let i = 0; i < rows; i++) {
     const row = [];
-    for (let j = 0; j < height; j++) {
-      const index = i * height + j;
+    for (let j = 0; j < cols; j++) {
+      const index = (i * cols) + j;
       const block = blocks[index];
-      row.push(<Block key={index} id={block.id} />);
+      row.push(<Block key={index} id={block.id} row={block.row} col={block.col} />);
     }
     blockGrid.push(
       <div

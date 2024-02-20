@@ -1,5 +1,5 @@
 export default function Block(
-  { id }: { id: number }
+  { id, row, col }: { id: number, row: number, col: number }
 ) {
   return (
     <div
@@ -12,6 +12,8 @@ export default function Block(
         width: '33px',
         height: '33px',
       }}
+      row={row}
+      col={col}
     >
       {id}
     </div>
