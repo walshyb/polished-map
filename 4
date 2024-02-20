@@ -8,7 +8,7 @@ export default function FileExplorer(
   const files = useAppSelector((state) => state.file.files);
 
   if (!fileExplorerActive) {
-    return null;
+    //return null;
   }
 
   return (
@@ -17,8 +17,7 @@ export default function FileExplorer(
         icon='labeled'
         vertical
         floated={true}
-        fixed='left'
-        style={{ display: 'flex', height: '100%', marginTop: '50px', marginLeft: '90px', overflowY: 'auto'}}
+        style={{ display: 'flex', height: '100%', marginTop: 0 }}
       >
         <MenuHeader>
           File Explorer

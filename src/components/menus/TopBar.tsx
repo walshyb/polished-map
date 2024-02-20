@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
-import { MenuItem, Menu, Dropdown } from 'semantic-ui-react'
+import { MenuItem, Menu, Dropdown, DropdownMenu, DropdownItem } from 'semantic-ui-react'
 import { useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../../hooks';
-import { processFile } from '../../store/fileSlice';
+import { processFile, openProject } from '../../store/fileSlice';
+import type { DropdownItemProps } from 'semantic-ui-react';
 
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget;
@@ -34,17 +35,29 @@ export default function TopBar(
     }
   };
 
+  const handleOpenProject = async (event: React.MouseEvent<HTMLDivElement, MouseEvent>, data: DropdownItemProps) => {
+    dispatch(openProject());
+    
+  };
+
   return (
       <Menu
         inverted={true}
       >
-        <Menu.Item>
+        <MenuItem>
           Logo Logo
-        </Menu.Item>
+        </MenuItem>
         <Dropdown item text='File'>
-          <Dropdown.Menu>
-            <Dropdown.Item>New</Dropdown.Item>
-            <Dropdown.Item>
+          <DropdownMenu>
+            <DropdownItem>New</DropdownItem>
+            <DropdownItem
+              onClick={handleOpenProject}
+            >
+              <label htmlFor='open-project' style={{ cursor: 'pointer' }}>
+                Open Project...
+              </label>
+            </DropdownItem>
+            <DropdownItem>
               <label htmlFor='file-upload' style={{ cursor: 'pointer' }}>
                 Open...
                 <input
@@ -54,8 +67,8 @@ export default function TopBar(
                   onChange={handleFileUpload}
                 />
               </label>
-            </Dropdown.Item>
-          </Dropdown.Menu>
+            </DropdownItem>
+          </DropdownMenu>
         </Dropdown>
 
         <MenuItem
