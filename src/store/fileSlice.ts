@@ -15,8 +15,8 @@ interface FileSlice {
 
 const initialState: FileSlice = {
   files: [],
-  state: '',
-  error: null
+  state: 'idle',
+  error: null,
 }
 
 export const processFile = createAsyncThunk('file/processFile', async (data: any, { dispatch }) => {

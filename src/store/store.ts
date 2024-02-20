@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { editorSlice } from './editorSlice'
+import { fileSlice } from './fileSlice'
 
 export const store = configureStore({
   reducer: {
     editor: editorSlice.reducer,
+    file: fileSlice.reducer
   },
   devTools: true,
 })

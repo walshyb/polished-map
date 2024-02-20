@@ -44,14 +44,15 @@ export function getBlocks(): Block[] {
   // Access block data from memory
   for (let i = 0; i < blocksArrayLength; i++) {
     // @ts-ignore
+    // Get pointer to block in the array in memory
     const blockPointer = Module.HEAP32[blocksArrayPtr / 4 + i]; // Assuming 32-bit integers
     
     // @ts-ignore
-    const blockRow = Module.HEAPU8[blocksArrayPointer + 0];
+    const blockRow = Module.HEAPU8[blockPointer + 0];
     // @ts-ignore
-    const blockCol = Module.HEAPU8[blocksArrayPointer + 1];
+    const blockCol = Module.HEAPU8[blockPointer + 1];
     // @ts-ignore
-    const blockId = Module.HEAPU8[blocksArrayPointer + 2];
+    const blockId = Module.HEAPU8[blockPointer + 2];
 
     blocksArray.push({
       row: blockRow,

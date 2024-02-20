@@ -1,7 +1,8 @@
-import { processFile } from '../../utils/wasm-funcs';
-import React, { Component } from 'react'
+import React, { useEffect } from 'react';
 import { MenuItem, Menu, Dropdown } from 'semantic-ui-react'
 import { useState } from 'react';
+import { useAppSelector, useAppDispatch } from '../../hooks';
+import { processFile } from '../../store/fileSlice';
 
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget;
@@ -10,6 +11,9 @@ export default function TopBar(
   { fileProcessed, setFileProcessed }: { fileProcessed: boolean; setFileProcessed: (fileProcessed: boolean) => void }
 ) {
   const [activeItem, setActiveItem] = useState<string>('');
+  const dispatch = useAppDispatch();
+  const status = useAppSelector((state) => state.file.state);
+
   
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file: any = event?.target.files && event.target.files[0];
@@ -20,9 +24,13 @@ export default function TopBar(
       const arrayBuffer: ArrayBuffer = await file.arrayBuffer();
 
       // Pass arrayBuffer to WebAssembly module
-      const result: boolean = processFile(arrayBuffer, arrayBuffer.byteLength, file.name);
-
-      setFileProcessed(result);
+      dispatch(
+        processFile({
+          arrayBuffer,
+          size: arrayBuffer.byteLength,
+          filename: file.name
+        })
+      );
     }
   };
 
