@@ -312,7 +312,7 @@ Palette_Window::~Palette_Window() {
 	delete _color_group;
 }
 
-static const char *palette_labels[NUM_GAME_PALETTES] = {"GRAY:", "RED:", "GREEN:", "WATER:", "YELLOW:", "BROWN:", "ROOF:", "TEXT:"};
+static const char *palette_labels[NUM_PALETTES] = {"GRAY:", "RED:", "GREEN:", "WATER:", "YELLOW:", "BROWN:", "ROOF:", "TEXT:"};
 
 void Palette_Window::initial_setup() {
 	// Populate window
@@ -326,7 +326,7 @@ void Palette_Window::initial_setup() {
 	initialize_inputs(107+off, 10, 172, 111+off, 159);
 	// Populate hue heading group
 	_palette_heading_group->begin();
-	for (int i = 0; i < NUM_GAME_PALETTES; i++) {
+	for (int i = 0; i < NUM_PALETTES; i++) {
 		Label *hhl = new Label(10, 11+21*i, off, 22, palette_labels[i]);
 		hhl->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
 	}
@@ -334,7 +334,7 @@ void Palette_Window::initial_setup() {
 	// Populate swatch group
 	_color_group->color(FL_INACTIVE_COLOR);
 	_color_group->begin();
-	for (int y = 0; y < NUM_GAME_PALETTES; y++) {
+	for (int y = 0; y < NUM_PALETTES; y++) {
 		for (int x = 0; x < NUM_HUES; x++) {
 			Color_Button *cb = new Color_Button(_color_group->x()+2+21*x, _color_group->y()+2+21*y, 20);
 			cb->color(Color::fl_color(_current_palettes, (Palette)y, Color::ordered_hue(x)));
@@ -351,7 +351,7 @@ void Palette_Window::initial_setup() {
 void Palette_Window::refresh() {
 	_canceled = false;
 	_copied = false;
-	for (int y = 0; y < NUM_GAME_PALETTES; y++) {
+	for (int y = 0; y < NUM_PALETTES; y++) {
 		for (int x = 0; x < NUM_HUES; x++) {
 			Fl_Color c = Color::fl_color(_current_palettes, (Palette)y, Color::ordered_hue(x));
 			_color_buttons[y][x]->color(c);
@@ -361,58 +361,10 @@ void Palette_Window::refresh() {
 }
 
 void Palette_Window::apply_modifications() {
-	for (int y = 0; y < NUM_GAME_PALETTES; y++) {
+	for (int y = 0; y < NUM_PALETTES; y++) {
 		for (int x = 0; x < NUM_HUES; x++) {
 			Color_Button *cb = _color_buttons[y][x];
 			Color::color(_current_palettes, (Palette)y, Color::ordered_hue(x), cb->color());
 		}
-	}
-}
-
-Monochrome_Palette_Window::Monochrome_Palette_Window(int x, int y) : Abstract_Palette_Window(x, y),
-	_palette_heading(NULL), _color_buttons() {}
-
-Monochrome_Palette_Window::~Monochrome_Palette_Window() {
-	delete _palette_heading;
-	delete _color_group;
-}
-
-void Monochrome_Palette_Window::initial_setup() {
-	// Populate window
-	int off = text_width("MONOCHROME:", 2);
-	_window = new Swatch_Window(_dx, _dy, 107+off, 192, "Edit Current Palettes");
-	_palette_heading = new Label(10, 11, off, 22, "MONOCHROME:");
-	_color_group = new Fl_Group(10+off, 10, 87, 24);
-	_color_group->end();
-	initialize_inputs(10, 44, 81+off, off-77, 160);
-	// Populate swatch group
-	_color_group->color(FL_INACTIVE_COLOR);
-	_color_group->begin();
-	for (int i = 0; i < NUM_HUES; i++) {
-		Color_Button *cb = new Color_Button(_color_group->x()+2+21*i, _color_group->y()+2, 20);
-		cb->color(Color::fl_color(_current_palettes, Palette::MONOCHROME, Color::ordered_hue(i)));
-		cb->callback((Fl_Callback *)select_color_cb, this);
-		_color_buttons[i] = cb;
-	}
-	_color_group->end();
-	// Initialize window's children
-	_palette_heading->align(FL_ALIGN_RIGHT | FL_ALIGN_INSIDE);
-	_color_group->box(OS_SPACER_THIN_DOWN_BOX);
-}
-
-void Monochrome_Palette_Window::refresh() {
-	_canceled = false;
-	_copied = false;
-	for (int i = 0; i < NUM_HUES; i++) {
-		Fl_Color c = Color::fl_color(_current_palettes, Palette::MONOCHROME, Color::ordered_hue(i));
-		_color_buttons[i]->color(c);
-	}
-	select(_color_buttons[0]);
-}
-
-void Monochrome_Palette_Window::apply_modifications() {
-	for (int i = 0; i < NUM_HUES; i++) {
-		Color_Button *cb = _color_buttons[i];
-		Color::color(_current_palettes, Palette::MONOCHROME, Color::ordered_hue(i), cb->color());
 	}
 }

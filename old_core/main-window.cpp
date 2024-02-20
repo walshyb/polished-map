@@ -63,13 +63,11 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	int show_warp_ids_config = Preferences::get("warp-ids", 1);
 	Palettes palettes_config = (Palettes)Preferences::get("palettes", (int)Palettes::DAY);
 
-	int monochrome_config = Preferences::get("monochrome", 0);
-	int allow_priority_config = Preferences::get("prioritize", 0);
-	int allow_256_tiles_config = Preferences::get("all256", 0);
+	int allow_512_tiles_config = Preferences::get("all512", 0);
+	int arrange_0_before_1_config = Preferences::get("swap01", 0);
 	int drag_and_drop_config = Preferences::get("drag", 1);
-	Config::monochrome(!!monochrome_config);
-	Config::allow_priority(!!allow_priority_config);
-	Config::allow_256_tiles(!!allow_256_tiles_config);
+	Config::allow_512_tiles(!!allow_512_tiles_config);
+	Config::arrange_0_before_1(!!arrange_0_before_1_config);
 	Config::drag_and_drop(!!drag_and_drop_config);
 
 	int print_grid_config = Preferences::get("print-grid", 0);
@@ -221,7 +219,6 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_tileset_window = new Tileset_Window(48, 48);
 	_roof_window = new Roof_Window(48, 48);
 	_palette_window = new Palette_Window(48, 48);
-	_monochrome_palette_window = new Monochrome_Palette_Window(48, 48);
 
 	// Drag-and-drop receiver
 	_dnd_receiver = new DnD_Receiver(0, 0, 0, 0);
@@ -398,12 +395,10 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 		OS_MENU_ITEM("Edit Current &Palettes...", FL_COMMAND + 'L', (Fl_Callback *)edit_current_palettes_cb, this, 0),
 		{},
 		OS_SUBMENU("&Options"),
-		OS_MENU_ITEM("&Monochrome", 0, (Fl_Callback *)monochrome_cb, this,
-			FL_MENU_TOGGLE | (monochrome_config ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("Tile &Priority", 0, (Fl_Callback *)allow_priority_cb, this,
-			FL_MENU_TOGGLE | (allow_priority_config ? FL_MENU_VALUE : 0)),
-		OS_MENU_ITEM("256 &Tiles", 0, (Fl_Callback *)allow_256_tiles_cb, this,
-			FL_MENU_TOGGLE | (allow_256_tiles_config ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("512 &Tiles", 0, (Fl_Callback *)allow_512_tiles_cb, this,
+			FL_MENU_TOGGLE | (allow_512_tiles_config ? FL_MENU_VALUE : 0)),
+		OS_MENU_ITEM("$0:80-FF &Before $1:80-FF", 0, (Fl_Callback *)arrange_0_before_1_cb, this,
+			FL_MENU_TOGGLE | (arrange_0_before_1_config ? FL_MENU_VALUE : 0)),
 		OS_MENU_ITEM("Roo&f Palettes", 0, NULL, NULL, FL_SUBMENU | FL_MENU_DIVIDER),
 		OS_MENU_ITEM("&Custom", 0, (Fl_Callback *)roof_custom_cb, this,
 			FL_MENU_RADIO | (_roof_palettes == Roof_Palettes::ROOF_CUSTOM ? FL_MENU_VALUE : 0)),
@@ -471,9 +466,8 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_custom_mi = PM_FIND_MENU_ITEM_CB(custom_palettes_cb);
 	_blocks_mode_mi = PM_FIND_MENU_ITEM_CB(blocks_mode_cb);
 	_events_mode_mi = PM_FIND_MENU_ITEM_CB(events_mode_cb);
-	_monochrome_mi = PM_FIND_MENU_ITEM_CB(monochrome_cb);
-	_allow_priority_mi = PM_FIND_MENU_ITEM_CB(allow_priority_cb);
-	_allow_256_tiles_mi = PM_FIND_MENU_ITEM_CB(allow_256_tiles_cb);
+	_allow_512_tiles_mi = PM_FIND_MENU_ITEM_CB(allow_512_tiles_cb);
+	_arrange_0_before_1_mi = PM_FIND_MENU_ITEM_CB(arrange_0_before_1_cb);
 	_roof_custom_mi = PM_FIND_MENU_ITEM_CB(roof_custom_cb);
 	_roof_day_nite_mi = PM_FIND_MENU_ITEM_CB(roof_day_nite_cb);
 	_roof_morn_day_nite_mi = PM_FIND_MENU_ITEM_CB(roof_morn_day_nite_cb);
@@ -667,12 +661,12 @@ Main_Window::Main_Window(int x, int y, int w, int h, const char *) : Fl_Overlay_
 	_new_dir_chooser->title("Choose Project Directory");
 
 	_blk_open_chooser->title("Open Map");
-	_blk_open_chooser->filter("BLK Files\t*.blk\nMAP Files\t*.map\n");
+	_blk_open_chooser->filter("BLK Files\t*.{ablk,blk}\n");
 
 	_blk_save_chooser->title("Save Map");
-	_blk_save_chooser->filter("BLK Files\t*.blk\n");
+	_blk_save_chooser->filter("BLK Files\t*.{ablk,blk}\n");
 	_blk_save_chooser->options(Fl_Native_File_Chooser::Option::SAVEAS_CONFIRM);
-	_blk_save_chooser->preset_file("NewMap.blk");
+	_blk_save_chooser->preset_file("NewMap.ablk");
 
 	_pal_load_chooser->title("Open Palettes");
 	_pal_load_chooser->filter("PAL Files\t*.pal\n");
@@ -754,7 +748,6 @@ Main_Window::~Main_Window() {
 	delete _tileset_window;
 	delete _roof_window;
 	delete _palette_window;
-	delete _monochrome_palette_window;
 }
 
 void Main_Window::show() {
@@ -1018,7 +1011,6 @@ void Main_Window::update_gameboy_screen(Block *b) {
 }
 
 void Main_Window::update_active_controls() {
-	update_priority_controls();
 	if (_map.size()) {
 		_load_event_script_mi->activate();
 		_load_event_script_tb->activate();
@@ -1142,27 +1134,17 @@ void Main_Window::update_active_controls() {
 		_edit_roof_mi->deactivate();
 		_edit_roof_tb->deactivate();
 	}
+	update_512_tile_controls();
 }
 
-void Main_Window::update_priority_controls() {
-	if (Config::allow_priority()) {
-		_allow_priority_mi->set();
-		_show_priority_mi->activate();
-		_show_priority_tb->activate();
+void Main_Window::update_512_tile_controls() {
+	if (Config::allow_512_tiles()) {
+		_allow_512_tiles_mi->set();
+		_arrange_0_before_1_mi->activate();
 	}
 	else {
-		_allow_priority_mi->clear();
-		_show_priority_mi->deactivate();
-		_show_priority_tb->deactivate();
-	}
-}
-
-void Main_Window::update_monochrome_controls() {
-	if (Config::monochrome()) {
-		_monochrome_mi->set();
-	}
-	else {
-		_monochrome_mi->clear();
+		_allow_512_tiles_mi->clear();
+		_arrange_0_before_1_mi->deactivate();
 	}
 }
 
@@ -1257,7 +1239,7 @@ void Main_Window::open_map(const char *filename) {
 	char directory[FL_PATH_MAX] = {};
 	if (!Config::project_path_from_blk_path(filename, directory)) {
 		std::string msg = "Could not find the project directory for\n";
-		msg = msg + basename + "!\nMake sure it contains a Makefile.";
+		msg = msg + basename + "!\nMake sure it contains a main.asm or layout.link file.";
 		_error_dialog->message(msg);
 		_error_dialog->show(this);
 		return;
@@ -1367,10 +1349,10 @@ void Main_Window::open_map(const char *directory, const char *filename) {
 	char buffer[FL_PATH_MAX] = {};
 	sprintf(buffer, PROGRAM_NAME " - %s", basename);
 	copy_label(buffer);
-	if (ends_with_ignore_case(basename, ".blk")) {
+	if (ends_with_ignore_case(basename, ".ablk") || ends_with_ignore_case(basename, ".blk")) {
 		strcpy(buffer, basename);
 		size_t n = strlen(buffer);
-		buffer[n - strlen(".blk")] = '\0';
+		buffer[n - (buffer[n-4] == 'a' ? strlen(".ablk") : strlen(".blk"))] = '\0';
 		strcat(buffer, ".png");
 	}
 	else {
@@ -1428,7 +1410,7 @@ void Main_Window::open_map(const char *directory, const char *filename) {
 		else if (_map.palette() == "PALETTE_MORN" || _map.palette() == "3") {
 			new_palettes = Palettes::MORN;
 		}
-		else if (OS::is_dark_theme(OS::current_theme()) && !Config::monochrome()) {
+		else if (OS::is_dark_theme(OS::current_theme())) {
 			new_palettes = Palettes::NITE;
 		}
 		else {
@@ -1442,7 +1424,7 @@ void Main_Window::open_map(const char *directory, const char *filename) {
 	}
 
 	// load roof colors if applicable
-	if (auto_load_roof_colors() && _map.group() && _map.is_outside() && !Config::monochrome()) {
+	if (auto_load_roof_colors() && _map.group() && _map.is_outside()) {
 		load_roof_colors(true);
 	}
 
@@ -1669,36 +1651,13 @@ bool Main_Window::read_metatile_data(const char *tileset_name, const char *roof_
 
 	const char *directory = _directory.c_str();
 
-	Config::palette_map_path(buffer, directory, tileset_name);
-	Palette_Map::Result rp = tileset.read_palette_map(buffer);
-	// 'monochrome' becomes true if the palette map could not be read
-	update_monochrome_controls();
-	// 'allow_priority' become true if a PRIORITY_* color was used
-	if (Config::allow_priority() && !_allow_priority_mi->value()) {
-		update_priority_controls();
-		redraw();
-	}
-	if (rp == Palette_Map::Result::PALETTE_TOO_LONG) {
-		Config::palette_map_path(buffer, "", tileset_name);
-		std::string msg = "Warning: ";
-		msg = msg + buffer + ":\n\n" + Palette_Map::error_message(rp);
-		_warning_dialog->message(msg);
-		_warning_dialog->show(this);
-	}
-	else if (rp != Palette_Map::Result::PALETTE_OK) {
-		Config::palette_map_path(buffer, "", tileset_name);
-		std::string msg = "Error reading ";
-		msg = msg + buffer + "!\n\n" + Palette_Map::error_message(rp);
-		_error_dialog->message(msg);
-		_error_dialog->show(this);
-		return false;
-	}
-
 	Config::tileset_path(buffer, directory, tileset_name);
 	char b_buffer[FL_PATH_MAX] = {}, a_buffer[FL_PATH_MAX] = {};
 	bool has_before = Config::tileset_before_path(b_buffer, directory, tileset_name);
 	bool has_after = Config::tileset_after_path(a_buffer, directory, tileset_name);
 	Tileset::Result rt = tileset.read_graphics(buffer, has_before ? b_buffer : NULL, has_after ? a_buffer : NULL, palettes());
+	// 'allow_512_tiles' becomes true if the tileset uses more than 256 tiles
+	update_512_tile_controls();
 	if (rt != Tileset::Result::GFX_OK) {
 		Config::tileset_path(buffer, "", tileset_name);
 		std::string msg = "Error reading ";
@@ -1720,6 +1679,27 @@ bool Main_Window::read_metatile_data(const char *tileset_name, const char *roof_
 	else if (rm != Metatileset::Result::META_OK) {
 		_metatileset.clear();
 		Config::metatileset_path(buffer, "", tileset_name);
+		std::string msg = "Error reading ";
+		msg = msg + buffer + "!\n\n" + Metatileset::error_message(rm);
+		_error_dialog->message(msg);
+		_error_dialog->show(this);
+		return false;
+	}
+
+	Config::attributes_path(buffer, directory, tileset_name);
+	rm = _metatileset.read_attributes(buffer);
+	// 'allow_512_tiles' becomes true if a metatile uses a tile index greater than $0ff
+	update_512_tile_controls();
+	if (rm == Metatileset::Result::META_TOO_SHORT || rm == Metatileset::Result::META_TOO_LONG) {
+		Config::attributes_path(buffer, "", tileset_name);
+		std::string msg = "Warning: ";
+		msg = msg + buffer + ":\n\n" + Metatileset::error_message(rm);
+		_warning_dialog->message(msg);
+		_warning_dialog->show(this);
+	}
+	else if (rm != Metatileset::Result::META_OK) {
+		_metatileset.clear();
+		Config::attributes_path(buffer, "", tileset_name);
 		std::string msg = "Error reading ";
 		msg = msg + buffer + "!\n\n" + Metatileset::error_message(rm);
 		_error_dialog->message(msg);
@@ -1965,6 +1945,10 @@ bool Main_Window::save_metatileset() {
 	Config::metatileset_path(filename, directory, tileset_name);
 	const char *basename = fl_filename_name(filename);
 
+	char filename_attr[FL_PATH_MAX] = {};
+	Config::attributes_path(filename_attr, directory, tileset_name);
+	const char *basename_attr = fl_filename_name(filename_attr);
+
 	char filename_coll[FL_PATH_MAX] = {};
 	Config::collisions_path(filename_coll, directory, tileset_name);
 	const char *basename_coll = fl_filename_name(filename_coll);
@@ -1982,6 +1966,23 @@ bool Main_Window::save_metatileset() {
 		if (!_metatileset.write_metatiles(filename)) {
 			std::string msg = "Could not write to ";
 			msg = msg + basename + "!";
+			_error_dialog->message(msg);
+			_error_dialog->show(this);
+			return false;
+		}
+
+		if (_metatileset.other_modified_attributes(filename_attr)) {
+			std::string msg = basename_attr;
+			msg = msg + " was modified by another program!\n\n"
+				"Save the attributes and overwrite it anyway?";
+			_unsaved_dialog->message(msg);
+			_unsaved_dialog->show(this);
+			if (_unsaved_dialog->canceled()) { return true; }
+		}
+
+		if (!_metatileset.write_attributes(filename_attr)) {
+			std::string msg = "Could not write to ";
+			msg = msg + basename_attr + "!";
 			_error_dialog->message(msg);
 			_error_dialog->show(this);
 			return false;
@@ -2011,23 +2012,14 @@ bool Main_Window::save_metatileset() {
 	std::string msg = "Saved ";
 	msg = msg + basename;
 	if (_has_collisions) {
-		msg = msg + "\nand " + basename_coll;
+		msg = msg + ", " + basename_attr + ",\nand " + basename_coll;
+	}
+	else {
+		msg = msg + "\nand " + basename_attr;
 	}
 	msg = msg + "!";
 	_success_dialog->message(msg);
 	_success_dialog->show(this);
-
-	size_t n = _metatileset.size();
-	if (_has_collisions && n > 128 && !Preferences::get("meta128", 0)) {
-		msg = "Warning: ";
-		msg = msg + basename + " has " + std::to_string(n) + " blocks.\n\n"
-			"Be sure to fix the 128-block limit:\n"
-			"https://github.com/pret/pokecrystal/blob/master/docs/bugs_and_glitches.md\n"
-			"(\"LoadMetatiles wraps around past 128 blocks\")";
-		_warning_dialog->message(msg);
-		_warning_dialog->show(this);
-		Preferences::set("meta128", 1);
-	}
 
 	return true;
 }
@@ -2079,34 +2071,8 @@ bool Main_Window::save_tileset() {
 		_error_dialog->show(this);
 		return false;
 	}
-
-	std::string msg = "Saved ";
-	msg = msg + basename + "!";
-	_success_dialog->message(msg);
-	_success_dialog->show(this);
-
-	if (!Config::monochrome()) {
-		Config::palette_map_path(filename, directory, tileset_name);
-		basename = fl_filename_name(filename);
-
-		if (tileset.palette_map().other_modified(filename)) {
-			msg = basename;
-			msg = msg + " was modified by another program!\n\n"
-				"Save the palette map and overwrite it anyway?";
-			_unsaved_dialog->message(msg);
-			_unsaved_dialog->show(this);
-			if (_unsaved_dialog->canceled()) { return true; }
-		}
-
-		if (!tileset.palette_map().write_palette_map(filename)) {
-			msg = "Could not write to ";
-			msg = msg + basename + "!";
-			_error_dialog->message(msg);
-			_error_dialog->show(this);
-			return false;
-		}
-
-		msg = "Saved ";
+	else {
+		std::string msg = "Saved ";
 		msg = msg + basename + "!";
 		_success_dialog->message(msg);
 		_success_dialog->show(this);
@@ -2236,12 +2202,12 @@ void Main_Window::print_map() {
 void Main_Window::edit_metatile(Metatile *mt) {
 	for (int y = 0; y < METATILE_SIZE; y++) {
 		for (int x = 0; x < METATILE_SIZE; x++) {
-			uint8_t id = _block_window->tile_id(x, y);
-			mt->tile_id(x, y, id);
+			const Chip *c = _block_window->const_chip(x, y);
+			mt->copy(x, y, c);
 			for (int i = 0; i < NUM_QUADRANTS; i++) {
 				Quadrant q = (Quadrant)i;
-				const char *c = _block_window->collision(q);
-				mt->collision(q, c);
+				const char *k = _block_window->collision(q);
+				mt->collision(q, k);
 				uint8_t b = _block_window->bin_collision(q);
 				mt->bin_collision(q, b);
 			}
@@ -2532,7 +2498,7 @@ void Main_Window::save_as_cb(Fl_Widget *, Main_Window *mw) {
 	if (status == 1) { return; }
 
 	char filename[FL_PATH_MAX] = {};
-	add_dot_ext(mw->_blk_save_chooser->filename(), ".blk", filename);
+	add_dot_ext(mw->_blk_save_chooser->filename(), ".ablk", filename);
 	const char *basename = fl_filename_name(filename);
 
 	if (status == -1) {
@@ -2869,9 +2835,8 @@ void Main_Window::exit_cb(Fl_Widget *, Main_Window *mw) {
 	Preferences::set("warp-ids", mw->show_warp_ids());
 	Preferences::set("transparent", mw->transparent());
 	Preferences::set("palettes", (int)mw->palettes());
-	Preferences::set("monochrome", mw->monochrome());
-	Preferences::set("prioritize", mw->allow_priority());
-	Preferences::set("all256", mw->allow_256_tiles());
+	Preferences::set("all512", mw->allow_512_tiles());
+	Preferences::set("swap01", mw->arrange_0_before_1());
 	Preferences::set("roof-palettes", (int)mw->_roof_palettes);
 	Preferences::set("events", mw->auto_load_events());
 	Preferences::set("special", mw->auto_load_special_palettes());
@@ -3273,7 +3238,6 @@ void Main_Window::change_tileset_cb(Fl_Widget *w, Main_Window *mw) {
 
 	char tileset_name[FL_PATH_MAX] = {};
 	strcpy(tileset_name, tileset.name());
-
 	if (w) {
 		if (!mw->_tileset_options_dialog->limit_tileset_options(tileset_name)) {
 			const char *basename = fl_filename_name(mw->_blk_file.c_str());
@@ -3311,7 +3275,7 @@ void Main_Window::edit_tileset_cb(Fl_Widget *, Main_Window *mw) {
 	if (!mw->_map.size()) { return; }
 
 	mw->_tileset_window->tileset(&mw->_metatileset.tileset());
-	mw->_tileset_window->show(mw, mw->show_priority());
+	mw->_tileset_window->show(mw);
 	bool canceled = mw->_tileset_window->canceled();
 	if (canceled) { return; }
 
@@ -3386,33 +3350,26 @@ void Main_Window::edit_roof_cb(Fl_Widget *, Main_Window *mw) {
 }
 
 void Main_Window::edit_current_palettes_cb(Fl_Widget *, Main_Window *mw) {
-	Abstract_Palette_Window *alw = mw->monochrome() ? (Abstract_Palette_Window *)mw->_monochrome_palette_window
-		                                             : (Abstract_Palette_Window *)mw->_palette_window;
-	alw->current_palettes(mw->palettes());
-	alw->show(mw);
-	bool canceled = alw->canceled();
+	mw->_palette_window->current_palettes(mw->palettes());
+	mw->_palette_window->show(mw);
+	bool canceled = mw->_palette_window->canceled();
 	if (canceled) { return; }
 
 	mw->_edited_palettes = true;
-	alw->apply_modifications();
+	mw->_palette_window->apply_modifications();
 	mw->update_palettes();
 	mw->redraw();
 }
 
-void Main_Window::monochrome_cb(Fl_Menu_ *m, Main_Window *mw) {
-	Config::monochrome(!!m->mvalue()->value());
+void Main_Window::allow_512_tiles_cb(Fl_Menu_ *m, Main_Window *mw) {
+	Config::allow_512_tiles(!!m->mvalue()->value());
+	mw->update_512_tile_controls();
 	change_tileset_cb(NULL, mw);
 }
 
-void Main_Window::allow_priority_cb(Fl_Menu_ *m, Main_Window *mw) {
-	Config::allow_priority(!!m->mvalue()->value());
-	mw->update_priority_controls();
+void Main_Window::arrange_0_before_1_cb(Fl_Menu_ *m, Main_Window *mw) {
+	Config::arrange_0_before_1(!!m->mvalue()->value());
 	mw->redraw();
-}
-
-void Main_Window::allow_256_tiles_cb(Fl_Menu_ *m, Main_Window *mw) {
-	Config::allow_256_tiles(!!m->mvalue()->value());
-	change_tileset_cb(NULL, mw);
 }
 
 void Main_Window::roof_custom_cb(Fl_Menu_ *, Main_Window *mw) {
@@ -3503,7 +3460,7 @@ void Main_Window::select_metatile_cb(Metatile_Button *mb, Main_Window *mw) {
 			// Right-click to edit
 			Metatile *mt = mw->_metatileset.metatile(mb->id());
 			mw->_block_window->metatile(mt, mw->_has_collisions, mw->_metatileset.bin_collisions());
-			mw->_block_window->show(mw, mw->show_priority());
+			mw->_block_window->show(mw);
 			if (!mw->_block_window->canceled()) {
 				mw->edit_metatile(mt);
 			}

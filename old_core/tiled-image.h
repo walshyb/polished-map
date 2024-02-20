@@ -7,7 +7,7 @@
 #include <FL/fl_ask.H>
 #pragma warning(pop)
 
-#include "tile.h"
+#include "deep-tile.h"
 
 #define BYTES_PER_2BPP_TILE (TILE_AREA / 4)
 
@@ -31,7 +31,6 @@ private:
 	Result read_png_graphics(const char *f);
 	Result read_2bpp_graphics(const char *f);
 	Result read_lz_graphics(const char *f);
-	Result read_asm_graphics(const char *f);
 	Result parse_2bpp_data(const std::vector<uchar> &data);
 };
 

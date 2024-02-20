@@ -10,7 +10,6 @@
 
 #include "tileset.h"
 #include "map-buttons.h"
-#include "palette-map.h"
 #include "metatile.h"
 #include "widgets.h"
 #include "block-window.h"
@@ -38,7 +37,7 @@ private:
 	OS_Button *_cancel_button;
 	friend class Roof_Tile_Window;
 	bool _copied;
-	Tile _clipboard;
+	Deep_Tile _clipboard;
 	bool _debounce;
 public:
 	Roof_Window(int x, int y);
