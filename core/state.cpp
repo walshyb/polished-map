@@ -21,9 +21,6 @@ extern "C" {
   Block ** getBlocks() {
     AppState *state = &AppState::getInstance();
     Map *map = state->getMap();
-    std::cout << "Block size: " << sizeof(map->_blocks[0])  << std::endl;
-    std::cout << "Blocks size: " << sizeof(map->_blocks)  << std::endl;
-    std::cout << "Blocks length: " << map->_numBlocks  << std::endl;
     Block ** blocks = map->_blocks;
     return blocks;
   }

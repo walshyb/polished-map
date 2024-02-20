@@ -2,12 +2,12 @@
 #include "tileset.h"
 #include "../../image.h"
 
-Tileset::Tileset() : _name(), _palettes(), _palette_map(), _tiles(), _roof_tiles(), _num_tiles(0), _num_before_tiles(0),
+Tileset::Tileset() : _name(), _palettes(), _tiles(), _roof_tiles(), _num_tiles(0), _num_before_tiles(0),
 	_num_mid_tiles(0), _num_roof_tiles(0), _result(Result::GFX_NULL), _modified(false), _modified_roof(false),
 	_mod_time(0), _mod_time_before(0), _mod_time_after(0), _mod_time_roof(0) {
 	for (size_t i = 0; i < MAX_NUM_TILES; i++) {
-		_tiles[i] = new Tile((uint8_t)i);
-		_roof_tiles[i] = new Tile((uint8_t)i);
+		_tiles[i] = new Deep_Tile((int)i);
+		_roof_tiles[i] = new Deep_Tile((int)i);
 	}
 }
 
@@ -21,12 +21,11 @@ Tileset::~Tileset() {
 
 void Tileset::clear() {
 	_name.clear();
-	_palette_map.clear();
 	_num_tiles = 0;
 	_num_before_tiles = 0;
 	_num_mid_tiles = 0;
-	for (Tile *t : _tiles) {
-		t->clear();
+	for (Deep_Tile *dt : _tiles) {
+		dt->clear();
 	}
 	clear_roof_graphics();
 	_result = Result::GFX_NULL;
@@ -37,32 +36,27 @@ void Tileset::clear() {
 
 void Tileset::clear_roof_graphics() {
 	_num_roof_tiles = 0;
-	for (Tile *rt : _roof_tiles) {
-		rt->clear();
+	for (Deep_Tile *dt : _roof_tiles) {
+		dt->clear();
 	}
 }
 
 void Tileset::update_palettes(Palettes l) {
 	_palettes = l;
-	bool allow_256_tiles = Config::allow_256_tiles();
 	for (int i = 0; i < MAX_NUM_TILES; i++) {
-		int j = (!allow_256_tiles && i >= 0x60) ? (i >= 0xE0 ? i - 0x80 : i + 0x20) : i;
-		_tiles[j]->update_palettes(l);
-		_roof_tiles[j]->update_palettes(l);
+		_tiles[i]->update_palettes(l);
+		_roof_tiles[i]->update_palettes(l);
 	}
 }
 
 unsigned char *Tileset::print_rgb(size_t w, size_t h, size_t off, size_t n) const {
 	unsigned char *buffer = new unsigned char[w * h * NUM_CHANNELS]();
 	std::fill_n(buffer, w * h * NUM_CHANNELS, (unsigned char)0xff);
-	bool allow_256_tiles = Config::allow_256_tiles();
 	for (size_t i = 0; i < n; i++) {
 		size_t j = i + off;
-		if (!allow_256_tiles && j == 0x60) { i += 0x1f; continue; }
-		const Tile *t = _tiles[j];
+		const Deep_Tile *dt = _tiles[j];
 		int ty = (i / TILES_PER_ROW) * TILE_SIZE, tx = (i % TILES_PER_ROW) * TILE_SIZE;
-		if (!allow_256_tiles && j >= 0x80) { ty -= 2 * TILE_SIZE; }
-		print_tile_rgb(t, tx, ty, TILES_PER_ROW, buffer);
+		print_tile_rgb(dt, tx, ty, TILES_PER_ROW, buffer);
 	}
 	return buffer;
 }
@@ -71,40 +65,32 @@ unsigned char *Tileset::print_roof_rgb(size_t w, size_t h) const {
 	unsigned char *buffer = new unsigned char[w * h * NUM_CHANNELS]();
 	std::fill_n(buffer, w * h * NUM_CHANNELS, (unsigned char)0xff);
 	for (size_t i = 0; i < NUM_ROOF_TILES; i++) {
-		const Tile *t = _roof_tiles[i + FIRST_ROOF_TILE_ID];
+		const Deep_Tile *dt = _roof_tiles[i + FIRST_ROOF_TILE_IDX];
 		int ty = (i / ROOF_TILES_PER_ROW) * TILE_SIZE, tx = (i % ROOF_TILES_PER_ROW) * TILE_SIZE;
-		print_tile_rgb(t, tx, ty, ROOF_TILES_PER_ROW, buffer);
+		print_tile_rgb(dt, tx, ty, ROOF_TILES_PER_ROW, buffer);
 	}
 	return buffer;
 }
 
-void Tileset::read_tile(Tile *t, const Tiled_Image &ti, uint8_t i, size_t j) {
-	Palette p = _palette_map.palette(i);
-	t->palette(p);
+void Tileset::read_tile(Deep_Tile *dt, const Tiled_Image &ti, size_t i) {
+	dt->undefined(false);
 	for (int ty = 0; ty < TILE_SIZE; ty++) {
 		for (int tx = 0; tx < TILE_SIZE; tx++) {
-			Hue h = ti.tile_hue(j, tx, ty);
-			const unsigned char *rgb = Color::color(_palettes, p, h);
-			t->pixel(tx, ty, h, rgb[0], rgb[1], rgb[2]);
+			Hue h = ti.tile_hue(i, tx, ty);
+			dt->render_pixel(tx, ty, _palettes, h);
 		}
 	}
 }
 
-void Tileset::print_tile_rgb(const Tile *t, int tx, int ty, int n, unsigned char *buffer) {
+void Tileset::print_tile_rgb(const Deep_Tile *dt, int tx, int ty, int n, unsigned char *buffer) {
 	for (int py = 0; py < TILE_SIZE; py++) {
 		for (int px = 0; px < TILE_SIZE; px++) {
-			Hue h = t->hue(px, py);
-			unsigned char c;
-			switch (h) {
-			case Hue::BLACK: c = 0x00; break;
-			case Hue::DARK:  c = 0x55; break;
-			case Hue::LIGHT: c = 0xAA; break;
-			case Hue::WHITE: default: c = 0xFF;
-			}
+			Hue h = dt->hue(px, py);
+			const unsigned char *rgb = Color::monochrome_color(h);
 			size_t j = ((ty + py) * n * TILE_SIZE + tx + px) * NUM_CHANNELS;
-			buffer[j++] = c;
-			buffer[j++] = c;
-			buffer[j] = c;
+			buffer[j++] = rgb[0];
+			buffer[j++] = rgb[1];
+			buffer[j]   = rgb[2];
 		}
 	}
 }
@@ -140,20 +126,21 @@ Tileset::Result Tileset::read_graphics(const char *f, const char *bf, const char
 	_num_before_tiles = ((bn + TILES_PER_ROW - 1) / TILES_PER_ROW) * TILES_PER_ROW;
 	_num_mid_tiles = an ? ((mn + TILES_PER_ROW - 1) / TILES_PER_ROW) * TILES_PER_ROW : mn;
 	_num_tiles = _num_before_tiles + (an ? _num_mid_tiles + an : mn);
+	if (_num_tiles > 0x100) {
+		Config::allow_512_tiles(true);
+	}
 
 	_palettes = l;
-	bool allow_256_tiles = Config::allow_256_tiles();
-	for (int i = 0; i < MAX_NUM_TILES; i++) {
-		int j = (!allow_256_tiles && i >= 0x60) ? (i >= 0xE0 ? i - 0x80 : i + 0x20) : i;
-		Tile *t = _tiles[j];
+	for (size_t i = 0; i < _num_tiles; i++) {
+		Deep_Tile *dt = _tiles[i];
 		if ((size_t)i < bn) {
-			read_tile(t, bti, (uint8_t)i, (size_t)i);
+			read_tile(dt, bti, i);
 		}
 		else if ((size_t)i >= _num_before_tiles && (size_t)i < _num_before_tiles + mn) {
-			read_tile(t, ti, (uint8_t)i, (size_t)i - _num_before_tiles);
+			read_tile(dt, ti, i - _num_before_tiles);
 		}
 		else if ((size_t)i >= _num_before_tiles + _num_mid_tiles) {
-			read_tile(t, ati, (uint8_t)i, (size_t)i - _num_before_tiles - _num_mid_tiles);
+			read_tile(dt, ati, i - _num_before_tiles - _num_mid_tiles);
 		}
 	}
 
@@ -184,17 +171,15 @@ Tileset::Result Tileset::read_roof_graphics(const char *f) {
 	if (ti.num_tiles() < NUM_ROOF_TILES) {
 		return Result::GFX_TOO_SHORT;
 	}
-	if (ti.num_tiles() > NUM_ROOF_TILES || FIRST_ROOF_TILE_ID + ti.num_tiles() > MAX_NUM_TILES) {
+	if (ti.num_tiles() > NUM_ROOF_TILES || FIRST_ROOF_TILE_IDX + ti.num_tiles() > MAX_NUM_TILES) {
 		return Result::GFX_TOO_LARGE;
 	}
 	_num_roof_tiles = ti.num_tiles();
 
-	bool allow_256_tiles = Config::allow_256_tiles();
 	for (size_t i = 0; i < _num_roof_tiles; i++) {
-		int k = (int)i + FIRST_ROOF_TILE_ID;
-		int j = (!allow_256_tiles && k >= 0x60) ? (k >= 0xE0 ? k - 0x80 : k + 0x20) : k;
-		Tile *t = _roof_tiles[j];
-		read_tile(t, ti, (uint8_t)k, i);
+		int k = (int)i + FIRST_ROOF_TILE_IDX;
+		Deep_Tile *dt = _roof_tiles[k];
+		read_tile(dt, ti, i);
 	}
 
 	_mod_time_roof = file_modified(f);
@@ -256,4 +241,3 @@ bool Tileset::write_roof_graphics(const char *f) {
 	_mod_time_roof = file_modified(f);
 	return true;
 }
-

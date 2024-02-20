@@ -3,9 +3,8 @@
 
 #include <deque>
 #include <vector>
-
-#include "../utils.h"
 #include "block.h"
+#include "../utils.h"
 
 #define MAX_HISTORY_SIZE 100
 
@@ -37,11 +36,8 @@ private:
 	std::deque<Map_State> _history, _future;
 	int64_t _mod_time;
 public:
-  Block ** _blocks;
-  int _numBlocks;
 	Map();
 	~Map();
-  void addBlock(int index, Block * block);
 	inline uint8_t width(void) const { return _width; }
 	inline uint8_t height(void) const { return _height; }
 	inline Map_Attributes attributes(void) const { return _attributes; }
@@ -57,6 +53,9 @@ public:
 	inline bool is_outside(void) const { return _attributes.environment == "TOWN" || _attributes.environment == "ROUTE"; }
 	void size(uint8_t w, uint8_t h);
 	inline size_t size(void) const { return (size_t)_width * (size_t)_height; }
+	inline Block *block(uint8_t x, uint8_t y) const { return _blocks[(size_t)y * _width + (size_t)x]; }
+	inline Block *block(size_t i) const { return _blocks[i]; }
+	void block(uint8_t x, uint8_t y, Block *b);
 	inline Result result(void) const { return _result; }
 	inline bool modified(void) const { return _modified; }
 	inline void modified(bool m) { _modified = m; }
@@ -65,14 +64,17 @@ public:
 	inline bool can_redo(void) const { return !_future.empty(); }
 	void clear();
 	void resize_blocks(int x, int y, int s) const;
-	void block(uint8_t x, uint8_t y, Block *b);
 	void remember(void);
 	void undo(void);
 	void redo(void);
 	Result read_blocks(const char *f);
 	bool write_blocks(const char *f);
-  Block * getBlocks();
+  Block* getBlocks();
+  void addBlock(int index, Block* block);
 public:
+  // TODO: remake into private member.
+  // Public for now
+	Block **_blocks;
 	static const char *error_message(Result result);
 };
 
