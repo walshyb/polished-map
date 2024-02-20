@@ -1,3 +1,8 @@
+import { Block } from '../store/editorSlice';
+
+/**
+  * Takes array buffer and passes it the FileProcessor in C++.
+  */
 export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: string): boolean {
   const filenamePtr: number = allocateUTF8(filename);
   const fn = UTF8ToString(filenamePtr);
@@ -9,23 +14,51 @@ export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: st
   Module.HEAPU8.set(new Uint8Array(arrayBuffer), bufferPtr);
 
   // @ts-ignore
-  const result: number = window._processFile(bufferPtr, size, filenamePtr);
-
-  console.log('_processFile', result, fn);
+  const success: boolean = Boolean(window._processFile(bufferPtr, size, filenamePtr));
 
   // @ts-ignore
   window._free(filenamePtr);
   // @ts-ignore
   window._free(bufferPtr);
 
-  return Boolean(result);
+  return success;
 }
 
-export function getBlocks() {
+
+// temporary type def 
+// TODO move to a separate file
+
+/**
+  * Get the Blocks to draw from wasm.
+  * These Blocks represent the layout of the tilemap 
+  */
+export function getBlocks(): Block[] {
+  // Get pointer to blocks array from Map in C++
   // @ts-ignore
-  const result: number[] = window._getBlocks();
-  // @ts-ignore
-  window.blocks = result;
-  console.log(result);
-  return result;
+  const blocksArrayPtr: number = window._getBlocks();
+
+  // TODO: hardcoded. find out length
+  const blocksArrayLength: number = 360;
+  let blocksArray: Block[] = [];
+
+  // Access block data from memory
+  for (let i = 0; i < blocksArrayLength; i++) {
+    // @ts-ignore
+    const blockPointer = Module.HEAP32[blocksArrayPtr / 4 + i]; // Assuming 32-bit integers
+    
+    // @ts-ignore
+    const blockRow = Module.HEAPU8[blocksArrayPointer + 0];
+    // @ts-ignore
+    const blockCol = Module.HEAPU8[blocksArrayPointer + 1];
+    // @ts-ignore
+    const blockId = Module.HEAPU8[blocksArrayPointer + 2];
+
+    blocksArray.push({
+      row: blockRow,
+      col: blockCol,
+      id: blockId
+    } as Block);
+  }
+
+  return blocksArray;
 }
