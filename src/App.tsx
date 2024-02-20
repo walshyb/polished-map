@@ -4,7 +4,7 @@ import TopBar from './components/menus/TopBar';
 import 'semantic-ui-css/semantic.min.css'
 import ActivityBar from './components/menus/ActivityBar';
 import { useState } from 'react';
-import { Grid, Menu, GridColumn } from 'semantic-ui-react';
+import { Grid, Menu, GridColumn, Sidebar, Segment, SidebarPushable, SidebarPusher } from 'semantic-ui-react';
 import FileExplorer from './components/menus/FileExplorer';
 
 function App() {
@@ -18,23 +18,22 @@ function App() {
         fileProcessed={fileProcessed}
         setFileProcessed={setFileProcessed}
       />
-      <Grid>
-        <GridColumn width={4} style={{ paddingTop: 0, position: 'fixed', height: '100vh', overflowY: 'auto' }}>
-          <ActivityBar
-            fileExplorerActive={fileExplorerActive}
-            setFileExplorerActive={setFileExplorerActive}
-          />
-          {/* Actually this should be a secondary menu in which the file explorer is one option */}
-          {/* But later TODO */}
-          <FileExplorer
-            fileExplorerActive={fileExplorerActive}
-          />
-        </GridColumn>
+      <ActivityBar
+        fileExplorerActive={fileExplorerActive}
+        setFileExplorerActive={setFileExplorerActive}
+      />
 
-        <GridColumn width={12} style={{ marginLeft: '25%', paddingTop: '50px' }}>
-          <Editor fileProcessed={fileProcessed} />
-        </GridColumn>
-      </Grid>
+      <SidebarPushable as={Segment} style={{ marginLeft: '100px' }}>
+        <FileExplorer
+          fileExplorerActive={fileExplorerActive}
+        />
+        <SidebarPusher style={{ minHeight: '100vh', transform: fileExplorerActive ? 'translateX(250px)' : 'none', transition: 'transform 0.5s ease'  }}>
+          <Segment basic>
+          Content
+            <Editor fileProcessed={fileProcessed} />
+          </Segment>
+        </SidebarPusher>
+      </SidebarPushable>
     </div>
   );
 }

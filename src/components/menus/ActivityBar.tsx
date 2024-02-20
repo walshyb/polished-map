@@ -20,7 +20,8 @@ export default function ActivityBar(
       icon='labeled'
       vertical
       floated={true}
-      style={{ display: 'flex', height: '100%', marginTop: 0 }}
+      fixed='left'
+      style={{ display: 'flex', height: '100%', marginTop: '50px' }}
     >
       <MenuItem
         name='file explorer'

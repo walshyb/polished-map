@@ -1,11 +1,13 @@
-import { MenuItem, Icon, Menu, MenuHeader } from 'semantic-ui-react'
+import { Sidebar, MenuItem, Icon, Menu, MenuHeader } from 'semantic-ui-react'
 import { useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../../hooks';
+import type { FileNode } from '../../store/fileSlice'; 
+import RecursiveMenuItem from './RecursiveMenuItem';
 
 export default function FileExplorer(
   { fileExplorerActive }: { fileExplorerActive: boolean }
 ) {
-  const files = useAppSelector((state) => state.file.files);
+  const files: FileNode[] = useAppSelector((state) => state.file.files);
 
   if (!fileExplorerActive) {
     return null;
@@ -13,29 +15,21 @@ export default function FileExplorer(
 
   return (
     <div>
-      <Menu
-        icon='labeled'
+      <Sidebar
+        as={Menu}
+        animation="push"
+        icon="labeled"
+        inverted
         vertical
-        floated={true}
-        fixed='left'
-        style={{ display: 'flex', height: '100%', marginTop: '50px', marginLeft: '90px', overflowY: 'auto'}}
+        visible={fileExplorerActive}
+        style={{ maxHeight: '100vh', overflowY: 'auto' }}
       >
-        <MenuHeader>
-          File Explorer
-        </MenuHeader>
         { files.map((file, index) => {
           return (
-            <MenuItem
-              key={index}
-              name={file.name}
-              active={false}
-              onClick={() => {}}
-            >
-              {file.name}
-            </MenuItem>
+            <RecursiveMenuItem fileNode={file} />
           );
         })}
-      </Menu>
+      </Sidebar>
     </div>
   );
 }

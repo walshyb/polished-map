@@ -15,7 +15,6 @@ export default function TopBar(
   const dispatch = useAppDispatch();
   const status = useAppSelector((state) => state.file.state);
 
-  
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file: any = event?.target.files && event.target.files[0];
     
