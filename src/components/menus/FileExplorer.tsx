@@ -1,10 +1,11 @@
 import { MenuItem, Icon, Menu, MenuHeader } from 'semantic-ui-react'
 import { useState } from 'react';
+import { useAppSelector, useAppDispatch } from '../../hooks';
 
 export default function FileExplorer(
   { fileExplorerActive }: { fileExplorerActive: boolean }
 ) {
-  const [files, setFiles] = useState<string[]>([]);
+  const files = useAppSelector((state) => state.file.files);
 
   if (!fileExplorerActive) {
     return null;
@@ -21,16 +22,15 @@ export default function FileExplorer(
         <MenuHeader>
           File Explorer
         </MenuHeader>
-        { files.map((filename, index) => {
+        { files.map((file, index) => {
           return (
             <MenuItem
               key={index}
-              name={filename}
+              name={file.name}
               active={false}
               onClick={() => {}}
             >
-              <Icon name='file' />
-              {filename}
+              {file.name}
             </MenuItem>
           );
         })}
