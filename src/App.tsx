@@ -12,7 +12,6 @@ function App() {
   // Really this is a flag for .(a)blk processed
   const [fileProcessed, setFileProcessed] = useState(false);
   const [fileExplorerActive, setFileExplorerActive] = useState<boolean>(false);
-  console.log(fileExplorerActive);
 
   return (
     <div className="App">

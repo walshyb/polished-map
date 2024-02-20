@@ -21,8 +21,19 @@ export default function FileExplorer(
         <MenuHeader>
           File Explorer
         </MenuHeader>
-        <MenuItem>
-        </MenuItem>
+        { files.map((filename, index) => {
+          return (
+            <MenuItem
+              key={index}
+              name={filename}
+              active={false}
+              onClick={() => {}}
+            >
+              <Icon name='file' />
+              {filename}
+            </MenuItem>
+          );
+        })}
       </Menu>
     </div>
   );
