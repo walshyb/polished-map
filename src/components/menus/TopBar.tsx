@@ -27,8 +27,13 @@ export default function TopBar(
   };
 
   return (
-      <Menu>
-        <Dropdown open={true} item text='File'>
+      <Menu
+        inverted={true}
+      >
+        <Menu.Item>
+          Logo Logo
+        </Menu.Item>
+        <Dropdown item text='File'>
           <Dropdown.Menu>
             <Dropdown.Item>New</Dropdown.Item>
             <Dropdown.Item>
