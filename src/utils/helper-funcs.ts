@@ -9,7 +9,7 @@ interface Size {
   for (let width = size; width >= 1; width--) {
     const height = Math.floor(size / width);
 
-    if (width * height == size) {
+    if (width * height === size) {
       validSizes.push({ width, height });
     }
   }

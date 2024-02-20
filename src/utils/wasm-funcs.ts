@@ -7,7 +7,6 @@ import { Block } from '../store/editorSlice';
   */
 export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: string): boolean {
   const filenamePtr: number = allocateUTF8(filename);
-  const fn = UTF8ToString(filenamePtr);
   // @ts-ignore
   const bufferPtr: number = window._malloc(size);
 
