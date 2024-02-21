@@ -15,6 +15,7 @@ export interface FileNode {
 }
 
 interface FileSlice {
+  explorerOpen: boolean;
   files: FileNode[];
   state: string;
   error: string | null;
@@ -22,6 +23,7 @@ interface FileSlice {
 }
 
 const initialState: FileSlice = {
+  explorerOpen: false,
   activeFile: null,
   files: [],  // open files
   state: 'idle',
@@ -106,6 +108,9 @@ export const fileSlice = createSlice({
     setState: (state, action: PayloadAction<string>) => {
       state.state = action.payload;
     },
+    toggleExplorer: (state) => {
+      state.explorerOpen = !state.explorerOpen;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -138,6 +143,7 @@ export const fileSlice = createSlice({
           state.error = action.payload.error;
         } else {
           state.files = action.payload.fileTree || [];
+          state.explorerOpen = true;
         }
       })
       .addCase(openFileByName.fulfilled, (state, action) => {
@@ -157,6 +163,6 @@ export const fileSlice = createSlice({
   }
 })
 
-export const { setState } = fileSlice.actions;
+export const { setState, toggleExplorer } = fileSlice.actions;
 export default fileSlice.reducer;
 

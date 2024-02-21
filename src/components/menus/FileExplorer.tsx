@@ -5,11 +5,11 @@ import type { FileNode } from '../../store/fileSlice';
 import RecursiveMenuItem from './RecursiveMenuItem';
 
 export default function FileExplorer(
-  { fileExplorerActive }: { fileExplorerActive: boolean }
+  { fileExplorerOpen}: { fileExplorerOpen: boolean }
 ) {
   const files: FileNode[] = useAppSelector((state) => state.file.files);
 
-  if (!fileExplorerActive) {
+  if (!fileExplorerOpen) {
     return null;
   }
 
@@ -21,7 +21,7 @@ export default function FileExplorer(
         icon="labeled"
         inverted
         vertical
-        visible={fileExplorerActive}
+        visible={fileExplorerOpen}
         style={{ maxHeight: '100vh', overflowY: 'auto' }}
       >
         { files.map((file, index) => {

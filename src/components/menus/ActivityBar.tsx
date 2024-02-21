@@ -1,15 +1,18 @@
 import { MenuItem, Icon, Menu } from 'semantic-ui-react'
 import { useState } from 'react';
+import { useAppDispatch } from '../../hooks';
+import { toggleExplorer } from '../../store/fileSlice';
 
 export default function ActivityBar(
-  { fileExplorerActive, setFileExplorerActive }: { fileExplorerActive: boolean; setFileExplorerActive: (fileExplorerActive: boolean) => void }
+  { fileExplorerOpen }: { fileExplorerOpen: boolean }
 ) {
   const [activeItem, setActiveItem] = useState<string>('file explorer');
-  const handleItemClick = (name: string) => {
+  const dispatch = useAppDispatch();
 
+  const handleItemClick = (name: string) => {
     // If curernt item is already active
     if (activeItem === name) {
-      setFileExplorerActive(!fileExplorerActive);
+      dispatch(toggleExplorer());
     }
 
     setActiveItem(name);

@@ -6,11 +6,12 @@ import ActivityBar from './components/menus/ActivityBar';
 import { useState } from 'react';
 import { Grid, Menu, GridColumn, Sidebar, Segment, SidebarPushable, SidebarPusher } from 'semantic-ui-react';
 import FileExplorer from './components/menus/FileExplorer';
+import { useAppSelector } from './hooks';
 
 function App() {
   // Really this is a flag for .(a)blk processed
   const [fileProcessed, setFileProcessed] = useState(false);
-  const [fileExplorerActive, setFileExplorerActive] = useState<boolean>(false);
+  const fileExplorerOpen = useAppSelector(state => state.file.explorerOpen);
 
   return (
     <div className="App">
@@ -19,15 +20,14 @@ function App() {
         setFileProcessed={setFileProcessed}
       />
       <ActivityBar
-        fileExplorerActive={fileExplorerActive}
-        setFileExplorerActive={setFileExplorerActive}
+        fileExplorerOpen={fileExplorerOpen}
       />
 
       <SidebarPushable as={Segment} style={{ marginLeft: '100px' }}>
         <FileExplorer
-          fileExplorerActive={fileExplorerActive}
+          fileExplorerOpen={fileExplorerOpen}
         />
-        <SidebarPusher style={{ minHeight: '100vh', transform: fileExplorerActive ? 'translateX(250px)' : 'none', transition: 'transform 0.5s ease'  }}>
+        <SidebarPusher style={{ minHeight: '100vh', transform: fileExplorerOpen ? 'translateX(250px)' : 'none', transition: 'transform 0.5s ease'  }}>
           <Segment basic>
           Content
             <Editor fileProcessed={fileProcessed} />
