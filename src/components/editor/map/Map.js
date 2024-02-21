@@ -25,7 +25,13 @@ export default function Map(
     for (let j = 0; j < cols; j++) {
       const index = (i * cols) + j;
       const block = blocks[index];
-      row.push(<Block key={index} id={block.id} row={block.row} col={block.col} />);
+
+      // TODO:
+      // this check is temporary while i have getBlocks() call size hardcoded to 360
+      // we shouldn't need this
+      if (block && block.id !== null && block.id !== undefined) {
+        row.push(<Block key={index} id={block.id} row={block.row} col={block.col} />);
+      }
     }
     blockGrid.push(
       <div
