@@ -21,10 +21,10 @@ export function calculateMapSizes(size: number): Size {
   return validSizes[Math.floor((validSizes.length - 1) / 2)];
 }
 
-const validFileTypes = ['.ablk', '.blk', '.map', '.tileset', '.metatileset', '.tilemap', '.bin', '.asm'];
+const validFileTypes = ['.ablk', '.blk', '.map', '.tileset', '.metatileset', '.tilemap', '.bin'];
 // Create a tree of files
 // We'll lazily fetch contents as needed
-export async function readFilesInDirectory(directoryHandler: FileSystemDirectoryHandle, recursive: boolean = false): Promise<FileNode[]> {
+export async function readFilesInDirectory(directoryHandler: FileSystemDirectoryHandle, currentDirectory: string, recursive: boolean = false): Promise<FileNode[]> {
   const entries: AsyncIterableIterator<[string, FileSystemDirectoryHandle | FileSystemFileHandle]> = directoryHandler.entries();
 
   let result: FileNode[] = [];
@@ -36,11 +36,12 @@ export async function readFilesInDirectory(directoryHandler: FileSystemDirectory
       name: filename,
       isFile: currentNode.kind === 'file',
       active: false,
+      path: currentDirectory+ '/'
     };
 
     if (recursive && currentNode.kind === 'directory') {
       // If it's a directory, recursively call readFilesInDirectory
-      const directoryResult = await readFilesInDirectory(currentNode, recursive);
+      const directoryResult = await readFilesInDirectory(currentNode, `${currentDirectory}/${currentNode.name}`, recursive);
       // Append the result of the recursive call to the current currentNode
       fileNode.children = directoryResult;
     }

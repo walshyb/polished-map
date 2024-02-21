@@ -11,7 +11,6 @@ export default function RecursiveMenuItem(
     setOpen(!open);
   };
 
-
   // Render just a menu item if no children
   if (!fileNode.children || fileNode.children.length === 0) {
     return (

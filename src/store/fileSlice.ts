@@ -11,31 +11,49 @@ export interface FileNode {
   isFile: boolean;
   children?: FileNode[];
   isOpen?: boolean;
+  path?: string;
 }
 
 interface FileSlice {
+  directoryHandler: FileSystemDirectoryHandle | undefined;
   files: FileNode[];
   state: string;
   error: string | null;
 }
 
 const initialState: FileSlice = {
+  directoryHandler: undefined,
   files: [],
   state: 'idle',
   error: null,
 }
+
+export const openFileByName = createAsyncThunk('file/openFileByName', async (data: any, { dispatch }) => {
+  const result: boolean = processFileUtil(data.arrayBuffer, data.size, data.filename);
+
+  // TODO:
+  // return result with information from C++
+  return {
+    result,
+    filename: data.filename,
+    size: data.size
+  };
+});
 
 // TODO:
 // go through files and make sure that this is a valid project
 export const openProject = createAsyncThunk('file/openProject', async () => {
   try {
     const directoryHandler: FileSystemDirectoryHandle = await window.showDirectoryPicker();
-    const fileTree: FileNode[] = await readFilesInDirectory(directoryHandler, true);
+    const directoryName: string = directoryHandler.name;
+    const fileTree: FileNode[] = await readFilesInDirectory(directoryHandler, directoryName, true);
 
     return {
-      fileTree
+      fileTree,
+      directoryHandler
     };
   } catch (error: any | DOMException) {
+    console.log(error);
     return {
       error: 'User did not grant file access',
     };
@@ -92,6 +110,7 @@ export const fileSlice = createSlice({
           state.state = 'error';
           state.error = action.payload.error;
         } else {
+          state.directoryHandler = action.payload.directoryHandler;
           state.files = action.payload.fileTree || [];
         }
       })
