@@ -17,9 +17,15 @@
  */
 bool FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
   std::string fn = std::string(filename);
+  std::string ext = fn.substr(fn.find_last_of(".") + 1);
 
   // If ending in .ablk, process as ablk
-  if (fn.substr(fn.find_last_of(".") + 1) == "ablk") {
+  if (ext == "ablk") {
+    processAblk(fileDataPtr, bufferSize, filename);
+    return true;
+  }
+
+  if (ext == "asm") {
     processAblk(fileDataPtr, bufferSize, filename);
     return true;
   }
