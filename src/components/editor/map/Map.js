@@ -10,7 +10,7 @@ export default function Map(
 ) {
   const dispatch = useAppDispatch();
   const blocks = useAppSelector((state) => state.editor.blocks);
-  const file = useAppSelector(getActiveFile);
+  const file = useAppSelector((state) => state.file.activeFile);
   let cols = 0, rows = 0;
 
   if (file) {

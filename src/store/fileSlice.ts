@@ -7,7 +7,7 @@ import FileHandlerManager from './fileManagerSingleton';
 export interface FileNode {
   name: string;
   size?: number;
-  active: boolean;
+  active: boolean; // TODO eventually have this represent a tab ID
   isFile: boolean;
   children?: FileNode[];
   isOpen?: boolean;
@@ -18,9 +18,11 @@ interface FileSlice {
   files: FileNode[];
   state: string;
   error: string | null;
+  activeFile: FileNode | null;
 }
 
 const initialState: FileSlice = {
+  activeFile: null,
   files: [],  // open files
   state: 'idle',
   error: null,
@@ -112,12 +114,13 @@ export const fileSlice = createSlice({
       })
       .addCase(processFile.fulfilled, (state, action) => {
         if (action.payload.result) {
-          state.files.push({
+          const activeFile: FileNode  = {
             isFile: true,
             name: action.payload.filename,
             size: action.payload.size,
             active: true
-          });
+          }
+          state.files.push(activeFile);
           state.state = 'idle';
           state.error = null;
         } else {
@@ -140,12 +143,12 @@ export const fileSlice = createSlice({
       .addCase(openFileByName.fulfilled, (state, action) => {
         if (action.payload.result) {
           state.state = 'processed';
-          state.files.push({
+          state.activeFile = {
             isFile: true,
             name: action.payload.filename,
             size: action.payload.size,
             active: true
-          });
+          };
         } else {
           state.state = 'error';
           state.error = action.payload.error;
@@ -154,13 +157,6 @@ export const fileSlice = createSlice({
   }
 })
 
-/**
-  * Selector func to get the active file
-  */
-export function getActiveFile(state: RootState): FileNode | undefined {
-  // TODO: support nested files
-  return state.file.files.find(file => file.active);
-}
 export const { setState } = fileSlice.actions;
 export default fileSlice.reducer;
 
