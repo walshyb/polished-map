@@ -25,6 +25,8 @@ const initialState: FileSlice = {
   error: null,
 }
 
+// TODO:
+// go through files and make sure that this is a valid project
 export const openProject = createAsyncThunk('file/openProject', async () => {
   try {
     const directoryHandler: FileSystemDirectoryHandle = await window.showDirectoryPicker();
