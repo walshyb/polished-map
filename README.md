@@ -51,6 +51,60 @@ The app will be accessible at http://localhost:3000.
 - `constants/map_constants.asm` Map constants
 - `constants/tileset_constants.asm` Tileset constants
 
+## App Structure
+
+```
+polished-map-web
+├─ core/
+│   ├─ */**.cpp
+│   └─ */**.h
+├─ src/
+│   ├─ App.tsx
+│   ├─ index.tsx
+│   ├─ components/
+│   │   ├─ editor/
+│   │   └─ menus/
+│   ├─ store/
+│   │   ├─ *Slice.ts
+│   │   └─ FileManagerSingleton.ts
+│   └─ utils/
+│       ├─ helper-funcs.ts
+│       └─ wasm-funcs.ts
+├─ public/
+│   ├─ index.html
+│   ├─ favicon.ico
+│   ├─ main.js
+│   └─ main.wasm
+├─ node_modules/
+│   └─ (dependencies)
+├─ package.json
+├─ package-lock.json
+└─ README.md
+```
+
+`core/*/**.cpp`: C++ Processing files
+
+`core/*/**.h`: C++ Headers 
+
+`src/components/*/**.tsx`: Component files
+
+`src/store/*Slice.ts`: Redux slice definitions, reducers, and actions
+
+`src/store/FileManagerSingleton.ts`: Singleton class that stores a JS Map, keeping track of file manager handles. This allows for:
+
+- easily keeping track of open map files
+- ability to open files in the project directory
+- capability to lazily fetch file contents
+- ability to save changes to open files
+
+`src/utils/helper-funcs.ts`: General and file-reading/writing-specific helper functions
+
+`src/utils/wasm-funcs.ts`: Functions that handle calling and response-handling of C++ functions
+
+`public/main.wasm`: Compiled C++ as wasm
+
+`public/main.js`: Linker file to define wasm-callable functions
+
 ## Original Description + Instructions
 
 A map and tileset editor for [pokecrystal](https://github.com/pret/pokecrystal), [pokegold](https://github.com/pret/pokegold), [pokeyellow](https://github.com/pret/pokeyellow), [pokered](https://github.com/pret/pokered), and hacks including [Polished Crystal v2](https://github.com/Rangi42/polishedcrystal/tree/v2.2.0), [Red++ v3](https://github.com/TheFakeMateo/rpp-backup), [Orange](https://github.com/PiaCarrot/pokeorange), [Prism](http://www.pokemonprism.com/), and many more.
