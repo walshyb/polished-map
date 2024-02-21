@@ -4,7 +4,7 @@ import { useState } from 'react';
 export default function ActivityBar(
   { fileExplorerActive, setFileExplorerActive }: { fileExplorerActive: boolean; setFileExplorerActive: (fileExplorerActive: boolean) => void }
 ) {
-  const [activeItem, setActiveItem] = useState<string>('');
+  const [activeItem, setActiveItem] = useState<string>('file explorer');
   const handleItemClick = (name: string) => {
 
     // If curernt item is already active

@@ -1,4 +1,4 @@
-import { MenuItem, Menu, Icon, Label } from 'semantic-ui-react'
+import { MenuHeader, MenuItem, Menu, Icon, Label } from 'semantic-ui-react'
 import type { FileNode } from '../../store/fileSlice'; 
 import { useState } from 'react';
 
@@ -32,19 +32,18 @@ export default function RecursiveMenuItem(
       name={fileNode.name}
       active={false}
       inverted
-      onClick={() => { handleToggle() }}
     >
-      <span
+      <MenuHeader
         style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}
+        onClick={() => { handleToggle() }}
       >
         {fileNode.name} <Icon name={open ? 'caret down' : 'caret right'} />
-      </span>
+      </MenuHeader>
 
       { open && fileNode.children && (
         <Menu
           vertical
           inverted
-          onClick={() => { handleToggle() }}
         >
           { fileNode.children.map((child, index) => {
             return (
