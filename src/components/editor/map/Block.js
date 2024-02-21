@@ -9,8 +9,8 @@ export default function Block(
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        width: '33px',
-        height: '33px',
+        width: '35px',
+        height: '35px',
       }}
       row={row}
       col={col}
