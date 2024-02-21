@@ -1,12 +1,12 @@
 #include <emscripten.h>
 #include <stdio.h>
 #include <iostream>
-#include <cstdio>
-#include <iomanip>
 #include "filereader.h"
 #include "../state.h"
 #include <emscripten/bind.h>
 #include "../map/block.h"
+#include "../map/map.h"
+#include "parse-png.h"
 
 /**
  * Process a file
@@ -25,12 +25,31 @@ bool FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, c
     return true;
   }
 
-  if (ext == "asm") {
-    processAblk(fileDataPtr, bufferSize, filename);
-    return true;
+  if (ext == "png") {
+    return processPng(fileDataPtr, bufferSize, filename);
   }
 
   return false;
+}
+
+/**
+ * Process a png file
+ * 
+ * @param fileDataPtr Pointer to the file data
+ * @param bufferSize Size of the file data
+ * @param filename Point to the name of the file
+ */
+bool FileProcessor::processPng(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
+  int width, height, depth;
+  std::vector<unsigned char> buffer(fileDataPtr, fileDataPtr + bufferSize);
+
+  bool result = getPngData(buffer, width, height, depth);
+
+  if (result) {
+    std::cout << "Width: " << width << ", Height: " << height << ", Depth: " << depth << std::endl;
+  }
+
+  return result;
 }
 
 /**
