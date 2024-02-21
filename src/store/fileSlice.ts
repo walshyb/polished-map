@@ -2,6 +2,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit'
 import type { RootState } from '../store/store'
 import { processFile as processFileUtil } from '../utils/wasm-funcs';
 import { readFilesInDirectory } from '../utils/helper-funcs';
+import FileHandlerManager from './fileManagerSingleton';
 
 
 export interface FileNode {
@@ -42,11 +43,21 @@ export const openFileByName = createAsyncThunk('file/openFileByName', async (dat
 
 // TODO:
 // go through files and make sure that this is a valid project
+/**
+  * Opens directory specified by user, and stores references to tile-related files
+  */
 export const openProject = createAsyncThunk('file/openProject', async () => {
   try {
+    // Prompt user to allow access to directory
     const directoryHandler: FileSystemDirectoryHandle = await window.showDirectoryPicker();
     const directoryName: string = directoryHandler.name;
+
+    // Get all files and subdirectories
     const fileTree: FileNode[] = await readFilesInDirectory(directoryHandler, directoryName, true);
+
+    // Add root directory handler to handlermanager singleton storage
+    const fileHandlerManager = FileHandlerManager.getInstance();
+    fileHandlerManager.addFileHandler('root', directoryHandler);
 
     return {
       fileTree,
