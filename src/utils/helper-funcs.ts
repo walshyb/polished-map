@@ -1,4 +1,5 @@
 import type { FileNode } from '../store/fileSlice';
+import FileHandlerManager from '../store/fileManagerSingleton';
 
 interface Size {
   width: number;
@@ -61,4 +62,46 @@ export async function readFilesInDirectory(directoryHandler: FileSystemDirectory
   
 
   return result;
+}
+
+export async function getFileHandlerByPath(path: string, filename: string): Promise<FileSystemFileHandle | undefined> {
+    const fullPath = path + '/' + filename;
+    const fileHandlerManager = FileHandlerManager.getInstance();
+    
+    // @ts-ignore Because guaranteed to get directory handle and not file handle
+    let directoryHandler: FileSystemDirectoryHandle = fileHandlerManager.getFileHandler('root');
+
+    if (!directoryHandler) {
+      console.log('No root directory');
+      return;
+    }
+
+    let fileHandler: FileSystemFileHandle;
+    // TODO: find out why errors not caught here
+    try {
+      let splitPath: string[] = path.split('/');
+      splitPath.shift(); // Remove root dir name from path
+
+      // Go to each directory one by one in the path (only way to do it)
+      for (const dirName of splitPath) {
+        // Handle trailing /
+        if (dirName === '') continue;
+
+        directoryHandler = await directoryHandler.getDirectoryHandle(dirName);
+      };
+
+      // Now we're at the folder of the file we're looking for
+      fileHandler = await directoryHandler.getFileHandle(filename);
+    } catch (error: any | DOMException) {
+      console.log('Couldn\'t open file');
+      return;
+    }
+
+    if (!fileHandler) {
+      console.log('No file handler');
+      return;
+    }
+
+    fileHandlerManager.addFileHandler(fullPath, fileHandler);
+    return fileHandler;
 }

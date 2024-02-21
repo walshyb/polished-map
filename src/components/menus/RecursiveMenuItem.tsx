@@ -1,14 +1,23 @@
 import { MenuHeader, MenuItem, Menu, Icon, Label } from 'semantic-ui-react'
 import type { FileNode } from '../../store/fileSlice'; 
 import { useState } from 'react';
+import { openFileByName } from '../../store/fileSlice';
+import { useAppDispatch } from '../../hooks';
 
 export default function RecursiveMenuItem(
   { fileNode }: { fileNode: FileNode }
 ) {
   const [open, setOpen] = useState(false);
+  const dispatch = useAppDispatch();
 
   const handleToggle = () => {
     setOpen(!open);
+  };
+
+  const handleOpenFile = (path: string, filename: string) => {
+    dispatch(
+      openFileByName({path: fileNode.path, name: fileNode.name})
+    );
   };
 
   // Render just a menu item if no children
@@ -19,6 +28,7 @@ export default function RecursiveMenuItem(
         active={false}
         inverted
         style={{ display: 'flex', alignItems: 'baseline', width: '100%' }}
+        onClick={ () => handleOpenFile(fileNode.path || '', fileNode.name) }
       >
         {fileNode.name}
       </MenuItem>

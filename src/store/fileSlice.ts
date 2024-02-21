@@ -1,9 +1,8 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit'
 import type { RootState } from '../store/store'
 import { processFile as processFileUtil } from '../utils/wasm-funcs';
-import { readFilesInDirectory } from '../utils/helper-funcs';
+import { readFilesInDirectory, getFileHandlerByPath } from '../utils/helper-funcs';
 import FileHandlerManager from './fileManagerSingleton';
-
 
 export interface FileNode {
   name: string;
@@ -16,28 +15,43 @@ export interface FileNode {
 }
 
 interface FileSlice {
-  directoryHandler: FileSystemDirectoryHandle | undefined;
   files: FileNode[];
   state: string;
   error: string | null;
 }
 
 const initialState: FileSlice = {
-  directoryHandler: undefined,
-  files: [],
+  files: [],  // open files
   state: 'idle',
   error: null,
 }
 
 export const openFileByName = createAsyncThunk('file/openFileByName', async (data: any, { dispatch }) => {
-  const result: boolean = processFileUtil(data.arrayBuffer, data.size, data.filename);
+  const { path, name } = data;
+  const fileHandler = await getFileHandlerByPath(path, name);
+
+  if (!fileHandler) {
+    // TODO make these states predefined and reuseable
+    return {
+      state: 'error',
+      error: 'Couldn\'t open file'
+    }
+  }
+
+  const file: File = await fileHandler.getFile();
+  const size = await file.size;
+  const arrayBuffer = await file.arrayBuffer();
+
+  const result: boolean = processFileUtil(arrayBuffer, file.size, file.name);
 
   // TODO:
   // return result with information from C++
   return {
     result,
-    filename: data.filename,
-    size: data.size
+    filename: file.name,
+    size: file.size,
+    active: true,
+    error: ''
   };
 });
 
@@ -61,7 +75,6 @@ export const openProject = createAsyncThunk('file/openProject', async () => {
 
     return {
       fileTree,
-      directoryHandler
     };
   } catch (error: any | DOMException) {
     console.log(error);
@@ -121,8 +134,21 @@ export const fileSlice = createSlice({
           state.state = 'error';
           state.error = action.payload.error;
         } else {
-          state.directoryHandler = action.payload.directoryHandler;
           state.files = action.payload.fileTree || [];
+        }
+      })
+      .addCase(openFileByName.fulfilled, (state, action) => {
+        if (action.payload.result) {
+          state.state = 'processed';
+          state.files.push({
+            isFile: true,
+            name: action.payload.filename,
+            size: action.payload.size,
+            active: true
+          });
+        } else {
+          state.state = 'error';
+          state.error = action.payload.error;
         }
       })
   }
