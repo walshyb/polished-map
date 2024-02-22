@@ -13,8 +13,9 @@ Tiled_Image::Tiled_Image(const char *f) : _tile_hues(), _num_tiles(0), _result(R
 
 Tiled_Image::~Tiled_Image() {}
 
+/*
 Tiled_Image::Result Tiled_Image::read_png_graphics(const char *f) {
-	Fl_PNG_Image png(f);
+	//Fl_PNG_Image png(f);
 	if (png.fail()) { return (_result = Result::IMG_BAD_FILE); }
 
 	int w = png.w(), h = png.h();
@@ -45,6 +46,7 @@ Tiled_Image::Result Tiled_Image::read_png_graphics(const char *f) {
 
 	return (_result = Result::IMG_OK);
 }
+*/
 
 // A rundown of Pokemon Crystal's LZ compression scheme:
 enum class Lz_Command {
@@ -69,7 +71,7 @@ enum class Lz_Command {
 #define LZ_END 0xff
 
 static auto bit_flipped = ([]() constexpr {
-	std::array<uchar, 256> a{};
+	std::array<unsigned char, 256> a{};
 	for (size_t i = 0; i < a.size(); i++) {
 		for (size_t b = 0; b < 8; b++) {
 			a[i] += ((i >> b) & 1) << (7 - b);
@@ -78,22 +80,23 @@ static auto bit_flipped = ([]() constexpr {
 	return a;
 })();
 
+/*
 Tiled_Image::Result Tiled_Image::read_lz_graphics(const char *f) {
 	FILE *file = fl_fopen(f, "rb");
 	if (!file) { return (_result = Result::IMG_BAD_FILE); }
 
 	size_t n = file_size(file);
-	std::vector<uchar> lz_data(n);
+	std::vector<unsigned char> lz_data(n);
 	size_t r = fread(lz_data.data(), 1, n, file);
 	fclose(file);
 	if (r != n) { return (_result = Result::IMG_BAD_FILE); }
 
 	size_t marker = 0, limit = MAX_NUM_TILES * BYTES_PER_2BPP_TILE;
-	std::vector <uchar> twobpp_data(limit);
+	std::vector <unsigned char> twobpp_data(limit);
 	for (size_t address = 0;;) {
-		uchar q[2];
+		unsigned char q[2];
 		int offset;
-		uchar b = lz_data[address++];
+		unsigned char b = lz_data[address++];
 		if (b == LZ_END) { break; }
 		if (marker >= limit) { return (_result = Result::IMG_TOO_LARGE); }
 		Lz_Command cmd = (Lz_Command)((b & 0xe0) >> 5);
@@ -169,8 +172,9 @@ Tiled_Image::Result Tiled_Image::read_lz_graphics(const char *f) {
 
 	return (_result = parse_2bpp_data(twobpp_data));
 }
+*/
 
-static void convert_2bytes_to_8hues(uchar b1, uchar b2, Hue *hues8) {
+static void convert_2bytes_to_8hues(unsigned char b1, unsigned char b2, Hue *hues8) {
 	// %ABCD_EFGH %abcd_efgh -> %Aa %Bb %Cc %Dd %Ee %Ff %GG %Hh
 	for (int i = 0; i < 8; i++) {
 		int j = 7 - i;
@@ -178,7 +182,7 @@ static void convert_2bytes_to_8hues(uchar b1, uchar b2, Hue *hues8) {
 	}
 }
 
-Tiled_Image::Result Tiled_Image::parse_2bpp_data(const std::vector<uchar> &data) {
+Tiled_Image::Result Tiled_Image::parse_2bpp_data(const std::vector<unsigned char> &data) {
 	_num_tiles = data.size() / BYTES_PER_2BPP_TILE;
 	if (_num_tiles > MAX_NUM_TILES) { return Result::IMG_TOO_LARGE; }
 
@@ -186,8 +190,8 @@ Tiled_Image::Result Tiled_Image::parse_2bpp_data(const std::vector<uchar> &data)
 
 	for (size_t i = 0; i < _num_tiles; i++) {
 		for (int j = 0; j < TILE_SIZE; j++) {
-			uchar b1 = data[i * BYTES_PER_2BPP_TILE + j * 2];
-			uchar b2 = data[i * BYTES_PER_2BPP_TILE + j * 2 + 1];
+			unsigned char b1 = data[i * BYTES_PER_2BPP_TILE + j * 2];
+			unsigned char b2 = data[i * BYTES_PER_2BPP_TILE + j * 2 + 1];
 			convert_2bytes_to_8hues(b1, b2, _tile_hues.data() + (i * TILE_SIZE + j) * 8);
 		}
 	}

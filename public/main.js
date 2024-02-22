@@ -5493,12 +5493,12 @@ var wasmImports = {
 };
 var wasmExports = createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors');
-var _main = Module['_main'] = createExportWrapper('__main_argc_argv');
+var _getBlocks = Module['_getBlocks'] = createExportWrapper('getBlocks');
 var _malloc = createExportWrapper('malloc');
 var setTempRet0 = createExportWrapper('setTempRet0');
 var _free = Module['_free'] = createExportWrapper('free');
 var _processFile = Module['_processFile'] = createExportWrapper('processFile');
-var _getBlocks = Module['_getBlocks'] = createExportWrapper('getBlocks');
+var _main = Module['_main'] = createExportWrapper('__main_argc_argv');
 var ___errno_location = createExportWrapper('__errno_location');
 var _fflush = Module['_fflush'] = createExportWrapper('fflush');
 var _setThrew = createExportWrapper('setThrew');

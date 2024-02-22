@@ -15,13 +15,14 @@ To make up for the above fact, and to take more advantage of the web environment
 Requirements:
 - Node 16.x.0 (I'll update!!)
 - Empscripten 3.1.51-git
+- make
 
 ### Compile the C++ into wasm:
 
 ```
-em++ core/main.cpp core/config.cpp core/map/tiles/deep-tile.cpp core/map/tiles/tile.cpp core/map/tiles/metatile.cpp core/map/tiles/tileset.cpp core/map/tiles/metatileset.cpp core/map/block.cpp core/map/map.cpp core/utils/filereader.cpp core/state.cpp -o public/main.js -s EXPORTED_RUNTIME_METHODS=ccall,allocateUTF8,cwrap -s EXPORTED_FUNCTIONS=_free,_main,_processFile,_getBlocks -std=c++17 --bind -s -s USE_ZLIB=1 -s USE_LIBPNG=1
+make
 ```
-_Note_: I'm currently manually compiling all the files in use in one line. That's not a good practice. A Makefile will be coming soon
+_Note_: What's neat is that you used to have to install zlib and libpng yourself, but with emscripten you can specify that you want to use the emscripten ports of those, and they're included!
 
 ### Install the node dependencies:
 ```
