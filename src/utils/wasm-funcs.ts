@@ -4,8 +4,7 @@ import { Block } from '../store/editorSlice';
   * Takes array buffer and passes it the FileProcessor in C++.
   *
   * @return {boolean} - Whether the file was processed successfully
-  */
-export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: string): boolean {
+  */ export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: string): boolean {
   const filenamePtr: number = allocateUTF8(filename);
   // @ts-ignore
   const bufferPtr: number = window._malloc(size);

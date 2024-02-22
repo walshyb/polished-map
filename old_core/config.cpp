@@ -84,6 +84,14 @@ bool Config::tileset_before_path(char *dest, const char *root, const char *tiles
 	return file_exists(dest);
 }
 
+/**
+ * Get the path to the tileset after the suffix
+ * 
+ * @param dest Destination buffer
+ * @param root Root directory
+ * @param tileset Tileset name
+ * @return true if the file exists, false otherwise
+ */
 bool Config::tileset_after_path(char *dest, const char *root, const char *tileset) {
 	char after[FL_PATH_MAX] = {};
 	after_suffix(tileset, after);
@@ -93,6 +101,7 @@ bool Config::tileset_after_path(char *dest, const char *root, const char *tilese
 }
 
 void Config::tileset_png_paths(char *dest, char *b_dest, char *a_dest, const char *root, const char *tileset) {
+  tileset_after_path
 	sprintf(dest, "%s%s%s.png", root, gfx_tileset_dir(), tileset);
 	char before[FL_PATH_MAX] = {}, after[FL_PATH_MAX] = {};
 	before_suffix(tileset, before);

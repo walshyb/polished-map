@@ -33,7 +33,72 @@ bool FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, c
 }
 
 /**
- * Process a png file
+ * Accepts two tileset files and a roof file and reads the graphics data.
+ *
+ * Tilesets can be named "bforeTileset.afterTileset.png" (e.g. "johto_traditional.johto_common.png").
+ * In this case we'll need to read both files and concatenate them into a single tileset.
+ *
+ * If there is a beforeTileset and an afterTileset,
+ * the two are concatenated into a single tileset. Otherwise, only 1 will be used.
+ *
+ * @param fullTilesetName Name of the full tileset
+ * @param fullTilesetSize Size of the full tileset data
+ * @param beforeTilesetPtr Pointer to the before tileset data
+ * @param beforeTilesetBufferSize Size of the before tileset data
+ * @param beforeTilesetFilename Point to the name of the before tileset file
+ * @param afterTilesetPtr Pointer to the after tileset data
+ * @param afterTilesetBufferSize Size of the after tileset data
+ * @param afterTilesetFilename Point to the name of the after tileset file
+ * @param roofPtr Pointer to the roof data
+ * @param roofBufferSize Size of the roof data
+ * @param roofName Point to the name of the roof file
+ * @return true if the file was read successfully, false otherwise
+ */
+bool FileProcessor::readMetatileData(
+    const char* fullTilesetName, size_t fullTilesetSize,
+    const uint8_t* beforeTilesetPtr, size_t beforeTilesetBufferSize, const char* beforeTilesetFilename,
+    const uint8_t* afterTilesetPtr, size_t afterTilesetBufferSize, const char* afterTilesetFilename,
+    const uint8_t* roofPtr, size_t roofBufferSize, const char* roofName 
+  ) {
+
+  // Get (active) metatileset and tileset from state
+  AppState *state = &AppState::getInstance();
+  Metatileset *metatileset = state->getMetatileset();
+	Tileset &tileset = metatileset->tileset();
+
+  // Set tileset and roof tileset names
+  tileset.name(fullTilesetName);
+  tileset.roof_name(roofName);
+
+  // Hold contents of before &| after tilesets
+  char buffer[FL_PATH_MAX] = {};
+
+  // Make structs for libpng easy reading
+  PngData beforeTilsetPng = {
+    .buf = beforeTilesetPtr,
+    .size = beforeTilesetBufferSize,
+    .pos = 0
+  };
+
+  PngData afterTilsetPng = {
+    .buf = afterTilesetPtr,
+    .size = afterTilesetBufferSize,
+    .pos = 0
+  };
+
+  Tileset::Result rt = tileset.read_graphics(
+    buffer,
+    beforeTilesetBufferSize ? beforeTilsetPng : NULL,
+    afterTilesetBufferSize ? afterTilsetPng : NULL,
+    // add palettes
+  );
+
+
+  //return metatileset->readMetatileData(tilesetPtr, bufferSize, filename);
+}
+
+/**
+ * Process a png file. Gets the width, height, and depth of the image
  * 
  * @param fileDataPtr Pointer to the file data
  * @param bufferSize Size of the file data
@@ -52,7 +117,7 @@ bool FileProcessor::processPng(const uint8_t* bufferPtr, size_t bufferSize, cons
 }
 
 /**
- * Process an ablk file
+ * Process an ablk file. Creates blocks for each ID in the file
  * 
  * @param fileDataPtr Pointer to the file data
  * @param bufferSize Size of the file data

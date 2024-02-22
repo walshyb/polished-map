@@ -1,4 +1,3 @@
-#include <iostream>
 #include "map/map.h"
 #include <emscripten.h>
 #include "state.h"
@@ -9,11 +8,15 @@ AppState::~AppState() {
 
 AppState::AppState() {
   map = new Map();
-  metaTileSet = new Metatileset();
+  metatileset = new Metatileset();
 }
 
 Map* AppState::getMap() {
   return map;
+}
+
+Metatileset* AppState::getMetatileset() {
+  return metatileset;
 }
 
 extern "C" {

@@ -13,11 +13,12 @@ public:
   }
 
   Map *getMap();
+  Metatileset *getMetatileset();
 private:
   AppState();
   ~AppState();
   Map *map;
-  Metatileset *metaTileSet;
+  Metatileset *metatileset;
 };
 
 #endif

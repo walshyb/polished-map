@@ -2,7 +2,7 @@
 #define TILED_IMAGE_H
 
 #include <vector>
-
+#include "../../utils/parse-png.h"
 #include "deep-tile.h"
 
 #define BYTES_PER_2BPP_TILE (TILE_AREA / 4)
@@ -16,6 +16,7 @@ private:
 	size_t _num_tiles;
 	Result _result;
 public:
+  Tiled_Image(PngData &png);
 	Tiled_Image(const char *f);
 	~Tiled_Image();
 	inline Hue tile_hue(size_t i, size_t x, size_t y) const {
@@ -24,7 +25,7 @@ public:
 	inline size_t num_tiles(void) const { return _num_tiles; }
 	inline Result result(void) const { return _result; }
 private:
-	Result read_png_graphics(const char *f);
+	Result read_png_graphics(PngData &png);
 	Result read_2bpp_graphics(const char *f);
 	Result read_lz_graphics(const char *f);
 	Result parse_2bpp_data(const std::vector<unsigned char> &data);
