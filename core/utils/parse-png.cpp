@@ -1,7 +1,6 @@
 #include <iostream>
 #include <png.h>
 #include "parse-png.h"
-#include <vector>
 
 bool getPngData(const uint8_t* bufferPtr, size_t bufferSize, int& width, int& height, int& depth) {
   png_structp png_ptr;

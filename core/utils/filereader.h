@@ -1,4 +1,5 @@
 #include "../state.h"
+#define 	FL_PATH_MAX   2048
 
 class FileProcessor {
 public:

@@ -40,9 +40,9 @@ public:
 	static const unsigned char *monochrome_color(Hue h);
 	static const unsigned char *undefined_color(Hue h);
 	static const unsigned char *color(Palettes l, Palette p, Hue h);
-	static PalVec parse_palettes(const char *f);
-	static Palettes read_palettes(const char *f, Palettes pals);
-	static bool read_roof_colors(const char *f, uint8_t map_group, Roof_Palettes roof_palettes);
+	static PalVec parse_palettes(const char *filePtr, size_t fileSize);
+	static Palettes read_palettes(const char *filePtr, size_t fileSize, Palettes pals);
+	static bool read_roof_colors(const char *filePtr, size_t fileSize, uint8_t map_group, Roof_Palettes roof_palettes);
 	static bool write_palettes(const char *f);
 };
 
