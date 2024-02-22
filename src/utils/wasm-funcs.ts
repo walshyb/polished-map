@@ -10,7 +10,8 @@ export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: st
   // @ts-ignore
   const bufferPtr: number = window._malloc(size);
 
-  // Copy ArrayBuffer to wasm memory
+  // Converts binary data of arrayBuffer to byte-separated array
+  // Copy file contents to wasm memory
   // @ts-ignore
   Module.HEAPU8.set(new Uint8Array(arrayBuffer), bufferPtr);
 

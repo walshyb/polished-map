@@ -3,7 +3,16 @@
 #include "parse-png.h"
 #include <vector>
 
-bool getPngData(const std::vector<unsigned char>& buffer, int& width, int& height, int& depth) {
+// Since we are using a custom read function,
+// and reading PNG data from memory,
+// we need to store the PNG data in a struct
+struct PngData {
+  const uint8_t* buf;   // Pointer to the PNG file data
+  size_t size;          // Size of the PNG file data
+  size_t pos;           // Current position in the data buffer
+};
+
+bool getPngData(const uint8_t* bufferPtr, size_t bufferSize, int& width, int& height, int& depth) {
   png_structp png_ptr;
   png_infop info_ptr;
 
@@ -29,8 +38,30 @@ bool getPngData(const std::vector<unsigned char>& buffer, int& width, int& heigh
     return false;
   }
 
-  // Set up data reading from memory buffer
-  png_set_read_fn(png_ptr, (png_voidp)buffer.data(), [](png_structp, png_bytep, png_size_t) {});
+  // Set up custom read function
+  PngData png_data_info;
+  png_data_info.buf = bufferPtr;
+  png_data_info.size = bufferSize;
+  png_data_info.pos = 0;
+
+  // This is a lambda function that will be called by libpng to read data from the PNG file
+  // the custom read function will copy data from the PNG file data buffer to the libpng buffer
+  png_set_read_fn(png_ptr, &png_data_info, [](png_structp png_ptr, png_bytep data, png_size_t length) {
+    // Get pointer to PNG data
+    PngData* png_data_info = (PngData*)png_get_io_ptr(png_ptr);
+
+    // Check if we have enough data
+    if (png_data_info->pos + length > png_data_info->size) {
+      std::cerr << "Error reading PNG data" << std::endl;
+      return;
+    }
+
+    // Copy data to the buffer
+    memcpy(data, png_data_info->buf + png_data_info->pos, length);
+
+    // Update position
+    png_data_info->pos += length;
+  });
 
   // Read PNG header
   png_read_info(png_ptr, info_ptr);

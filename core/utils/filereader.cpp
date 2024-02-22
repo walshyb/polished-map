@@ -39,11 +39,10 @@ bool FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, c
  * @param bufferSize Size of the file data
  * @param filename Point to the name of the file
  */
-bool FileProcessor::processPng(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
+bool FileProcessor::processPng(const uint8_t* bufferPtr, size_t bufferSize, const char* filename) {
   int width, height, depth;
-  std::vector<unsigned char> buffer(fileDataPtr, fileDataPtr + bufferSize);
 
-  bool result = getPngData(buffer, width, height, depth);
+  bool result = getPngData(bufferPtr, bufferSize, width, height, depth);
 
   if (result) {
     std::cout << "Width: " << width << ", Height: " << height << ", Depth: " << depth << std::endl;
