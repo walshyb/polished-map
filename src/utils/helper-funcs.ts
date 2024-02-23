@@ -1,5 +1,5 @@
-import type { FileNode } from '../store/fileSlice';
-import FileHandlerManager from '../store/fileManagerSingleton';
+import type { FileNode } from "../store/fileSlice";
+import FileHandlerManager from "../store/fileManagerSingleton";
 
 interface Size {
   width: number;
@@ -22,87 +22,115 @@ export function calculateMapSizes(size: number): Size {
   return validSizes[Math.floor((validSizes.length - 1) / 2)];
 }
 
-const validFileTypes = ['.ablk', '.blk', '.map', '.tileset', '.metatileset', '.tilemap', '.bin'];
+const validFileTypes = [
+  ".ablk",
+  ".blk",
+  ".map",
+  ".tileset",
+  ".metatileset",
+  ".tilemap",
+  ".bin",
+];
 // Create a tree of files
 // We'll lazily fetch contents as needed
-export async function readFilesInDirectory(directoryHandler: FileSystemDirectoryHandle, currentDirectory: string, recursive: boolean = false): Promise<FileNode[]> {
-  const entries: AsyncIterableIterator<[string, FileSystemDirectoryHandle | FileSystemFileHandle]> = directoryHandler.entries();
+export async function readFilesInDirectory(
+  directoryHandler: FileSystemDirectoryHandle,
+  currentDirectory: string,
+  recursive: boolean = false,
+): Promise<FileNode[]> {
+  const entries: AsyncIterableIterator<
+    [string, FileSystemDirectoryHandle | FileSystemFileHandle]
+  > = directoryHandler.entries();
 
   let result: FileNode[] = [];
 
   // loop over entries iterator
   for await (const [filename, currentNode] of entries) {
-
     let fileNode: FileNode = {
       name: filename,
-      isFile: currentNode.kind === 'file',
+      isFile: currentNode.kind === "file",
       active: false,
-      path: currentDirectory+ '/'
+      path: currentDirectory + "/",
     };
 
-    if (recursive && currentNode.kind === 'directory') {
+    if (recursive && currentNode.kind === "directory") {
       // If it's a directory, recursively call readFilesInDirectory
-      const directoryResult: FileNode[] = await readFilesInDirectory(currentNode, `${currentDirectory}/${currentNode.name}`, recursive);
-      const sorted = directoryResult.sort((a, b) => a.name.localeCompare(b.name));
+      const directoryResult: FileNode[] = await readFilesInDirectory(
+        currentNode,
+        `${currentDirectory}/${currentNode.name}`,
+        recursive,
+      );
+      const sorted = directoryResult.sort((a, b) =>
+        a.name.localeCompare(b.name),
+      );
       // Append the result of the recursive call to the current currentNode
       fileNode.children = sorted;
     }
-  
+
     // Directory is valid if it has directory
-    const validDirectory = currentNode.kind === 'directory' && fileNode.children?.length;
+    const validDirectory =
+      currentNode.kind === "directory" && fileNode.children?.length;
 
     // File is valid is it's extension is in validFileTypes
-    const extension: string | null = filename.substring(filename.lastIndexOf('.'));
-    const validFile = currentNode.kind === 'file' && extension && validFileTypes.includes(extension);
+    const extension: string | null = filename.substring(
+      filename.lastIndexOf("."),
+    );
+    const validFile =
+      currentNode.kind === "file" &&
+      extension &&
+      validFileTypes.includes(extension);
 
     // Only save directories and valid files
-    if (validFile || validDirectory){
+    if (validFile || validDirectory) {
       result.push(fileNode);
     }
   }
-  
 
   return result;
 }
 
-export async function getFileHandlerByPath(path: string, filename: string): Promise<FileSystemFileHandle | undefined> {
-    const fullPath = path + '/' + filename;
-    const fileHandlerManager = FileHandlerManager.getInstance();
-    
-    // @ts-ignore Because guaranteed to get directory handle and not file handle
-    let directoryHandler: FileSystemDirectoryHandle = fileHandlerManager.getFileHandler('root');
+export async function getFileHandlerByPath(
+  path: string,
+  filename: string = "",
+): Promise<FileSystemFileHandle | undefined> {
+  const fullPath = path + "/" + filename;
+  const fileHandlerManager = FileHandlerManager.getInstance();
 
-    if (!directoryHandler) {
-      console.log('No root directory');
-      return;
+  // @ts-ignore Because guaranteed to get directory handle and not file handle
+  let directoryHandler: FileSystemDirectoryHandle =
+    fileHandlerManager.getFileHandler("root");
+
+  if (!directoryHandler) {
+    console.log("No root directory");
+    return;
+  }
+
+  let fileHandler: FileSystemFileHandle;
+  try {
+    let splitPath: string[] = path.split("/");
+    // TODO make it so you don't have to
+    splitPath.shift(); // Remove root dir name from path
+
+    // Go to each directory one by one in the path (only way to do it)
+    for (const dirName of splitPath) {
+      // Handle trailing /
+      if (dirName === "") continue;
+
+      directoryHandler = await directoryHandler.getDirectoryHandle(dirName);
     }
 
-    let fileHandler: FileSystemFileHandle;
-    // TODO: find out why errors not caught here
-    try {
-      let splitPath: string[] = path.split('/');
-      splitPath.shift(); // Remove root dir name from path
+    // Now we're at the folder of the file we're looking for
+    fileHandler = await directoryHandler.getFileHandle(filename);
+  } catch (error: any | DOMException) {
+    console.log("Couldn't open file");
+    return;
+  }
 
-      // Go to each directory one by one in the path (only way to do it)
-      for (const dirName of splitPath) {
-        // Handle trailing /
-        if (dirName === '') continue;
+  if (!fileHandler) {
+    console.log("No file handler");
+    return;
+  }
 
-        directoryHandler = await directoryHandler.getDirectoryHandle(dirName);
-      };
-
-      // Now we're at the folder of the file we're looking for
-      fileHandler = await directoryHandler.getFileHandle(filename);
-    } catch (error: any | DOMException) {
-      console.log('Couldn\'t open file');
-      return;
-    }
-
-    if (!fileHandler) {
-      console.log('No file handler');
-      return;
-    }
-
-    fileHandlerManager.addFileHandler(fullPath, fileHandler);
-    return fileHandler;
+  fileHandlerManager.addFileHandler(fullPath, fileHandler);
+  return fileHandler;
 }
