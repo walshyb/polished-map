@@ -19,17 +19,36 @@ bool FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, c
   std::string fn = std::string(filename);
   std::string ext = fn.substr(fn.find_last_of(".") + 1);
 
-  // If ending in .ablk, process as ablk
+  // If ending in .ablk, process as ablk (map) file
   if (ext == "ablk") {
     processAblk(fileDataPtr, bufferSize, filename);
     return true;
   }
 
+  // If ending in .png, process as png file, or a tileset
   if (ext == "png") {
     return processPng(fileDataPtr, bufferSize, filename);
   }
 
+  // If ending in .pal, process as pal file, or palette
+  if (ext == "pal") {
+    return processPal(fileDataPtr, bufferSize, filename);
+  }
+
   return false;
+}
+
+/**
+ * Process a pal file. Creates a palette from the file
+ * 
+ * @param fileDataPtr Pointer to the file data
+ * @param bufferSize Size of the file data
+ * @param filename Point to the name of the file
+ */
+bool FileProcessor::processPal(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
+  // Get (active) metatileset and tileset from state
+  AppState *state = &AppState::getInstance();
+  Metatileset *metatileset = state->getMetatileset();
 }
 
 /**
@@ -86,6 +105,7 @@ bool FileProcessor::readMetatileData(
     .pos = 0
   };
 
+  /*
   Tileset::Result rt = tileset.read_graphics(
     buffer,
     beforeTilesetBufferSize ? &beforeTilsetPng : NULL,
@@ -93,7 +113,7 @@ bool FileProcessor::readMetatileData(
     // todo add current palettes
     palettes 
     );
-
+*/
 
   //return metatileset->readMetatileData(tilesetPtr, bufferSize, filename);
 }
