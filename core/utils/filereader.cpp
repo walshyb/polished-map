@@ -88,10 +88,11 @@ bool FileProcessor::readMetatileData(
 
   Tileset::Result rt = tileset.read_graphics(
     buffer,
-    beforeTilesetBufferSize ? beforeTilsetPng : NULL,
-    afterTilesetBufferSize ? afterTilsetPng : NULL,
-    // add palettes
-  );
+    beforeTilesetBufferSize ? &beforeTilsetPng : NULL,
+    afterTilesetBufferSize ? &afterTilsetPng : NULL,
+    // todo add current palettes
+    palettes 
+    );
 
 
   //return metatileset->readMetatileData(tilesetPtr, bufferSize, filename);

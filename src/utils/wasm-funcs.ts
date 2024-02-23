@@ -1,10 +1,15 @@
-import { Block } from '../store/editorSlice';
+import { Block } from "../store/editorSlice";
 
 /**
-  * Takes array buffer and passes it the FileProcessor in C++.
-  *
-  * @return {boolean} - Whether the file was processed successfully
-  */ export function processFile(arrayBuffer: ArrayBuffer, size: number, filename: string): boolean {
+ * Takes array buffer and passes it the FileProcessor in C++.
+ *
+ * @return {boolean} - Whether the file was processed successfully
+ */
+export function processFile(
+  arrayBuffer: ArrayBuffer,
+  size: number,
+  filename: string,
+): boolean {
   const filenamePtr: number = allocateUTF8(filename);
   // @ts-ignore
   const bufferPtr: number = window._malloc(size);
@@ -14,8 +19,10 @@ import { Block } from '../store/editorSlice';
   // @ts-ignore
   Module.HEAPU8.set(new Uint8Array(arrayBuffer), bufferPtr);
 
-  // @ts-ignore
-  const success: boolean = Boolean(window._processFile(bufferPtr, size, filenamePtr));
+  const success: boolean = Boolean(
+    // @ts-ignore
+    window._processFile(bufferPtr, size, filenamePtr),
+  );
 
   // @ts-ignore
   window._free(filenamePtr);
@@ -25,11 +32,10 @@ import { Block } from '../store/editorSlice';
   return success;
 }
 
-
 /**
-  * Get the Blocks to draw from wasm.
-  * These Blocks represent the layout of the tilemap 
-  */
+ * Get the Blocks to draw from wasm.
+ * These Blocks represent the layout of the tilemap
+ */
 export function getBlocks(): Block[] {
   // Get pointer to blocks array from Map in C++
   // @ts-ignore
@@ -45,7 +51,7 @@ export function getBlocks(): Block[] {
     // @ts-ignore
     // Get pointer to block in the array in memory
     const blockPointer = Module.HEAP32[blocksArrayPtr / 4 + i]; // Assuming 32-bit integers
-    
+
     // @ts-ignore
     const blockRow = Module.HEAPU8[blockPointer + 0];
     // @ts-ignore
@@ -56,7 +62,7 @@ export function getBlocks(): Block[] {
     blocksArray.push({
       row: blockRow,
       col: blockCol,
-      id: blockId
+      id: blockId,
     } as Block);
   }
 

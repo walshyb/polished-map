@@ -70,31 +70,25 @@ export const openFileByName = createAsyncThunk(
  * Opens directory specified by user, and stores references to tile-related files
  */
 export const openProject = createAsyncThunk("file/openProject", async () => {
-  try {
-    // Prompt user to allow access to directory
-    const directoryHandler: FileSystemDirectoryHandle =
-      await window.showDirectoryPicker();
+  // Prompt user to allow access to directory
+  // Errors caught by thunk
+  const directoryHandler: FileSystemDirectoryHandle =
+    await window.showDirectoryPicker();
 
-    // Get all files and subdirectories
-    const fileTree: FileNode[] = await readFilesInDirectory(
-      directoryHandler,
-      "",
-      true,
-    );
+  // Get all files and subdirectories
+  const fileTree: FileNode[] = await readFilesInDirectory(
+    directoryHandler,
+    "",
+    true,
+  );
 
-    // Add root directory handler to handlermanager singleton storage
-    const fileHandlerManager = FileHandlerManager.getInstance();
-    fileHandlerManager.addFileHandler("root", directoryHandler);
+  // Add root directory handler to handlermanager singleton storage
+  const fileHandlerManager = FileHandlerManager.getInstance();
+  fileHandlerManager.addFileHandler("root", directoryHandler);
 
-    return {
-      fileTree,
-    };
-  } catch (error: any | DOMException) {
-    console.log(error);
-    return {
-      error: "User did not grant file access",
-    };
-  }
+  return {
+    fileTree,
+  };
 });
 
 // TODO rename to openFile?
@@ -154,13 +148,14 @@ export const fileSlice = createSlice({
         state.error = "File processing failed";
       })
       .addCase(openProject.fulfilled, (state, action) => {
-        if (action.payload.error) {
-          state.state = "error";
-          state.error = action.payload.error;
-        } else {
-          state.files = action.payload.fileTree || [];
-          state.explorerOpen = true;
-        }
+        state.files = action.payload.fileTree || [];
+        state.explorerOpen = true;
+      })
+      .addCase(openProject.rejected, (state, action) => {
+        state.state = "error";
+
+        // TODO: handle specific error messages
+        state.error = action.error.message || "";
       })
       .addCase(openFileByName.fulfilled, (state, action) => {
         if (action.payload.result) {

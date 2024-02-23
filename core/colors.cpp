@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <fstream>
 #include <sstream>
 #include "colors.h"
 #include "utils.h"
@@ -156,6 +155,13 @@ Fl_Color Color::fl_color(Palettes l, Palette p, Hue h) {
 }*/
 
 /**
+ * Parse the contents of a .pal file
+ *
+ * @param paletteFileContentsPtr The contents of the .pal file
+ * @param fileSize The size of the .pal file
+ *
+ * @return The parsed palette set
+ *
  * Example pal file:
  * RGB 15,14,24, 11,11,19, 07,07,12, 00,00,00 ; gray
  * RGB 15,14,24, 14,07,17, 13,00,08, 00,00,00 ; red
@@ -201,6 +207,15 @@ PalVec Color::parse_palettes(const char *paletteFileContentsPtr, size_t fileSize
 	return colors;
 }
 
+/**
+ * Take in .pal file contents and update the colors that should be displayed appropriately.
+ *
+ * @param paletteFileContentsPtr The contents of the .pal file
+ * @param fileSize The size of the .pal file
+ * @param pals The current palette set
+ *
+ * @return The new palette set
+ */
 Palettes Color::read_palettes(const char *paletteFileContentsPtr, size_t fileSize, Palettes pals) {
 	PalVec custom_colors = parse_palettes(paletteFileContentsPtr, fileSize);
 	size_t n = custom_colors.size();

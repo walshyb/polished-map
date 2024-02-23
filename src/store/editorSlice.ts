@@ -1,6 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import type { RootState } from '../store/store'
-import { getBlocks } from '../utils/wasm-funcs';
+import { createSlice } from "@reduxjs/toolkit";
+import { getBlocks } from "../utils/wasm-funcs";
 
 export interface Block {
   row: number;
@@ -13,28 +12,25 @@ interface Editor {
 }
 
 const initialState: Editor = {
-  blocks: []
-}
+  blocks: [],
+};
 
 export const editorSlice = createSlice({
-  name: 'editor',
+  name: "editor",
   initialState,
-  reducers: {
-    setBlocks: (state) => {
-      state.blocks = getBlocks();
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
-    // On file processing, fetch blocks
     builder
-      .addCase('file/processFile/fulfilled', (state, action) => {
+      .addCase("file/processFile/fulfilled", (state) => {
+        // On file processing, fetch blocks
         state.blocks = getBlocks();
       })
-      .addCase('file/openFileByName/fulfilled', (state, action) => {
+      .addCase("file/openFileByName/fulfilled", (state) => {
+        // On file processing, fetch blocks
         state.blocks = getBlocks();
-      })
-  }
-})
+      });
+  },
+});
 
-export const { setBlocks } = editorSlice.actions;
+export const {} = editorSlice.actions;
 export default editorSlice.reducer;
