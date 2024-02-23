@@ -110,6 +110,7 @@ Tileset::Result Tileset::convert_tiled_image_result(Tiled_Image::Result r) {
 	}
 }
 
+/*
 Tileset::Result Tileset::read_graphics(const char *f, const char *bf, const char *af, Palettes l) {
 	Tiled_Image bti(bf);
 	size_t bn = bti.num_tiles();
@@ -151,7 +152,7 @@ Tileset::Result Tileset::read_graphics(const char *f, const char *bf, const char
 	_mod_time_after = file_modified(af);
 
 	return (_result = Result::GFX_OK);
-}
+}*/
 
 Tileset::Result Tileset::read_roof_graphics(const char *f) {
 	Tiled_Image ti(f);

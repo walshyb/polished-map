@@ -4,9 +4,8 @@
 #include "filereader.h"
 #include "../state.h"
 #include <emscripten/bind.h>
-#include "../map/block.h"
-#include "../map/map.h"
 #include "parse-png.h"
+#include "../colors.h"
 
 /**
  * Process a file
@@ -49,6 +48,11 @@ bool FileProcessor::processPal(const uint8_t* fileDataPtr, size_t bufferSize, co
   // Get (active) metatileset and tileset from state
   AppState *state = &AppState::getInstance();
   Metatileset *metatileset = state->getMetatileset();
+  Tileset &tileset = metatileset->tileset();
+  Palettes defaultPalettes = Palettes();
+  Palettes newPalettes = Color::read_palettes((char*)fileDataPtr, bufferSize, defaultPalettes);
+
+
 }
 
 /**
@@ -73,6 +77,7 @@ bool FileProcessor::processPal(const uint8_t* fileDataPtr, size_t bufferSize, co
  * @param roofName Point to the name of the roof file
  * @return true if the file was read successfully, false otherwise
  */
+/*
 bool FileProcessor::readMetatileData(
     const char* fullTilesetName, size_t fullTilesetSize,
     const uint8_t* beforeTilesetPtr, size_t beforeTilesetBufferSize, const char* beforeTilesetFilename,
@@ -105,7 +110,6 @@ bool FileProcessor::readMetatileData(
     .pos = 0
   };
 
-  /*
   Tileset::Result rt = tileset.read_graphics(
     buffer,
     beforeTilesetBufferSize ? &beforeTilsetPng : NULL,
@@ -113,10 +117,10 @@ bool FileProcessor::readMetatileData(
     // todo add current palettes
     palettes 
     );
-*/
+
 
   //return metatileset->readMetatileData(tilesetPtr, bufferSize, filename);
-}
+}*/
 
 /**
  * Process a png file. Gets the width, height, and depth of the image

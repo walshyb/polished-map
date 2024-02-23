@@ -1,3 +1,6 @@
+#ifndef PARSE_PNG_H
+#define PARSE_PNG_H
+
 #include <iostream>
 
 bool getPngData(const uint8_t* bufferPtr, size_t bufferSize, int& width, int& height, int& depth);
@@ -10,3 +13,5 @@ struct PngData {
   size_t size;          // Size of the PNG file data
   size_t pos;           // Current position in the data buffer
 };
+
+#endif

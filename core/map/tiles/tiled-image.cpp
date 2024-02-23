@@ -16,6 +16,7 @@ Tiled_Image::Tiled_Image(const char *f) : _tile_hues(), _num_tiles(0), _result(R
 
 Tiled_Image::~Tiled_Image() {}
 
+/*
 Tiled_Image::Result Tiled_Image::read_png_graphics(PngData &png) {
 	//Fl_PNG_Image png(f);
 	if (png.fail()) { return (_result = Result::IMG_BAD_FILE); }
@@ -47,7 +48,7 @@ Tiled_Image::Result Tiled_Image::read_png_graphics(PngData &png) {
 	}
 
 	return (_result = Result::IMG_OK);
-}
+}*/
 
 /*
 Tiled_Image::Result Tiled_Image::read_png_graphics(const char *f) {
