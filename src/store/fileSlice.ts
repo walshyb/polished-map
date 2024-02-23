@@ -5,6 +5,7 @@ import {
   getFileHandlerByPath,
 } from "../utils/helper-funcs";
 import FileHandlerManager from "./fileManagerSingleton";
+import { loadPaletteAction } from "./editorSlice";
 
 export interface FileNode {
   name: string;
@@ -40,10 +41,8 @@ export const openFileByName = createAsyncThunk(
 
     if (!fileHandler) {
       // TODO make these states predefined and reuseable
-      return {
-        state: "error",
-        error: "Couldn't open file",
-      };
+      // caught by thunk
+      throw new Error("Couldn't open file");
     }
 
     const file: File = await fileHandler.getFile();
@@ -69,27 +68,33 @@ export const openFileByName = createAsyncThunk(
 /**
  * Opens directory specified by user, and stores references to tile-related files
  */
-export const openProject = createAsyncThunk("file/openProject", async () => {
-  // Prompt user to allow access to directory
-  // Errors caught by thunk
-  const directoryHandler: FileSystemDirectoryHandle =
-    await window.showDirectoryPicker();
+export const openProject = createAsyncThunk(
+  "file/openProject",
+  async (_, { dispatch }) => {
+    // Prompt user to allow access to directory
+    // Errors caught by thunk
+    const directoryHandler: FileSystemDirectoryHandle =
+      await window.showDirectoryPicker();
 
-  // Get all files and subdirectories
-  const fileTree: FileNode[] = await readFilesInDirectory(
-    directoryHandler,
-    "",
-    true,
-  );
+    // Get all files and subdirectories
+    const fileTree: FileNode[] = await readFilesInDirectory(
+      directoryHandler,
+      "",
+      true,
+    );
 
-  // Add root directory handler to handlermanager singleton storage
-  const fileHandlerManager = FileHandlerManager.getInstance();
-  fileHandlerManager.addFileHandler("root", directoryHandler);
+    // Add root directory handler to handlermanager singleton storage
+    const fileHandlerManager = FileHandlerManager.getInstance();
+    fileHandlerManager.addFileHandler("root", directoryHandler);
 
-  return {
-    fileTree,
-  };
-});
+    // Load default palette
+    dispatch(loadPaletteAction({}));
+
+    return {
+      fileTree,
+    };
+  },
+);
 
 // TODO rename to openFile?
 export const processFile = createAsyncThunk(
