@@ -1,6 +1,7 @@
 #include <iostream>
 #include <png.h>
 #include "parse-png.h"
+#include <vector>
 
 Png::Png(PngData pngData) : _valid(false), _size(0) {
 
@@ -43,7 +44,7 @@ char Png::valueAt(int index) {
  *
  * @return True if the PNG data was parsed successfully, false otherwise
  */
-bool Png::parsePng(const uint8_t* bufferPtr, size_t bufferSize) {
+bool Png::parsePng(uint8_t* bufferPtr, size_t bufferSize) {
   png_structp png_ptr;
   png_infop info_ptr;
 
@@ -111,26 +112,11 @@ bool Png::parsePng(const uint8_t* bufferPtr, size_t bufferSize) {
 
   // If image is already grayscale
   bool isGrayscale = png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_GRAY;
-  std::cout << "Grayscale: " << isGrayscale << "color type: " << png_get_color_type(png_ptr, info_ptr) << std::endl;
+  std::cout << "Grayscale: " << isGrayscale << "color type: " << (int) png_get_color_type(png_ptr, info_ptr) << std::endl;
 
   // If image is not grayscale, desaturate it
   if (!isGrayscale) {
-    png_bytep row_pointers[_height];
-    for (int y = 0; y < _height; y++) {
-      row_pointers[y] = (png_bytep)malloc(png_get_rowbytes(png_ptr, info_ptr));
-    }
-    png_read_image(png_ptr, row_pointers);
-
-    // Apply desaturation transformation
-    for (int y = 0; y < _height; y++) {
-      desaturate(row_pointers[y], _width);
-    }
-
-    for (int y = 0; y < _height; y++) {
-      free(row_pointers[y]);
-    }
-
-    std::cout << "Cleaned up" << std::endl;
+    // TODO
   }
 
   // Clean up
@@ -145,18 +131,27 @@ bool Png::parsePng(const uint8_t* bufferPtr, size_t bufferSize) {
  * @param row Pointer to the row of PNG data
  * @param width Width of the row
  */
-void Png::desaturate(png_bytep row, int width) {
+void Png::desaturate(png_bytep row, int width, int channels) {
   for (int x = 0; x < width; x++) {
-    // Extract RGB components
-    png_byte r = row[x * 3];
-    png_byte g = row[x * 3 + 1];
-    png_byte b = row[x * 3 + 2];
+    // Extract color components based on the number of channels
+    png_byte color[4] = {0}; // Initialize array to hold color components
+    for (int c = 0; c < channels; c++) {
+      color[c] = row[x * channels + c];
+    }
 
-    // Compute luminance
-    png_byte gray = (png_byte)(0.2126 * r + 0.7152 * g + 0.0722 * b);
+    // Compute luminance (grayscale) value based on color components
+    // Adjust weights based on the color model (RGB, RGBA, grayscale, etc.)
+    png_byte gray = 0;
+    if (channels == 1) { // Grayscale image
+      gray = color[0]; // Use the single component value directly
+    } else { // RGB, RGBA, or other color models
+      gray = (png_byte)(0.2126 * color[0] + 0.7152 * color[1] + 0.0722 * color[2]);
+    }
 
-    // Set RGB components to grayscale value
-    row[x * 3] = row[x * 3 + 1] = row[x * 3 + 2] = gray;
+    // Set all color components to grayscale value
+    for (int c = 0; c < channels; c++) {
+      row[x * channels + c] = gray;
+    }
   }
 }
 

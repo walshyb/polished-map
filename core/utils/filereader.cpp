@@ -14,7 +14,7 @@
  * @param bufferSize Size of the file data
  * @param filename Point to the name of the file
  */
-bool FileProcessor::processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
+bool FileProcessor::processFile(uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
   std::string fn = std::string(filename);
   std::string ext = fn.substr(fn.find_last_of(".") + 1);
 
@@ -81,8 +81,8 @@ bool FileProcessor::processPal(const uint8_t* fileDataPtr, size_t bufferSize, co
  */
 bool FileProcessor::readMetatileData(
     const char* fullTilesetName, size_t fullTilesetSize,
-    const uint8_t* beforeTilesetPtr, size_t beforeTilesetBufferSize, const char* beforeTilesetFilename,
-    const uint8_t* afterTilesetPtr, size_t afterTilesetBufferSize, const char* afterTilesetFilename,
+     uint8_t* beforeTilesetPtr, size_t beforeTilesetBufferSize, const char* beforeTilesetFilename,
+     uint8_t* afterTilesetPtr, size_t afterTilesetBufferSize, const char* afterTilesetFilename,
     const uint8_t* roofPtr, size_t roofBufferSize, const char* roofName 
   ) {
 
@@ -129,7 +129,7 @@ bool FileProcessor::readMetatileData(
  * @param bufferSize Size of the file data
  * @param filename Point to the name of the file
  */
-bool FileProcessor::processPng(const uint8_t* bufferPtr, size_t bufferSize, const char* filename) {
+bool FileProcessor::processPng(uint8_t* bufferPtr, size_t bufferSize, const char* filename) {
   PngData data = {
     .buf = bufferPtr,
     .size = bufferSize,
@@ -185,7 +185,7 @@ void FileProcessor::processAblk(const uint8_t* fileDataPtr, size_t bufferSize, c
 extern "C" {
   FileProcessor fileProcessor;
 
-  bool processFile(const uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
+  bool processFile(uint8_t* fileDataPtr, size_t bufferSize, const char* filename) {
     return fileProcessor.processFile(fileDataPtr, bufferSize, filename);
   }
 }

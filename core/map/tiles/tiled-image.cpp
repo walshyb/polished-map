@@ -33,7 +33,7 @@ Tiled_Image::Result Tiled_Image::read_png_graphics(const PngData pngData) {
 	_num_tiles = w * h;
 	if (_num_tiles > MAX_NUM_TILES) { return (_result = Result::IMG_TOO_LARGE); }
 
-	png.desaturate();
+	//png.desaturate();
 	if (png.count() != 1) { return (_result = Result::IMG_NOT_GRAYSCALE); }
 
 	_tile_hues.resize(_num_tiles * TILE_AREA);
