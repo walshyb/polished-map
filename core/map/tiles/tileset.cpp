@@ -110,19 +110,24 @@ Tileset::Result Tileset::convert_tiled_image_result(Tiled_Image::Result r) {
 	}
 }
 
-/*
-Tileset::Result Tileset::read_graphics(const char *f, const char *bf, const char *af, Palettes l) {
-	Tiled_Image bti(bf);
-	size_t bn = bti.num_tiles();
-	if (bf && convert_tiled_image_result(bti.result()) != Result::GFX_OK) { return _result; }
 
-	Tiled_Image ti(f);
+Tileset::Result Tileset::read_graphics(
+    const char *buffer,
+    const PngData beforeTileset,
+    const PngData afterTileset,
+    Palettes l
+) {
+	Tiled_Image bti(beforeTileset);
+	size_t bn = bti.num_tiles();
+	if (beforeTileset.size && convert_tiled_image_result(bti.result()) != Result::GFX_OK) { return _result; }
+
+	Tiled_Image ti(buffer);
 	size_t mn = ti.num_tiles();
 	if (convert_tiled_image_result(ti.result()) != Result::GFX_OK) { return _result; }
 
-	Tiled_Image ati(af);
+	Tiled_Image ati(afterTileset);
 	size_t an = ati.num_tiles();
-	if (af && convert_tiled_image_result(ati.result()) != Result::GFX_OK) { return _result; }
+	if (afterTileset.size && convert_tiled_image_result(ati.result()) != Result::GFX_OK) { return _result; }
 
 	_num_before_tiles = ((bn + TILES_PER_ROW - 1) / TILES_PER_ROW) * TILES_PER_ROW;
 	_num_mid_tiles = an ? ((mn + TILES_PER_ROW - 1) / TILES_PER_ROW) * TILES_PER_ROW : mn;
@@ -147,12 +152,12 @@ Tileset::Result Tileset::read_graphics(const char *f, const char *bf, const char
 
 	_modified = false;
 	_modified_roof = false;
-	_mod_time = file_modified(f);
-	_mod_time_before = file_modified(bf);
-	_mod_time_after = file_modified(af);
+	//_mod_time = file_modified(f);
+	//_mod_time_before = file_modified(bf);
+	//_mod_time_after = file_modified(af);
 
 	return (_result = Result::GFX_OK);
-}*/
+}
 
 Tileset::Result Tileset::read_roof_graphics(const char *f) {
 	Tiled_Image ti(f);

@@ -965,7 +965,7 @@ function dbg(text) {
 // === Body ===
 
 var ASM_CONSTS = {
-  94220: () => { Module['print'] = function(text) { console.log(text); }; }
+  102380: () => { Module['print'] = function(text) { console.log(text); }; }
 };
 
 

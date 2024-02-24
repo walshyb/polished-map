@@ -6,6 +6,7 @@
 #include "deep-tile.h"
 #include "tiled-image.h"
 #include "../../utils.h"
+#include "../../utils/parse-png.h"
 
 #define MAX_NUM_TILES 512
 
@@ -66,7 +67,12 @@ public:
 	void update_palettes(Palettes l);
 	unsigned char *print_rgb(size_t w, size_t h, size_t off, size_t n) const;
 	unsigned char *print_roof_rgb(size_t w, size_t h) const;
-	Result read_graphics(const char *f, PngData beforeTileset, PngData afterTileSet, Palettes l);
+Result read_graphics(
+    const char *buffer,
+    const PngData beforeTilesetPtr,
+    const PngData afterTilesetPtr,
+    Palettes l
+);
 	Result read_roof_graphics(const char *f);
 	static const char *error_message(Result result);
 	const char *write_graphics(const char *f, const char *bf, const char *af);

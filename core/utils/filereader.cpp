@@ -52,7 +52,9 @@ bool FileProcessor::processPal(const uint8_t* fileDataPtr, size_t bufferSize, co
   Palettes defaultPalettes = Palettes();
   Palettes newPalettes = Color::read_palettes((char*)fileDataPtr, bufferSize, defaultPalettes);
 
+  tileset.update_palettes(newPalettes);
 
+  return true;
 }
 
 /**
@@ -77,7 +79,6 @@ bool FileProcessor::processPal(const uint8_t* fileDataPtr, size_t bufferSize, co
  * @param roofName Point to the name of the roof file
  * @return true if the file was read successfully, false otherwise
  */
-/*
 bool FileProcessor::readMetatileData(
     const char* fullTilesetName, size_t fullTilesetSize,
     const uint8_t* beforeTilesetPtr, size_t beforeTilesetBufferSize, const char* beforeTilesetFilename,
@@ -98,13 +99,13 @@ bool FileProcessor::readMetatileData(
   char buffer[FL_PATH_MAX] = {};
 
   // Make structs for libpng easy reading
-  PngData beforeTilsetPng = {
+  const PngData beforeTilsetPng = {
     .buf = beforeTilesetPtr,
     .size = beforeTilesetBufferSize,
     .pos = 0
   };
 
-  PngData afterTilsetPng = {
+  const PngData afterTilsetPng = {
     .buf = afterTilesetPtr,
     .size = afterTilesetBufferSize,
     .pos = 0
@@ -112,15 +113,14 @@ bool FileProcessor::readMetatileData(
 
   Tileset::Result rt = tileset.read_graphics(
     buffer,
-    beforeTilesetBufferSize ? &beforeTilsetPng : NULL,
-    afterTilesetBufferSize ? &afterTilsetPng : NULL,
-    // todo add current palettes
-    palettes 
-    );
+    beforeTilsetPng,
+    afterTilsetPng,
+    tileset.palettes()
+  );
 
 
   //return metatileset->readMetatileData(tilesetPtr, bufferSize, filename);
-}*/
+}
 
 /**
  * Process a png file. Gets the width, height, and depth of the image
@@ -130,15 +130,23 @@ bool FileProcessor::readMetatileData(
  * @param filename Point to the name of the file
  */
 bool FileProcessor::processPng(const uint8_t* bufferPtr, size_t bufferSize, const char* filename) {
-  int width, height, depth;
+  PngData data = {
+    .buf = bufferPtr,
+    .size = bufferSize,
+    .pos = 0
+  };
 
-  bool result = getPngData(bufferPtr, bufferSize, width, height, depth);
+  std::cout << "Processing PNG" << std::endl;
+  Png *png = new Png(data);
 
-  if (result) {
-    std::cout << "Width: " << width << ", Height: " << height << ", Depth: " << depth << std::endl;
+  if (png->size()) {
+    std::cout << "Width: " << png->width() << ", Height: " << png->height() << ", Depth: " << png->depth() << std::endl;
+    return true;
+  } else {
+    std::cout << "Error reading PNG" << std::endl;
   }
 
-  return result;
+  return false;
 }
 
 /**

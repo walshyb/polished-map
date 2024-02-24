@@ -3,8 +3,12 @@
 #include "../../utils.h"
 #include "tileset.h"
 #include "tiled-image.h"
+#include "../../utils/parse-png.h"
 
-Tiled_Image::Tiled_Image(PngData &png) : _tile_hues(), _num_tiles(0), _result(Result::IMG_NULL) {
+Tiled_Image::Tiled_Image(const PngData png) : _tile_hues(), _num_tiles(0), _result(Result::IMG_NULL) {
+  if (!png.size) {
+    return;
+  }
 	read_png_graphics(png);
 }
 
@@ -16,12 +20,12 @@ Tiled_Image::Tiled_Image(const char *f) : _tile_hues(), _num_tiles(0), _result(R
 
 Tiled_Image::~Tiled_Image() {}
 
-/*
-Tiled_Image::Result Tiled_Image::read_png_graphics(PngData &png) {
-	//Fl_PNG_Image png(f);
-	if (png.fail()) { return (_result = Result::IMG_BAD_FILE); }
+Tiled_Image::Result Tiled_Image::read_png_graphics(const PngData pngData) {
+  Png png = Png(pngData);
 
-	int w = png.w(), h = png.h();
+	if (!png.valid()) { return (_result = Result::IMG_BAD_FILE); }
+
+	int w = png.width(), h = png.height();
 	if (w % TILE_SIZE || h % TILE_SIZE) { return (_result = Result::IMG_BAD_DIMS); }
 
 	w /= TILE_SIZE;
@@ -35,20 +39,21 @@ Tiled_Image::Result Tiled_Image::read_png_graphics(PngData &png) {
 	_tile_hues.resize(_num_tiles * TILE_AREA);
 
 	size_t hi = 0;
-	int d = png.d();
+	int d = png.depth();
 	for (int y = 0; y < h; y++) {
 		for (int x = 0; x < w; x++) {
 			for (int ty = 0; ty < TILE_SIZE; ty++) {
 				for (int tx = 0; tx < TILE_SIZE; tx++) {
 					long ti = ((y * TILE_SIZE + ty) * (w * TILE_SIZE) + (x * TILE_SIZE + tx)) * d;
-					_tile_hues[hi++] = Color::mono_hue(png.array[ti]);
+          // png.array[ti] is the grayscale value of the pixel at (tx, ty) in the tile at (x, y)
+					_tile_hues[hi++] = Color::mono_hue(png.valueAt(ti));
 				}
 			}
 		}
 	}
 
 	return (_result = Result::IMG_OK);
-}*/
+}
 
 /*
 Tiled_Image::Result Tiled_Image::read_png_graphics(const char *f) {

@@ -2,6 +2,7 @@
 #include <sstream>
 #include "colors.h"
 #include "utils.h"
+#include <iostream>
 
 
 #define RGB5(r, g, b) {RGB5C(r), RGB5C(g), RGB5C(b)}
@@ -126,6 +127,7 @@ const unsigned char *Color::color(Palettes l, Palette p, Hue h) {
 
 void Color::color(Palettes l, Palette p, Hue h, ColorArray v) {
 	unsigned char *cs = tileset_colors[(int)l][(int)p][(int)h];
+
 	for (int i = 0; i < NUM_CHANNELS; i++) {
 		cs[i] = RGB5C(v[i]);
 	}
@@ -183,6 +185,7 @@ PalVec Color::parse_palettes(const char *paletteFileContentsPtr, size_t fileSize
 		std::string line;
 		std::getline(ifs, line);
 		line += ";"; // ensure trailing separator
+    std::cout << "line: " << line << std::endl;
 		std::istringstream lss(line);
 		std::string macro;
 		if (!leading_macro(lss, macro, "RGB")) { continue; }
@@ -223,15 +226,18 @@ Palettes Color::read_palettes(const char *paletteFileContentsPtr, size_t fileSiz
 	case 1 * NUM_PALETTES: // CUSTOM
 		for (int p = 0; p < NUM_PALETTES; p++) {
 			color(Palettes::CUSTOM, (Palette)p, custom_colors[p]);
+      std::cout << "color: " << p << ", custom: " << std::endl;
 		}
 		pals = Palettes::CUSTOM;
 		break;
 	case 2 * NUM_PALETTES: // DAY, NITE
 		for (int p = 0; p < NUM_PALETTES; p++) {
 			color(Palettes::DAY, (Palette)p, custom_colors[p]);
+      std::cout << "color: " << p << ", custom: " << std::endl;
 		}
 		for (int p = 0; p < NUM_PALETTES; p++) {
 			color(Palettes::NITE, (Palette)p, custom_colors[p+NUM_PALETTES]);
+      std::cout << "color: " << p << ", custom: " << std::endl;
 		}
 		if (pals != Palettes::NITE) {
 			pals = Palettes::DAY;
@@ -241,20 +247,24 @@ Palettes Color::read_palettes(const char *paletteFileContentsPtr, size_t fileSiz
 		for (int l = 0; l < 3; l++) {
 			for (int p = 0; p < NUM_PALETTES; p++) {
 				color((Palettes)l, (Palette)p, custom_colors[p+l*NUM_PALETTES]);
+      std::cout << "color: " << p << ", custom: " << std::endl;
 			}
 		}
 		if (pals != Palettes::MORN && pals != Palettes::NITE) {
 			pals = Palettes::DAY;
+      std::cout << "color: " << (char)Palettes::DAY << ", custom: " << std::endl;
 		}
 		break;
 	case 4 * NUM_PALETTES: // MORN, DAY, NITE, INDOOR
 		for (int l = 0; l < 3; l++) {
 			for (int p = 0; p < NUM_PALETTES; p++) {
 				color((Palettes)l, (Palette)p, custom_colors[p+l*NUM_PALETTES]);
+      std::cout << "color: " << p << ", custom: " << std::endl;
 			}
 		}
 		for (int p = 0; p < NUM_PALETTES; p++) {
 			color(Palettes::INDOOR, (Palette)p, custom_colors[p+3*NUM_PALETTES]);
+      std::cout << "color: " << p << ", custom: " << std::endl;
 		}
 		if (pals != Palettes::MORN && pals != Palettes::NITE && pals != Palettes::INDOOR) {
 			pals = Palettes::DAY;
@@ -264,6 +274,7 @@ Palettes Color::read_palettes(const char *paletteFileContentsPtr, size_t fileSiz
 		for (int l = 0; l < 5; l++) {
 			for (int p = 0; p < NUM_PALETTES; p++) {
 				color((Palettes)l, (Palette)p, custom_colors[p+l*NUM_PALETTES]);
+      std::cout << "color: " << p << ", custom: " << std::endl;
 			}
 		}
 		if (pals == Palettes::CUSTOM) {
@@ -275,6 +286,7 @@ Palettes Color::read_palettes(const char *paletteFileContentsPtr, size_t fileSiz
 		for (int l = 0; l < 5; l++) {
 			for (int p = 0; p < NUM_PALETTES; p++) {
 				color((Palettes)l, (Palette)p, custom_colors[p+l*NUM_PALETTES]);
+      std::cout << "color: " << p << ", custom: " << std::endl;
 			}
 		}
 		// apply separate WATER hues
