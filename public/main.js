@@ -965,7 +965,7 @@ function dbg(text) {
 // === Body ===
 
 var ASM_CONSTS = {
-  94348: () => { Module['print'] = function(text) { console.log(text); }; }
+  94476: () => { Module['print'] = function(text) { console.log(text); }; }
 };
 
 
@@ -5497,6 +5497,7 @@ var _getBlocks = Module['_getBlocks'] = createExportWrapper('getBlocks');
 var _malloc = createExportWrapper('malloc');
 var setTempRet0 = createExportWrapper('setTempRet0');
 var _free = Module['_free'] = createExportWrapper('free');
+var _readMetatileData = Module['_readMetatileData'] = createExportWrapper('readMetatileData');
 var _processFile = Module['_processFile'] = createExportWrapper('processFile');
 var _main = Module['_main'] = createExportWrapper('__main_argc_argv');
 var ___errno_location = createExportWrapper('__errno_location');

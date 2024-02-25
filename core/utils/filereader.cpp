@@ -24,6 +24,14 @@ bool FileProcessor::processFile(uint8_t* fileDataPtr, size_t bufferSize, const c
     return true;
   }
 
+  if (ext == "bin") {
+    std::cout << "Processing bin file" << std::endl;
+    // if file_name contains "metatiles":
+    if (fn.find("_metatiles") != std::string::npos) {
+      return processMetatiles(fileDataPtr, bufferSize);
+    }
+  }
+
   // If ending in .png, process as png file, or a tileset
   if (ext == "png") {
     return processPng(fileDataPtr, bufferSize, filename);
@@ -58,6 +66,24 @@ bool FileProcessor::processPal(const uint8_t* fileDataPtr, size_t bufferSize, co
 }
 
 /**
+ * Creates a metatileset from a .bin file
+ */
+bool FileProcessor::processMetatiles(const uint8_t* fileDataPtr, size_t bufferSize) {
+  // Get (active) metatileset and tileset from state
+  AppState *state = &AppState::getInstance();
+  Metatileset *metatileset = state->getMetatileset();
+  Tileset &tileset = metatileset->tileset();
+
+  std::cout << "Process metatiles" << std::endl;
+
+  Metatileset:: Result result = metatileset->read_metatiles(fileDataPtr, bufferSize);
+
+  std::cout << "Process metatiles Result: " << (bool) result << std::endl;
+
+  return (bool)result;
+}
+
+/**
  * Accepts two tileset files and a roof file and reads the graphics data.
  *
  * Tilesets can be named "bforeTileset.afterTileset.png" (e.g. "johto_traditional.johto_common.png").
@@ -79,47 +105,47 @@ bool FileProcessor::processPal(const uint8_t* fileDataPtr, size_t bufferSize, co
  * @param roofName Point to the name of the roof file
  * @return true if the file was read successfully, false otherwise
  */
-bool FileProcessor::readMetatileData(
-    const char* fullTilesetName, size_t fullTilesetSize,
-     uint8_t* beforeTilesetPtr, size_t beforeTilesetBufferSize, const char* beforeTilesetFilename,
-     uint8_t* afterTilesetPtr, size_t afterTilesetBufferSize, const char* afterTilesetFilename,
+extern "C" {
+  bool readMetatileData(
+    uint8_t* tilesetPtr, size_t tilesetBufferSize, const char* tilesetFilename,
+    uint8_t* beforeTilesetPtr, size_t beforeTilesetBufferSize, const char* beforeTilesetFilename,
     const uint8_t* roofPtr, size_t roofBufferSize, const char* roofName 
   ) {
 
-  // Get (active) metatileset and tileset from state
-  AppState *state = &AppState::getInstance();
-  Metatileset *metatileset = state->getMetatileset();
-	Tileset &tileset = metatileset->tileset();
+    // Get (active) metatileset and tileset from state
+    AppState *state = &AppState::getInstance();
+    Metatileset *metatileset = state->getMetatileset();
+    Tileset &tileset = metatileset->tileset();
 
-  // Set tileset and roof tileset names
-  tileset.name(fullTilesetName);
-  tileset.roof_name(roofName);
+    // Set tileset and roof tileset names
+    tileset.name(tilesetFilename);
+    tileset.roof_name(roofName);
 
-  // Hold contents of before &| after tilesets
-  char buffer[FL_PATH_MAX] = {};
+    // Hold contents of before &| after tilesets
+    char buffer[FL_PATH_MAX] = {};
 
-  // Make structs for libpng easy reading
-  const PngData beforeTilsetPng = {
-    .buf = beforeTilesetPtr,
-    .size = beforeTilesetBufferSize,
-    .pos = 0
-  };
+    // Make structs for libpng easy reading
+    const PngData tilesetPng = {
+      .buf = tilesetPtr,
+      .size = tilesetBufferSize,
+      .pos = 0
+    };
 
-  const PngData afterTilsetPng = {
-    .buf = afterTilesetPtr,
-    .size = afterTilesetBufferSize,
-    .pos = 0
-  };
+    const PngData beforeTilsetPng = {
+      .buf = beforeTilesetPtr,
+      .size = beforeTilesetBufferSize,
+      .pos = 0
+    };
 
-  Tileset::Result rt = tileset.read_graphics(
-    buffer,
-    beforeTilsetPng,
-    afterTilsetPng,
-    tileset.palettes()
-  );
+    Tileset::Result rt = tileset.read_graphics(
+      tilesetPng,
+      beforeTilsetPng,
+      tileset.palettes()
+    );
 
 
-  //return metatileset->readMetatileData(tilesetPtr, bufferSize, filename);
+    //return metatileset->readMetatileData(tilesetPtr, bufferSize, filename);
+  }
 }
 
 /**

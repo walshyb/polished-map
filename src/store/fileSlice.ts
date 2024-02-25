@@ -33,9 +33,12 @@ const initialState: FileSlice = {
   error: null,
 };
 
+/**
+ * This is really open map file and load related files
+ */
 export const openFileByName = createAsyncThunk(
   "file/openFileByName",
-  async (data: any) => {
+  async (data: any, { dispatch }) => {
     const { path, name } = data;
     const fileHandler = await getFileHandlerByPath(path, name);
 
@@ -49,7 +52,21 @@ export const openFileByName = createAsyncThunk(
     //const size = file.size;
     const arrayBuffer = await file.arrayBuffer();
 
+    // TODO: go through directory and look for related files
+
+    // Process map file
+    // TODO name this processMapFile (i..e AzaleaTown.ablk)
     const result: boolean = processFileUtil(arrayBuffer, file.size, file.name);
+
+    // load ileset before: gfx/tilesets/johto_overcast.johto_common.png
+    // load tileset after: gfx/tilesets/johto_common.png
+    // load metatileset: data/tilesets/johto_overcast_metatiles.bin
+
+    if (!result) {
+      throw new Error("Map (.ablk) opening failed");
+    }
+
+    const metatilesetHandle = await getFileHandlerByPath();
 
     // TODO:
     // return result with information from C++

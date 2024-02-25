@@ -67,12 +67,7 @@ public:
 	void update_palettes(Palettes l);
 	unsigned char *print_rgb(size_t w, size_t h, size_t off, size_t n) const;
 	unsigned char *print_roof_rgb(size_t w, size_t h) const;
-Result read_graphics(
-    const char *buffer,
-    const PngData beforeTilesetPtr,
-    const PngData afterTilesetPtr,
-    Palettes l
-);
+  Result read_graphics(const PngData tileset, const PngData beforeTilesetPtr, Palettes l);
 	Result read_roof_graphics(const char *f);
 	static const char *error_message(Result result);
 	const char *write_graphics(const char *f, const char *bf, const char *af);

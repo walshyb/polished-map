@@ -111,27 +111,38 @@ Tileset::Result Tileset::convert_tiled_image_result(Tiled_Image::Result r) {
 }
 
 
+/**
+ * Build tiles off of passed in .png tilesets
+ *
+ * @param tileset The tileset png data. i.e. johto_overcast.johto_common.png
+ * @param beforeTileset The before tileset png data. i.e. johto_common.png
+ * @param l The palettes
+ *
+ * @return The result of the operation
+ */
 Tileset::Result Tileset::read_graphics(
-    const char *buffer,
+    const PngData tileset,
     const PngData beforeTileset,
-    const PngData afterTileset,
     Palettes l
 ) {
 	Tiled_Image bti(beforeTileset);
 	size_t bn = bti.num_tiles();
 	if (beforeTileset.size && convert_tiled_image_result(bti.result()) != Result::GFX_OK) { return _result; }
 
-	Tiled_Image ti(buffer);
+	Tiled_Image ti(tileset);
 	size_t mn = ti.num_tiles();
 	if (convert_tiled_image_result(ti.result()) != Result::GFX_OK) { return _result; }
 
-	Tiled_Image ati(afterTileset);
-	size_t an = ati.num_tiles();
-	if (afterTileset.size && convert_tiled_image_result(ati.result()) != Result::GFX_OK) { return _result; }
-
 	_num_before_tiles = ((bn + TILES_PER_ROW - 1) / TILES_PER_ROW) * TILES_PER_ROW;
-	_num_mid_tiles = an ? ((mn + TILES_PER_ROW - 1) / TILES_PER_ROW) * TILES_PER_ROW : mn;
-	_num_tiles = _num_before_tiles + (an ? _num_mid_tiles + an : mn);
+  // TODO implement after tile image one day
+  //Tiled_Image ati(afterTileset);
+	//size_t an = ati.num_tiles();
+	//if (afterTileset.size && convert_tiled_image_result(ati.result()) != Result::GFX_OK) { return _result; }
+	//_num_mid_tiles = an ? ((mn + TILES_PER_ROW - 1) / TILES_PER_ROW) * TILES_PER_ROW : mn;
+	//_num_tiles = _num_before_tiles + (an ? _num_mid_tiles + an : mn);
+
+	_num_mid_tiles = mn;
+	_num_tiles = _num_before_tiles + mn;
 	if (_num_tiles > 0x100) {
 		Config::allow_512_tiles(true);
 	}
@@ -146,7 +157,9 @@ Tileset::Result Tileset::read_graphics(
 			read_tile(dt, ti, i - _num_before_tiles);
 		}
 		else if ((size_t)i >= _num_before_tiles + _num_mid_tiles) {
-			read_tile(dt, ati, i - _num_before_tiles - _num_mid_tiles);
+      std::cerr << "Made it to after tiles land" << std::endl;
+      // TODO implement after tile image one day
+			//read_tile(dt, ati, i - _num_before_tiles - _num_mid_tiles);
 		}
 	}
 

@@ -108,21 +108,18 @@ export async function getFileHandlerByPath(
   let fileHandler: FileSystemFileHandle;
   try {
     let splitPath: string[] = path.split("/");
-    // TODO make it so you don't have to
-    splitPath.shift(); // Remove root dir name from path
 
     // Go to each directory one by one in the path (only way to do it)
     for (const dirName of splitPath) {
       // Handle trailing /
       if (dirName === "") continue;
-
       directoryHandler = await directoryHandler.getDirectoryHandle(dirName);
     }
 
     // Now we're at the folder of the file we're looking for
     fileHandler = await directoryHandler.getFileHandle(filename);
   } catch (error: any | DOMException) {
-    console.log("Couldn't open file");
+    console.log("Couldn't open file or directory.");
     return;
   }
 

@@ -87,6 +87,39 @@ void Metatileset::trim_tileset() {
 	}
 }
 
+/**
+ * Parse contents of a .bin file (metatileset content) and create metatiles to make a metatileset
+ */
+Metatileset::Result Metatileset::read_metatiles(const uint8_t *filePtr, size_t size) {
+  if (!_tileset.num_tiles()) { return (_result = Result::META_NO_GFX); } // no graphics
+
+  const unsigned char *ptr = filePtr;
+  const unsigned char *endPtr = filePtr+ size;
+
+  while (ptr < endPtr) {
+    unsigned char data[METATILE_SIZE * METATILE_SIZE] = {};
+
+    // Read a metatile's worth of data
+    size_t bytesToRead = std::min<size_t>(METATILE_SIZE * METATILE_SIZE, endPtr - ptr);
+    std::memcpy(data, ptr, bytesToRead);
+    ptr += bytesToRead;
+
+    // Error and bad-file handling
+    if (bytesToRead < METATILE_SIZE * METATILE_SIZE) { return (_result = Result::META_TOO_SHORT); }
+    if (_num_metatiles == MAX_NUM_METATILES) { return (_result = Result::META_TOO_LONG); }
+
+    Metatile *mt = _metatiles[_num_metatiles++];
+    for (int y = 0; y < METATILE_SIZE; y++) {
+      for (int x = 0; x < METATILE_SIZE; x++) {
+        unsigned char v = data[y * METATILE_SIZE + x];
+        mt->offset(x, y, v);
+      }
+    }
+  }
+
+  return (_result = Result::META_OK);
+}
+
 
 
 unsigned char *Metatileset::print_rgb(const Map &map) const {

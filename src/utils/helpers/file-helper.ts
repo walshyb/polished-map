@@ -15,6 +15,8 @@ export async function loadPalette(
   const fileHandle: FileSystemFileHandle | undefined =
     await getFileHandlerByPath(palettePath, fileName);
 
+  console.log(palettePath, fileName);
+
   if (!fileHandle) {
     console.error("Couldn't open file");
     return false;
