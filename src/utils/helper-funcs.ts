@@ -54,12 +54,12 @@ export async function readFilesInDirectory(
     };
 
     if (recursive && currentNode.kind === "directory") {
-      // If it's a directory, recursively call readFilesInDirectory
       const directoryResult: FileNode[] = await readFilesInDirectory(
         currentNode,
         `${currentDirectory}/${currentNode.name}`,
         recursive,
       );
+      // If it's a directory, recursively call readFilesInDirectory
       const sorted = directoryResult.sort((a, b) =>
         a.name.localeCompare(b.name),
       );

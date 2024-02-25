@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getBlocks } from "../utils/wasm-funcs";
+import { getBlocks, loadTilesetData, processFile } from "../utils/wasm-funcs";
 import { loadPalette } from "../utils/helpers/file-helper";
+import { getFileHandlerByPath } from "../utils/helper-funcs";
 
 export interface Block {
   row: number;
@@ -28,6 +29,85 @@ interface LoadPaletteData {
   path?: string;
   filename?: string;
 }
+
+export const loadMetatilesetAction = createAsyncThunk(
+  "editor/loadMetatileset",
+  async (data: any) => {
+    const { path, name } = data;
+
+    const handler = await getFileHandlerByPath(
+      "data/tilesets/",
+      "johto_overcast_metatiles.bin",
+    );
+
+    if (!handler) {
+      throw new Error("Couldn't open metatile file");
+    }
+
+    const metatilesetFile: File = await handler.getFile();
+    const metatilesetData = await metatilesetFile.arrayBuffer();
+
+    // load metatileset
+    const result = processFile(
+      metatilesetData,
+      metatilesetFile.size,
+      "johto_overcast_metatiles.bin",
+    );
+
+    if (!result) {
+      // Caught by thunk
+      throw new Error("Couldn't open metatileset");
+    }
+
+    return {
+      activeMetatileset: name,
+    };
+  },
+);
+
+export const loadTilesetAction = createAsyncThunk(
+  "editor/loadTileset",
+  async (data: any) => {
+    const { path, name } = data;
+    const tilesetHandler = await getFileHandlerByPath(
+      "gfx/tilesets/",
+      "johto_overcast.johto_common.png",
+    );
+    const beforeTilesetHandler = await getFileHandlerByPath(
+      "gfx/tilesets/",
+      "johto_common.png",
+    );
+
+    if (!tilesetHandler || !beforeTilesetHandler) {
+      // TODO make these states predefined and reuseable
+      // caught by thunk
+      throw new Error("Couldn't open file");
+    }
+
+    const tileset: File = await tilesetHandler.getFile();
+    const tilesetArrayBuffer = await tileset.arrayBuffer();
+
+    const beforeTileset: File = await beforeTilesetHandler.getFile();
+    const beforeTilesetArrayBuffer = await beforeTileset.arrayBuffer();
+
+    const result = loadTilesetData(
+      tilesetArrayBuffer,
+      tileset.size,
+      beforeTilesetArrayBuffer,
+      beforeTileset.size,
+      name || "johto_overcast.johto_common.png",
+    );
+
+    if (!result) {
+      throw new Error("Tileset opening failed");
+    }
+
+    return {
+      activeTileset: name,
+    };
+  },
+);
+
 export const loadPaletteAction = createAsyncThunk<
   LoadPaletteResult,
   LoadPaletteData

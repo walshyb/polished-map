@@ -86,30 +86,32 @@ bool FileProcessor::processMetatiles(const uint8_t* fileDataPtr, size_t bufferSi
 /**
  * Accepts two tileset files and a roof file and reads the graphics data.
  *
- * Tilesets can be named "bforeTileset.afterTileset.png" (e.g. "johto_traditional.johto_common.png").
+ * Tilesets can be named "tileset.beforeTileset.png" (e.g. "johto_traditional.johto_common.png").
  * In this case we'll need to read both files and concatenate them into a single tileset.
  *
- * If there is a beforeTileset and an afterTileset,
+ * If there is a tileset and an beforeTileset,
  * the two are concatenated into a single tileset. Otherwise, only 1 will be used.
  *
- * @param fullTilesetName Name of the full tileset
- * @param fullTilesetSize Size of the full tileset data
+ * @param tilesetPtr Pointer to the tileset data
+ * @param tilesetBufferSize Size of the tileset data
+ * @param tilesetFilename Name of the tileset
  * @param beforeTilesetPtr Pointer to the before tileset data
  * @param beforeTilesetBufferSize Size of the before tileset data
- * @param beforeTilesetFilename Point to the name of the before tileset file
+ *
+ * TODO:
  * @param afterTilesetPtr Pointer to the after tileset data
  * @param afterTilesetBufferSize Size of the after tileset data
- * @param afterTilesetFilename Point to the name of the after tileset file
  * @param roofPtr Pointer to the roof data
  * @param roofBufferSize Size of the roof data
  * @param roofName Point to the name of the roof file
+ *
  * @return true if the file was read successfully, false otherwise
  */
 extern "C" {
   bool readMetatileData(
     uint8_t* tilesetPtr, size_t tilesetBufferSize, const char* tilesetFilename,
-    uint8_t* beforeTilesetPtr, size_t beforeTilesetBufferSize, const char* beforeTilesetFilename,
-    const uint8_t* roofPtr, size_t roofBufferSize, const char* roofName 
+    uint8_t* beforeTilesetPtr, size_t beforeTilesetBufferSize
+    //const uint8_t* roofPtr, size_t roofBufferSize, const char* roofName 
   ) {
 
     // Get (active) metatileset and tileset from state
@@ -119,10 +121,7 @@ extern "C" {
 
     // Set tileset and roof tileset names
     tileset.name(tilesetFilename);
-    tileset.roof_name(roofName);
-
-    // Hold contents of before &| after tilesets
-    char buffer[FL_PATH_MAX] = {};
+    //tileset.roof_name(roofName);
 
     // Make structs for libpng easy reading
     const PngData tilesetPng = {

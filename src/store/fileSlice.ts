@@ -5,7 +5,11 @@ import {
   getFileHandlerByPath,
 } from "../utils/helper-funcs";
 import FileHandlerManager from "./fileManagerSingleton";
-import { loadPaletteAction } from "./editorSlice";
+import {
+  loadPaletteAction,
+  loadMetatilesetAction,
+  loadTilesetAction,
+} from "./editorSlice";
 
 export interface FileNode {
   name: string;
@@ -58,15 +62,26 @@ export const openFileByName = createAsyncThunk(
     // TODO name this processMapFile (i..e AzaleaTown.ablk)
     const result: boolean = processFileUtil(arrayBuffer, file.size, file.name);
 
-    // load ileset before: gfx/tilesets/johto_overcast.johto_common.png
-    // load tileset after: gfx/tilesets/johto_common.png
+    // load tileset: gfx/tilesets/johto_overcast.johto_common.png
+    // load tileset before: gfx/tilesets/johto_common.png
     // load metatileset: data/tilesets/johto_overcast_metatiles.bin
 
     if (!result) {
       throw new Error("Map (.ablk) opening failed");
     }
 
-    const metatilesetHandle = await getFileHandlerByPath();
+    dispatch(
+      loadTilesetAction({
+        path: "gfx/tilesets/",
+        name: "johto_overcast.johto_common.png",
+      }),
+    );
+    dispatch(
+      loadMetatilesetAction({
+        path: "data/tilesets/",
+        name: "johto_overcast_metatiles.bin",
+      }),
+    );
 
     // TODO:
     // return result with information from C++
@@ -93,7 +108,6 @@ export const openProject = createAsyncThunk(
     const directoryHandler: FileSystemDirectoryHandle =
       await window.showDirectoryPicker();
 
-    // Get all files and subdirectories
     const fileTree: FileNode[] = await readFilesInDirectory(
       directoryHandler,
       "",

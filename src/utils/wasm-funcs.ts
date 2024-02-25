@@ -68,3 +68,40 @@ export function getBlocks(): Block[] {
 
   return blocksArray;
 }
+
+export function loadTilesetData(
+  tilesetBuffer: ArrayBuffer,
+  tilesetSize: number,
+  beforeTilesetBuffer: ArrayBuffer,
+  beforeTilesetSize: number,
+  filename: string,
+): boolean {
+  const filenamePtr: number = allocateUTF8(filename);
+
+  // @ts-ignore
+  const tilesetBufferPtr: number = window._malloc(tilesetSize);
+  // @ts-ignore
+  const beforeTilesetBufferPtr: number = window._malloc(beforeTilesetSize);
+
+  // @ts-ignore
+  Module.HEAPU8.set(new Uint8Array(tilesetBuffer), tilesetBufferPtr);
+
+  // @ts-ignore
+  Module.HEAPU8.set(
+    new Uint8Array(beforeTilesetBuffer),
+    beforeTilesetBufferPtr,
+  );
+
+  const success: boolean = Boolean(
+    // @ts-ignore
+    window._readMetatileData(
+      tilesetBufferPtr,
+      tilesetSize,
+      filenamePtr,
+      beforeTilesetBufferPtr,
+      beforeTilesetSize,
+    ),
+  );
+
+  return false;
+}

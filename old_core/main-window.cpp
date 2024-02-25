@@ -1643,7 +1643,7 @@ void Main_Window::load_roof_colors(bool quiet) {
 }
 
 bool Main_Window::read_metatile_data(const char *tileset_name, const char *roof_name) {
-	char buffer[FL_PATH_MAX] = {};
+	char buffer[FL_PATH_MAX] = {}
 
 	Tileset &tileset = _metatileset.tileset();
 	tileset.name(tileset_name);
