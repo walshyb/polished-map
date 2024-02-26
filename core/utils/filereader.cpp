@@ -108,7 +108,11 @@ bool FileProcessor::processMetatiles(const uint8_t* fileDataPtr, size_t bufferSi
  * @return true if the file was read successfully, false otherwise
  */
 extern "C" {
-  bool readMetatileData(
+  
+  /**
+   * Read metatile data from png files
+   */
+  bool readMetatilePngData(
     uint8_t* tilesetPtr, size_t tilesetBufferSize, const char* tilesetFilename,
     uint8_t* beforeTilesetPtr, size_t beforeTilesetBufferSize
     //const uint8_t* roofPtr, size_t roofBufferSize, const char* roofName 
@@ -145,33 +149,6 @@ extern "C" {
 
     //return metatileset->readMetatileData(tilesetPtr, bufferSize, filename);
   }
-}
-
-/**
- * Process a png file. Gets the width, height, and depth of the image
- * 
- * @param fileDataPtr Pointer to the file data
- * @param bufferSize Size of the file data
- * @param filename Point to the name of the file
- */
-bool FileProcessor::processPng(uint8_t* bufferPtr, size_t bufferSize, const char* filename) {
-  PngData data = {
-    .buf = bufferPtr,
-    .size = bufferSize,
-    .pos = 0
-  };
-
-  std::cout << "Processing PNG" << std::endl;
-  Png *png = new Png(data);
-
-  if (png->size()) {
-    std::cout << "Width: " << png->width() << ", Height: " << png->height() << ", Depth: " << png->depth() << std::endl;
-    return true;
-  } else {
-    std::cout << "Error reading PNG" << std::endl;
-  }
-
-  return false;
 }
 
 /**

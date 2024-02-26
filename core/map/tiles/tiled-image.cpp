@@ -12,10 +12,11 @@ Tiled_Image::Tiled_Image(const PngData png) : _tile_hues(), _num_tiles(0), _resu
 	read_png_graphics(png);
 }
 
+/**
+ * Read 2bpp
+ */
 Tiled_Image::Tiled_Image(const char *f) : _tile_hues(), _num_tiles(0), _result(Result::IMG_NULL) {
-	if (!f) { return; }
-	else if (ends_with_ignore_case(f, ".2bpp")) { read_2bpp_graphics(f); }
-	else if (ends_with_ignore_case(f, ".2bpp.lz")) { read_lz_graphics(f); }
+  read_2bpp_graphics(f);
 }
 
 Tiled_Image::~Tiled_Image() {}
