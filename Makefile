@@ -1,7 +1,7 @@
 # Compiler settings
 CXX := em++
 CXXFLAGS := -std=c++17 --bind -s USE_ZLIB=1 -s USE_LIBPNG=1
-EM_FLAGS := -s EXPORTED_RUNTIME_METHODS=ccall,allocateUTF8,cwrap -s EXPORTED_FUNCTIONS=_free,_main,_processFile,_getBlocks,_readMetatileData
+EM_FLAGS := -s EXPORTED_RUNTIME_METHODS=ccall,allocateUTF8,cwrap -s EXPORTED_FUNCTIONS=_free,_main,_processFile,_getBlocks,_readMetatileData,_drawMetatile
 
 # Source directory
 SRC_DIR := core

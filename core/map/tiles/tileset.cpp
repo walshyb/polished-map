@@ -127,11 +127,17 @@ Tileset::Result Tileset::read_graphics(
 ) {
 	Tiled_Image bti(beforeTileset);
 	size_t bn = bti.num_tiles();
-	if (beforeTileset.size && convert_tiled_image_result(bti.result()) != Result::GFX_OK) { return _result; }
+	if (beforeTileset.size && convert_tiled_image_result(bti.result()) != Result::GFX_OK) {
+    std::cerr << "Failed to convert before tiled image result" << std::endl;
+    return _result;
+  }
 
 	Tiled_Image ti(tileset);
 	size_t mn = ti.num_tiles();
-	if (convert_tiled_image_result(ti.result()) != Result::GFX_OK) { return _result; }
+	if (convert_tiled_image_result(ti.result()) != Result::GFX_OK) {
+    std::cerr << "Failed to convert tiled image result" << std::endl;
+    return _result;
+  }
 
   std::cout << "loaded bti and ti" << std::endl;
 
@@ -149,6 +155,8 @@ Tileset::Result Tileset::read_graphics(
 		Config::allow_512_tiles(true);
 	}
 
+  std::cout << "num before tiles: " << _num_before_tiles << std::endl;
+
 	_palettes = l;
 	for (size_t i = 0; i < _num_tiles; i++) {
 		Deep_Tile *dt = _tiles[i];
@@ -164,6 +172,8 @@ Tileset::Result Tileset::read_graphics(
 			//read_tile(dt, ati, i - _num_before_tiles - _num_mid_tiles);
 		}
 	}
+
+  std::cout << "finished reading tiles" << std::endl;
 
 	_modified = false;
 	_modified_roof = false;

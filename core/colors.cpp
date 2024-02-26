@@ -185,7 +185,7 @@ PalVec Color::parse_palettes(const char *paletteFileContentsPtr, size_t fileSize
 		std::string line;
 		std::getline(ifs, line);
 		line += ";"; // ensure trailing separator
-    std::cout << "line: " << line << std::endl;
+    //std::cout << "line: " << line << std::endl;
 		std::istringstream lss(line);
 		std::string macro;
 		if (!leading_macro(lss, macro, "RGB")) { continue; }

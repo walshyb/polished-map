@@ -6,16 +6,21 @@
 #include "../../utils/parse-png.h"
 
 Tiled_Image::Tiled_Image(const PngData data) : _tile_hues(), _num_tiles(0), _result(Result::IMG_NULL) {
+  std::cout << "Tiled_Image::Tiled_Image" << std::endl;
   if (!data.size) {
+    std::cout << "Tiled_Image::Tiled_Image: IMG_NULL " << data.size << std::endl;
     return;
   }
 
   // get .ext from filename
   std::string filename = std::string(data.filename);
   std::string ext = filename.substr(filename.find_last_of(".") + 1);
+
+  std::cout << "filename: " << filename << " ext: " << ext << std::endl;
   if (ext == "png") {
     read_png_graphics(data);
   } else if (ext == "2bpp") {
+    std::cout << "about to read 2bpp graphics" << std::endl;
     read_2bpp_graphics(data);
   }
 }
@@ -233,7 +238,10 @@ static void convert_2bytes_to_8hues(unsigned char b1, unsigned char b2, Hue *hue
 
 Tiled_Image::Result Tiled_Image::parse_2bpp_data(const std::vector<unsigned char> &data) {
 	_num_tiles = data.size() / BYTES_PER_2BPP_TILE;
-	if (_num_tiles > MAX_NUM_TILES) { return Result::IMG_TOO_LARGE; }
+	if (_num_tiles > MAX_NUM_TILES) {
+    std::cout << "Tiled_Image::parse_2bpp_data: IMG_TOO_LARGE" << std::endl;
+    return Result::IMG_TOO_LARGE;
+  }
 
 	_tile_hues.resize(_num_tiles * TILE_AREA);
 
@@ -251,7 +259,10 @@ Tiled_Image::Result Tiled_Image::parse_2bpp_data(const std::vector<unsigned char
 
 Tiled_Image::Result Tiled_Image::read_2bpp_graphics(const PngData tilesetData) {
 	size_t n = tilesetData.size;
-	if (n % BYTES_PER_2BPP_TILE) { return (_result = Result::IMG_BAD_DIMS); }
+	if (n % BYTES_PER_2BPP_TILE) {
+    std::cout << "Tiled_Image::read_2bpp_graphics: IMG_TOO_SHORT" << std::endl;
+    return (_result = Result::IMG_BAD_DIMS);
+  }
 
 	std::vector<unsigned char> data(n);
   memcpy(data.data(), tilesetData.buf, n);

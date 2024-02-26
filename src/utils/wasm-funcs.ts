@@ -78,6 +78,9 @@ export function loadTilesetData(
 ): boolean {
   const filenamePtr: number = allocateUTF8(filename);
 
+  // TODO: make it read the before
+  const beforeFilenamePtr: number = allocateUTF8("johto_common.2bpp");
+
   // @ts-ignore
   const tilesetBufferPtr: number = window._malloc(tilesetSize);
   // @ts-ignore
@@ -100,8 +103,12 @@ export function loadTilesetData(
       filenamePtr,
       beforeTilesetBufferPtr,
       beforeTilesetSize,
+      beforeFilenamePtr,
     ),
   );
 
-  return false;
+  // TODO
+  // free memory
+
+  return success;
 }

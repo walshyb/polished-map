@@ -71,12 +71,6 @@ export const openFileByName = createAsyncThunk(
     }
 
     dispatch(
-      loadTilesetAction({
-        path: "gfx/tilesets/",
-        name: "johto_overcast.johto_common.png",
-      }),
-    );
-    dispatch(
       loadMetatilesetAction({
         path: "data/tilesets/",
         name: "johto_overcast_metatiles.bin",
@@ -120,6 +114,12 @@ export const openProject = createAsyncThunk(
 
     // Load default palette
     dispatch(loadPaletteAction({}));
+    dispatch(
+      loadTilesetAction({
+        path: "gfx/tilesets/",
+        name: "johto_overcast.johto_common.2bpp",
+      }),
+    );
 
     return {
       fileTree,

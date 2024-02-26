@@ -965,7 +965,7 @@ function dbg(text) {
 // === Body ===
 
 var ASM_CONSTS = {
-  94476: () => { Module['print'] = function(text) { console.log(text); }; }
+  100252: () => { Module['print'] = function(text) { console.log(text); }; }
 };
 
 
@@ -5489,6 +5489,8 @@ var wasmImports = {
   /** @export */
   invoke_viiii: invoke_viiii,
   /** @export */
+  invoke_viiiiiiiii: invoke_viiiiiiiii,
+  /** @export */
   strftime_l: _strftime_l
 };
 var wasmExports = createWasm();
@@ -5500,6 +5502,7 @@ var _free = Module['_free'] = createExportWrapper('free');
 var _readMetatileData = Module['_readMetatileData'] = createExportWrapper('readMetatileData');
 var _processFile = Module['_processFile'] = createExportWrapper('processFile');
 var _main = Module['_main'] = createExportWrapper('__main_argc_argv');
+var _drawMetatile = Module['_drawMetatile'] = createExportWrapper('drawMetatile');
 var ___errno_location = createExportWrapper('__errno_location');
 var _fflush = Module['_fflush'] = createExportWrapper('fflush');
 var _setThrew = createExportWrapper('setThrew');
@@ -5577,6 +5580,17 @@ function invoke_vii(index,a1,a2) {
   var sp = stackSave();
   try {
     getWasmTableEntry(index)(a1,a2);
+  } catch(e) {
+    stackRestore(sp);
+    if (e !== e+0) throw e;
+    _setThrew(1, 0);
+  }
+}
+
+function invoke_viiiiiiiii(index,a1,a2,a3,a4,a5,a6,a7,a8,a9) {
+  var sp = stackSave();
+  try {
+    getWasmTableEntry(index)(a1,a2,a3,a4,a5,a6,a7,a8,a9);
   } catch(e) {
     stackRestore(sp);
     if (e !== e+0) throw e;

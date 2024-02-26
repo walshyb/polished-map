@@ -69,11 +69,11 @@ bool FileProcessor::processMetatiles(const uint8_t* fileDataPtr, size_t bufferSi
   Metatileset *metatileset = state->getMetatileset();
   Tileset &tileset = metatileset->tileset();
 
-  std::cout << "Process metatiles" << std::endl;
+  std::cout << "Process metatiles buffer size: " << bufferSize << std::endl;
+  std::cout << "Metatileset Size before" << metatileset->size() << std::endl;
 
   Metatileset:: Result result = metatileset->read_metatiles(fileDataPtr, bufferSize);
-
-  std::cout << "Process metatiles Result: " << (bool) result << std::endl;
+  std::cout << "Metatileset Size after " << metatileset->size() << std::endl;
 
   return (bool)result;
 }
@@ -112,6 +112,9 @@ extern "C" {
     //const uint8_t* roofPtr, size_t roofBufferSize, const char* roofName 
   ) {
 
+    std::cout << "Read metatile data" << "Size: " << tilesetBufferSize << ", Filename: " << tilesetFilename << std::endl;
+    std::cout << "Read metatile data" << "Size: " << beforeTilesetBufferSize << ", Beefore Filename: " << beforeTilesetFilename << std::endl;
+
     // Get (active) metatileset and tileset from state
     AppState *state = &AppState::getInstance();
     Metatileset *metatileset = state->getMetatileset();
@@ -143,6 +146,8 @@ extern "C" {
       tileset.palettes()
     );
 
+    std::cout << "Read metatile data Result: " << (bool) rt << std::endl;
+
     return (bool) rt;
   }
 }
@@ -171,9 +176,7 @@ void FileProcessor::processAblk(const uint8_t* fileDataPtr, size_t bufferSize, c
       size_t i = (size_t)y * _width + (size_t)x;
       uint8_t id = fileDataPtr[i];
         map->addBlock(i, new Block(y, x, id));
-
-
-      std::cout << "Index: " << (int)i << ", val: " << static_cast<int>(id) << ", row: " << static_cast<int>(y) << ", col: " << static_cast<int>(x) << std::endl; // Print ID
+      //std::cout << "Index: " << (int)i << ", val: " << static_cast<int>(id) << ", row: " << static_cast<int>(y) << ", col: " << static_cast<int>(x) << std::endl; // Print ID
     }
   }
   std::cout << "File processed" << std::endl; // Print ID

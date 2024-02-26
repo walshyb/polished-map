@@ -61,7 +61,6 @@ export async function readFilesInDirectory(
       currentNode.kind === "directory" &&
       !ignoreDirs.includes(currentNode.name)
     ) {
-      console.log("Reading directory: ", currentNode.name);
       const directoryResult: FileNode[] = await readFilesInDirectory(
         currentNode,
         `${currentDirectory}/${currentNode.name}`,

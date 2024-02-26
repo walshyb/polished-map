@@ -1,9 +1,7 @@
 #include <cstdio>
-#include <fstream>
-#include <sstream>
-
-#include "../../config.h"
 #include "metatileset.h"
+#include "../../utils/parse-png.h"
+#include "../../colors.h"
 
 // 8x8 translucent zigzag pattern for tile priority
 static unsigned char small_priority_png_buffer[] = {
@@ -91,7 +89,10 @@ void Metatileset::trim_tileset() {
  * Parse contents of a .bin file (metatileset content) and create metatiles to make a metatileset
  */
 Metatileset::Result Metatileset::read_metatiles(const uint8_t *filePtr, size_t size) {
-  if (!_tileset.num_tiles()) { return (_result = Result::META_NO_GFX); } // no graphics
+  if (!_tileset.num_tiles()) { 
+    std::cout << "No corresponding graphics file chosen." << std::endl;
+    return (_result = Result::META_NO_GFX);
+  } // no graphics
 
   const unsigned char *ptr = filePtr;
   const unsigned char *endPtr = filePtr+ size;
@@ -116,6 +117,8 @@ Metatileset::Result Metatileset::read_metatiles(const uint8_t *filePtr, size_t s
       }
     }
   }
+
+  std::cout << "Number of metatiles: " << _num_metatiles << std::endl;
 
   return (_result = Result::META_OK);
 }
@@ -153,6 +156,69 @@ unsigned char *Metatileset::print_rgb(const Map &map) const {
 	return buffer;
 }
 
+/**
+ * Draw a metatile and return image data as base64-encoded PNG
+ *
+ * @param x X-coordinate of the top-left corner of the metatile
+ * @param y Y-coordinate of the top-left corner of the metatile
+ * @param id ID of the metatile to draw
+ * @param zoom Whether to draw the metatile zoomed in
+ *
+ * @return Base64-encoded PNG image data
+ */
+std::string Metatileset::draw_metatile(int x, int y, uint8_t id, bool zoom) const {
+  std::cout << "drawing metatile " << (int)id << " at " << x << ", " << y << std::endl;
+    int s = TILE_SIZE * (zoom ? ZOOM_FACTOR : 1);
+    int k = zoom ? 1 : ZOOM_FACTOR;
+    int d = NUM_CHANNELS * k;
+    int ld = LINE_BYTES * k;
+    Metatile *mt = _metatiles[id];
+
+    std::cout << "drawing metatile " << (int)id << " at " << x << ", " << y << std::endl;
+
+    // Create a vector to hold the pixel data
+    std::vector<unsigned char> image_data(s * s * NUM_CHANNELS, 255); // Initialize with white background
+
+    std::cout << "created image data" << std::endl;
+    for (int ty = 0; ty < METATILE_SIZE; ty++) {
+        int ay = y + ty * s;
+        for (int tx = 0; tx < METATILE_SIZE; tx++) {
+            std::cout << "drawing tile " << tx << ", " << ty << std::endl;
+            int ax = x + tx * s;
+            const Tile *tile = mt->tile(tx, ty);
+            const Deep_Tile *deepTile = _tileset.const_tile_or_roof(tile->index());
+            const unsigned char *buffer = deepTile->rgb(tile->palette());
+
+            // Calculate starting position in image_data for this tile
+            int start_pos = (ay * s + ax) * NUM_CHANNELS;
+
+            // Copy tile data into image_data
+            for (int dy = 0; dy < s; dy++) {
+                for (int dx = 0; dx < s; dx++) {
+                    std::cout << "copying pixel " << dx << ", " << dy << std::endl;
+                    int src_pos = ((dy / k) * LINE_BYTES + (dx / k) * NUM_CHANNELS);
+                    std::memcpy(&image_data[start_pos + (dy * s + dx) * NUM_CHANNELS], buffer + src_pos, NUM_CHANNELS);
+                }
+            }
+        }
+    }
+
+    std::cout << "copied tile data into image data" << std::endl;
+
+    int imageHeight = s;
+    int imageWidth = s;
+    // Encode image data as PNG and return base64-encoded string
+    std::vector<unsigned char> png_buffer;
+    bool result = Png::encode_png(png_buffer, image_data.data(), imageWidth, imageHeight, NUM_CHANNELS == 4);
+
+    if (!result) {
+      std::cerr << "Failed to encode PNG" << std::endl;
+      return "";
+    }
+
+    // Return base64-encoded PNG
+    return Png::base64_encode(png_buffer.data(), png_buffer.size());
+}
 
 
 

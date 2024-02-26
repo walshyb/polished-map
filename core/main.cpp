@@ -20,3 +20,14 @@ int main(int argc, char **argv) {
   return 0;
 }
 
+extern "C" {
+  EMSCRIPTEN_KEEPALIVE
+
+  std::string drawMetatile(int id) {
+    Metatileset *metatileset = state->getMetatileset();
+    std::cout << "Metatileset: " << metatileset << std::endl;
+    std::string image = metatileset->draw_metatile(0, 0, 1, false);
+    std::cout << "Image: " << image << std::endl;
+    return image;
+  }
+}

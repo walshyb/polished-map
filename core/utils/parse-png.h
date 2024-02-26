@@ -26,6 +26,8 @@ public:
   char valueAt(int index);
   //void desaturate();
   int count();
+  static bool encode_png(std::vector<unsigned char>& out_png, const unsigned char* image_data, int width, int height, bool has_alpha);
+  static std::string base64_encode(const unsigned char* buffer, size_t length);
 private:
   uint8_t* _bufferPtr;
   int _width, _height, _depth;
