@@ -38,21 +38,26 @@ Tiled_Image::Result Tiled_Image::read_png_graphics(const PngData pngData) {
 
 	_tile_hues.resize(_num_tiles * TILE_AREA);
 
+  std::cout << "about to read png data" << std::endl;
 	size_t hi = 0;
-	int d = png.depth();
-	for (int y = 0; y < h; y++) {
-		for (int x = 0; x < w; x++) {
-			for (int ty = 0; ty < TILE_SIZE; ty++) {
-				for (int tx = 0; tx < TILE_SIZE; tx++) {
-					long ti = ((y * TILE_SIZE + ty) * (w * TILE_SIZE) + (x * TILE_SIZE + tx)) * d;
+  int d = png.depth();
+  for (int y = 0; y < h; y++) {
+    for (int x = 0; x < w; x++) {
+      for (int ty = 0; ty < TILE_SIZE; ty++) {
+        for (int tx = 0; tx < TILE_SIZE; tx++) {
+          // The index of the pixel at (tx, ty) in the tile at (x, y) in the png data
+          // TODO loop over pixels
+          //long ti = ((y * TILE_SIZE + ty) * (w * TILE_SIZE) + (x * TILE_SIZE + tx)) * d;
+          long ti = (((y * TILE_SIZE) + ty) * (w * TILE_SIZE) + (x * TILE_SIZE + tx)) * d;
           // png.array[ti] is the grayscale value of the pixel at (tx, ty) in the tile at (x, y)
-					_tile_hues[hi++] = Color::mono_hue(png.valueAt(ti));
-				}
-			}
-		}
-	}
+          _tile_hues[hi++] = Color::mono_hue(png.valueAt(ti));
+        }
+      }
+    }
+  }
 
-	return (_result = Result::IMG_OK);
+  std::cout << "read png data" << std::endl;
+  return (_result = Result::IMG_OK);
 }
 
 /*

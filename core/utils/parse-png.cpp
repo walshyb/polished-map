@@ -28,8 +28,9 @@ Png::~Png() {
  * @return Value of the PNG data at the given index
  */
 char Png::valueAt(int index) {
+  // get the value of the PNG data at the given index
   if (index < 0 || index >= _size) {
-    std::cerr << "Index out of range" << std::endl;
+    //std::cerr << "Index out of range" << "index: " << index << "size: " << _size << std::endl;
     return 0;
   }
 

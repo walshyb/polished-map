@@ -133,6 +133,8 @@ Tileset::Result Tileset::read_graphics(
 	size_t mn = ti.num_tiles();
 	if (convert_tiled_image_result(ti.result()) != Result::GFX_OK) { return _result; }
 
+  std::cout << "loaded bti and ti" << std::endl;
+
 	_num_before_tiles = ((bn + TILES_PER_ROW - 1) / TILES_PER_ROW) * TILES_PER_ROW;
   // TODO implement after tile image one day
   //Tiled_Image ati(afterTileset);

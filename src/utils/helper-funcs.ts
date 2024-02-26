@@ -31,6 +31,9 @@ const validFileTypes = [
   ".tilemap",
   ".bin",
 ];
+// Need to ignore directories that don't contain useful files,
+// particularly because they can be large dirs and filesystem api hangs
+const ignoreDirs = ["pokemon", "audio", "whirlpool", "gfx"];
 // Create a tree of files
 // We'll lazily fetch contents as needed
 export async function readFilesInDirectory(
@@ -53,7 +56,12 @@ export async function readFilesInDirectory(
       path: currentDirectory + "/",
     };
 
-    if (recursive && currentNode.kind === "directory") {
+    if (
+      recursive &&
+      currentNode.kind === "directory" &&
+      !ignoreDirs.includes(currentNode.name)
+    ) {
+      console.log("Reading directory: ", currentNode.name);
       const directoryResult: FileNode[] = await readFilesInDirectory(
         currentNode,
         `${currentDirectory}/${currentNode.name}`,
