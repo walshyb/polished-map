@@ -71,11 +71,11 @@ export const loadTilesetAction = createAsyncThunk(
     const { path, name } = data;
     const tilesetHandler = await getFileHandlerByPath(
       "gfx/tilesets/",
-      "johto_overcast.johto_common.png",
+      "johto_overcast.johto_common.2bpp",
     );
     const beforeTilesetHandler = await getFileHandlerByPath(
       "gfx/tilesets/",
-      "johto_common.png",
+      "johto_common.2bpp",
     );
 
     if (!tilesetHandler || !beforeTilesetHandler) {
@@ -95,7 +95,7 @@ export const loadTilesetAction = createAsyncThunk(
       tileset.size,
       beforeTilesetArrayBuffer,
       beforeTileset.size,
-      name || "johto_overcast.johto_common.png",
+      name || "johto_overcast.johto_common.2bpp",
     );
 
     if (!result) {

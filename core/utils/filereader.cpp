@@ -32,11 +32,6 @@ bool FileProcessor::processFile(uint8_t* fileDataPtr, size_t bufferSize, const c
     }
   }
 
-  // If ending in .png, process as png file, or a tileset
-  if (ext == "png") {
-    return processPng(fileDataPtr, bufferSize, filename);
-  }
-
   // If ending in .pal, process as pal file, or palette
   if (ext == "pal") {
     return processPal(fileDataPtr, bufferSize, filename);
@@ -83,38 +78,37 @@ bool FileProcessor::processMetatiles(const uint8_t* fileDataPtr, size_t bufferSi
   return (bool)result;
 }
 
-/**
- * Accepts two tileset files and a roof file and reads the graphics data.
- *
- * Tilesets can be named "tileset.beforeTileset.png" (e.g. "johto_traditional.johto_common.png").
- * In this case we'll need to read both files and concatenate them into a single tileset.
- *
- * If there is a tileset and an beforeTileset,
- * the two are concatenated into a single tileset. Otherwise, only 1 will be used.
- *
- * @param tilesetPtr Pointer to the tileset data
- * @param tilesetBufferSize Size of the tileset data
- * @param tilesetFilename Name of the tileset
- * @param beforeTilesetPtr Pointer to the before tileset data
- * @param beforeTilesetBufferSize Size of the before tileset data
- *
- * TODO:
- * @param afterTilesetPtr Pointer to the after tileset data
- * @param afterTilesetBufferSize Size of the after tileset data
- * @param roofPtr Pointer to the roof data
- * @param roofBufferSize Size of the roof data
- * @param roofName Point to the name of the roof file
- *
- * @return true if the file was read successfully, false otherwise
- */
 extern "C" {
-  
   /**
-   * Read metatile data from png files
+   * Read metatile data from .png and .2bpp files
+   *
+   * Accepts two tileset files (todo: and a roof file) and reads the graphics data.
+   *
+   * Tilesets can be named "tileset.beforeTileset.png" (e.g. "johto_traditional.johto_common.png").
+   * In this case we'll need to read both files and concatenate the contents into a single tileset.
+   *
+   * If there is a tileset and an beforeTileset,
+   * the two are concatenated into a single tileset. Otherwise, only 1 will be used.
+   *
+   * @param tilesetPtr Pointer to the base tileset data
+   * @param tilesetBufferSize Size of the base tileset data
+   * @param tilesetFilename full name of the tileset
+   * @param beforeTilesetPtr Pointer to the before tileset data
+   * @param beforeTilesetBufferSize Size of the before tileset data
+   * @param beforeTilesetFilename name of the before tileset
+   *
+   * @return true if the files were read successfully, false otherwise
+   *
+   * TODO:
+   * @param afterTilesetPtr Pointer to the after tileset data
+   * @param afterTilesetBufferSize Size of the after tileset data
+   * @param roofPtr Pointer to the roof data
+   * @param roofBufferSize Size of the roof data
+   * @param roofName Point to the name of the roof file
    */
-  bool readMetatilePngData(
+  bool readMetatileData(
     uint8_t* tilesetPtr, size_t tilesetBufferSize, const char* tilesetFilename,
-    uint8_t* beforeTilesetPtr, size_t beforeTilesetBufferSize
+    uint8_t* beforeTilesetPtr, size_t beforeTilesetBufferSize, const char* beforeTilesetFilename
     //const uint8_t* roofPtr, size_t roofBufferSize, const char* roofName 
   ) {
 
@@ -126,28 +120,30 @@ extern "C" {
     // Set tileset and roof tileset names
     tileset.name(tilesetFilename);
     //tileset.roof_name(roofName);
-
+    
+    // TODO: rename this struct
     // Make structs for libpng easy reading
-    const PngData tilesetPng = {
+    const PngData tilesetData = {
       .buf = tilesetPtr,
       .size = tilesetBufferSize,
-      .pos = 0
+      .pos = 0,
+      .filename = tilesetFilename
     };
 
-    const PngData beforeTilsetPng = {
+    const PngData beforeTilsetData = {
       .buf = beforeTilesetPtr,
       .size = beforeTilesetBufferSize,
-      .pos = 0
+      .pos = 0,
+      .filename = beforeTilesetFilename
     };
 
     Tileset::Result rt = tileset.read_graphics(
-      tilesetPng,
-      beforeTilsetPng,
+      tilesetData,
+      beforeTilsetData,
       tileset.palettes()
     );
 
-
-    //return metatileset->readMetatileData(tilesetPtr, bufferSize, filename);
+    return (bool) rt;
   }
 }
 

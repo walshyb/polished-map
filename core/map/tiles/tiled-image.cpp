@@ -5,18 +5,19 @@
 #include "tiled-image.h"
 #include "../../utils/parse-png.h"
 
-Tiled_Image::Tiled_Image(const PngData png) : _tile_hues(), _num_tiles(0), _result(Result::IMG_NULL) {
-  if (!png.size) {
+Tiled_Image::Tiled_Image(const PngData data) : _tile_hues(), _num_tiles(0), _result(Result::IMG_NULL) {
+  if (!data.size) {
     return;
   }
-	read_png_graphics(png);
-}
 
-/**
- * Read 2bpp
- */
-Tiled_Image::Tiled_Image(const char *f) : _tile_hues(), _num_tiles(0), _result(Result::IMG_NULL) {
-  read_2bpp_graphics(f);
+  // get .ext from filename
+  std::string filename = std::string(data.filename);
+  std::string ext = filename.substr(filename.find_last_of(".") + 1);
+  if (ext == "png") {
+    read_png_graphics(data);
+  } else if (ext == "2bpp") {
+    read_2bpp_graphics(data);
+  }
 }
 
 Tiled_Image::~Tiled_Image() {}
@@ -247,3 +248,14 @@ Tiled_Image::Result Tiled_Image::parse_2bpp_data(const std::vector<unsigned char
 	return Result::IMG_OK;
 }
 
+
+Tiled_Image::Result Tiled_Image::read_2bpp_graphics(const PngData tilesetData) {
+	size_t n = tilesetData.size;
+	if (n % BYTES_PER_2BPP_TILE) { return (_result = Result::IMG_BAD_DIMS); }
+
+	std::vector<unsigned char> data(n);
+  memcpy(data.data(), tilesetData.buf, n);
+	//if (r != n) { return (_result = Result::IMG_BAD_FILE); }
+
+	return (_result = parse_2bpp_data(data));
+}

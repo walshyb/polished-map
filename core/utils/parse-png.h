@@ -11,6 +11,7 @@ struct PngData {
   uint8_t* buf;   // Pointer to the PNG file data
   size_t size;          // Size of the PNG file data
   size_t pos;           // Current position in the data buffer
+  const char* filename; // Name of the PNG file
 };
 
 class Png {
