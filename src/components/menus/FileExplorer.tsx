@@ -1,12 +1,13 @@
-import { Sidebar, MenuItem, Icon, Menu, MenuHeader } from 'semantic-ui-react'
-import { useState } from 'react';
-import { useAppSelector, useAppDispatch } from '../../hooks';
-import type { FileNode } from '../../store/fileSlice'; 
-import RecursiveMenuItem from './RecursiveMenuItem';
+import { Sidebar, MenuItem, Menu } from "semantic-ui-react";
+import { useAppSelector } from "../../hooks";
+import type { FileNode } from "../../store/fileSlice";
+import RecursiveMenuItem from "./RecursiveMenuItem";
 
-export default function FileExplorer(
-  { fileExplorerOpen}: { fileExplorerOpen: boolean }
-) {
+export default function FileExplorer({
+  fileExplorerOpen,
+}: {
+  fileExplorerOpen: boolean;
+}) {
   const files: FileNode[] = useAppSelector((state) => state.file.files);
 
   if (!fileExplorerOpen) {
@@ -22,24 +23,23 @@ export default function FileExplorer(
         inverted
         vertical
         visible={fileExplorerOpen}
-        style={{ maxHeight: '100vh', overflowY: 'auto' }}
+        style={{ maxHeight: "100vh", overflowY: "auto" }}
       >
-        { files.map((file, index) => {
-          return (
-            <RecursiveMenuItem fileNode={file} />
-          );
+        {files.map((file, index) => {
+          return <RecursiveMenuItem fileNode={file} />;
         })}
 
-        { !files || files.length === 0 && (
-          <MenuItem
-            name='no files'
-            active={false}
-            inverted
-            style={{ display: 'flex', alignItems: 'baseline', width: '100%' }}
-          >
-            No files, try opening a project
-          </MenuItem>
-        )}
+        {!files ||
+          (files.length === 0 && (
+            <MenuItem
+              name="no files"
+              active={false}
+              inverted
+              style={{ display: "flex", alignItems: "baseline", width: "100%" }}
+            >
+              No files, try opening a project
+            </MenuItem>
+          ))}
       </Sidebar>
     </div>
   );

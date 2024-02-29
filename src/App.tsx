@@ -14,14 +14,28 @@ function App() {
   const fileExplorerOpen = useAppSelector((state) => state.file.explorerOpen);
 
   return (
-    <div className="App">
+    <div
+      className="App"
+      style={{
+        maxHeight: "100vh",
+        overflowY: "hidden",
+      }}
+    >
       <TopBar
         fileProcessed={fileProcessed}
         setFileProcessed={setFileProcessed}
       />
       <ActivityBar fileExplorerOpen={fileExplorerOpen} />
 
-      <SidebarPushable as={Segment} style={{ marginLeft: "100px" }}>
+      <SidebarPushable
+        as={Segment}
+        style={{
+          marginLeft: "83px",
+          border: 0,
+          marginTop: "-15px",
+          background: "#939090",
+        }}
+      >
         <FileExplorer fileExplorerOpen={fileExplorerOpen} />
         <SidebarPusher
           style={{
