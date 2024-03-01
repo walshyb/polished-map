@@ -52,7 +52,7 @@ bool FileProcessor::processPal(const uint8_t* fileDataPtr, size_t bufferSize, co
   AppState *state = &AppState::getInstance();
   Metatileset *metatileset = state->getMetatileset();
   Tileset &tileset = metatileset->tileset();
-  Palettes defaultPalettes = Palettes();
+  Palettes defaultPalettes = (Palettes)1;
   Palettes newPalettes = Color::read_palettes((char*)fileDataPtr, bufferSize, defaultPalettes);
 
   tileset.update_palettes(newPalettes);
