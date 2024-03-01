@@ -24,9 +24,10 @@ extern "C" {
   EMSCRIPTEN_KEEPALIVE
 
   std::string drawMetatile(int id) {
-    Metatileset *metatileset = state->getMetatileset();
+    AppState *appState = &AppState::getInstance();
+    Metatileset *metatileset = appState->getMetatileset();
     std::cout << "Metatileset: " << metatileset << std::endl;
-    std::string image = metatileset->draw_metatile(0, 0, 1, false);
+    std::string image = metatileset->draw_metatile(303, 143, 97, false);
     std::cout << "Image: " << image << std::endl;
     return image;
   }
