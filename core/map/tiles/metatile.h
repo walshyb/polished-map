@@ -18,6 +18,9 @@ class Chip;
 class Metatile {
 private:
 	uint8_t _id;
+  
+  // 4x4 grid of tiles
+  // each tile is 8x8 pixels
 	Tile _tiles[METATILE_SIZE][METATILE_SIZE];
 	std::string _collisions[NUM_QUADRANTS];
 	uint8_t _bin_collisions[NUM_QUADRANTS];
