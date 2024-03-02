@@ -185,7 +185,7 @@ PalVec Color::parse_palettes(const char *paletteFileContentsPtr, size_t fileSize
 		std::string line;
 		std::getline(ifs, line);
 		line += ";"; // ensure trailing separator
-    //std::cout << "line: " << line << std::endl;
+    std::cout << "line: " << line << std::endl;
 		std::istringstream lss(line);
 		std::string macro;
 		if (!leading_macro(lss, macro, "RGB")) { continue; }
@@ -196,6 +196,7 @@ PalVec Color::parse_palettes(const char *paletteFileContentsPtr, size_t fileSize
 			if (hue == 0 && channel == 0) {
 				colors.emplace_back();
 			}
+      std::cout << "v: " << v << std::endl;
 			colors[palette][(int)ordered_hue(hue)][channel] = (unsigned char)v;
 			if (++channel == NUM_CHANNELS) {
 				channel = 0;
@@ -274,7 +275,6 @@ Palettes Color::read_palettes(const char *paletteFileContentsPtr, size_t fileSiz
 		for (int l = 0; l < 5; l++) {
 			for (int p = 0; p < NUM_PALETTES; p++) {
 				color((Palettes)l, (Palette)p, custom_colors[p+l*NUM_PALETTES]);
-      std::cout << "color: " << p << ", custom: " << std::endl;
 			}
 		}
 		if (pals == Palettes::CUSTOM) {
@@ -286,7 +286,6 @@ Palettes Color::read_palettes(const char *paletteFileContentsPtr, size_t fileSiz
 		for (int l = 0; l < 5; l++) {
 			for (int p = 0; p < NUM_PALETTES; p++) {
 				color((Palettes)l, (Palette)p, custom_colors[p+l*NUM_PALETTES]);
-      std::cout << "color: " << p << ", custom: " << std::endl;
 			}
 		}
 		// apply separate WATER hues
@@ -301,8 +300,10 @@ Palettes Color::read_palettes(const char *paletteFileContentsPtr, size_t fileSiz
 		}
 		break;
 	case 5 * NUM_PALETTES + 4: // MORN, DAY, NITE, CUSTOM, INDOOR, MORN WATER, DAY WATER, NITE WATER, CUSTOM WATER
+    std::cout << "5 * NUM_PALETTES + 4" << std::endl;
 		for (int l = 0; l < 3; l++) {
 			for (int p = 0; p < NUM_PALETTES; p++) {
+        std::cout << "l: " << l << ", p: " << p << "num_pals: " << NUM_PALETTES << std::endl;
 				color((Palettes)l, (Palette)p, custom_colors[p+l*NUM_PALETTES]);
 			}
 		}
@@ -326,6 +327,7 @@ Palettes Color::read_palettes(const char *paletteFileContentsPtr, size_t fileSiz
 		}
 		break;
 	}
+  std::cout << "pals: " << (int)pals << std::endl;
 	return pals;
 }
 

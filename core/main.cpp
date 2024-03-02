@@ -1,9 +1,9 @@
 #include <iostream>
 #include "map/map.h"
 #include <emscripten.h>
+#include <emscripten/bind.h>
 #include "state.h"
 #include "utils/filereader.h"
-#include <emscripten/bind.h>
 
 AppState *state;
 
@@ -27,7 +27,7 @@ extern "C" {
     AppState *appState = &AppState::getInstance();
     Metatileset *metatileset = appState->getMetatileset();
     std::cout << "Metatileset: " << metatileset << std::endl;
-    std::string image = metatileset->draw_metatile(303, 143, 97, false);
+    std::string image = metatileset->draw_metatile(303, 143, 2, false);
     std::cout << "Image: " << image << std::endl;
     return image;
   }

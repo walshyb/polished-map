@@ -113,13 +113,14 @@ export const openProject = createAsyncThunk(
     fileHandlerManager.addFileHandler("root", directoryHandler);
 
     // Load default palette
-    dispatch(loadPaletteAction({}));
+
     dispatch(
       loadTilesetAction({
         path: "gfx/tilesets/",
         name: "johto_overcast.johto_common.2bpp",
       }),
     );
+    dispatch(loadPaletteAction({}));
 
     return {
       fileTree,

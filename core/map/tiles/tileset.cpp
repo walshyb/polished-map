@@ -112,7 +112,9 @@ Tileset::Result Tileset::convert_tiled_image_result(Tiled_Image::Result r) {
 
 
 /**
- * Build tiles off of passed in .png tilesets
+ * Build tiles off of passed in .2bpp (and eventually .png) tilesets
+ *
+ * Parses the data in the respective files. Updates the DeepTiles in this current tileset
  *
  * @param tileset The tileset png data. i.e. johto_overcast.johto_common.png
  * @param beforeTileset The before tileset png data. i.e. johto_common.png
@@ -125,6 +127,7 @@ Tileset::Result Tileset::read_graphics(
     const PngData beforeTileset,
     Palettes l
 ) {
+  std::cout << "Reading graphics palette" << (int)l << std::endl;
 	Tiled_Image bti(beforeTileset);
 	size_t bn = bti.num_tiles();
 	if (beforeTileset.size && convert_tiled_image_result(bti.result()) != Result::GFX_OK) {
@@ -156,6 +159,7 @@ Tileset::Result Tileset::read_graphics(
 	}
 
   std::cout << "num before tiles: " << _num_before_tiles << std::endl;
+  std::cout << "num tiles: " << _num_tiles << std::endl;
 
 	_palettes = l;
 	for (size_t i = 0; i < _num_tiles; i++) {

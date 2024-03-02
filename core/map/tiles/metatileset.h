@@ -14,7 +14,7 @@ public:
 	enum class Result { META_OK, META_NO_GFX, META_BAD_FILE, META_TOO_SHORT, META_TOO_LONG, META_NULL };
 private:
 	Tileset _tileset;
-	Metatile *_metatiles[MAX_NUM_METATILES];
+	Metatile *_metatiles[MAX_NUM_METATILES]; // holds every crumb (two bits) in a .bin file
 	size_t _num_metatiles;
 	Result _result;
 	bool _modified, _bin_collisions;

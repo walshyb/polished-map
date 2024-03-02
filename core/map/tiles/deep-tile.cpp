@@ -2,6 +2,7 @@
 
 #include "../../utils.h"
 #include "deep-tile.h"
+#include <iostream>
 
 Deep_Tile::Deep_Tile(int idx) : _index(idx), _undefined(true), _hues(), _rgb(), _monochrome_rgb(), _undefined_rgb() {}
 

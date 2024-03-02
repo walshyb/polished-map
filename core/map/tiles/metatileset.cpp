@@ -175,6 +175,7 @@ std::string Metatileset::draw_metatile(int x, int y, uint8_t id, bool zoom) cons
     Metatile *mt = _metatiles[id];
 
     std::cout << "drawing metatile " << (int)id << " at " << x << ", " << y << std::endl;
+    std::cout << "METATILE_SIZE: " << METATILE_SIZE << std::endl;
 
     // Create a vector to hold the pixel data
     std::vector<unsigned char> image_data(s * s * NUM_CHANNELS, 255); // Initialize with white background
