@@ -192,15 +192,17 @@ std::string Metatileset::draw_metatile(int x, int y, uint8_t id, bool zoom) cons
 
     std::cout << "num channels: " << NUM_CHANNELS << std::endl;
 
+
     // Create a vector to hold the pixel data
+    // metatile final images are 32px x 32px in size. but each metatile is 4x4 tiles, so we need to draw 4 tiles in each direction
     std::vector<unsigned char> image_data(32*32* NUM_CHANNELS, 255); // Initialize with white background
 
     std::cout << "created image data" << std::endl;
+
+    // loop through each tile in the metatile
     for (int ty = 0; ty < 4; ty++) {
-        //int ay = y + ty * s;
         for (int tx = 0; tx < 4; tx++) {
-            //std::cout << "drawing tile " << tx << ", " << ty << std::endl;
-            //int ax = x + tx * s;
+            std::cout << "drawing tile " << tx << ", " << ty << std::endl;
 
             int src_x = x + tx * TILE_SIZE;
             int src_y = y + ty * TILE_SIZE;
@@ -215,23 +217,18 @@ std::string Metatileset::draw_metatile(int x, int y, uint8_t id, bool zoom) cons
             // Get the deeptile with palette applied
             const unsigned char *buffer = deepTile->rgb(tile->palette());
 
-            // Calculate starting position in image_data for this tile
-            //int start_pos = (ay * s + ax) * NUM_CHANNELS;
-            //int start_pos = (ty * 8 * 32 + tx * 8) * NUM_CHANNELS;
-
-            //std::cout << "start_pos: " << start_pos << std::endl;
-
             // Copy tile data into image_data
             for (int dy = 0; dy < 8; dy++) {
                 for (int dx = 0; dx < 8; dx++) {
-                    std::cout << "copying pixel " << dx << ", " << dy << std::endl;
-
                     // Calculate position in image_data for this pixel
                     int dest_x = tx * TILE_SIZE + dx;
                     int dest_y = ty * TILE_SIZE + dy;
 
-                    int dest_pos = (dest_y * 32+ dest_x) * NUM_CHANNELS;
-                    int src_pos = ((src_y + dy) * LINE_BYTES + (src_x + dx) * NUM_CHANNELS);
+                    // 32 because metatile printed is 32x32
+                    int dest_pos = (dest_y * 32 + dest_x) * NUM_CHANNELS;
+
+                    // Mod the source x and y by 8 to wrap around the tile, bc each deeptile/tile is 8x8
+                    int src_pos = (((src_y + dy)%8) * LINE_BYTES + ((src_x + dx)%8) * NUM_CHANNELS);
 
                       // Debugging output
                     std::cout << "Copying pixel: (" << dx << ", " << dy << ") ";
