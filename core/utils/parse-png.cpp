@@ -247,6 +247,8 @@ std::string Png::base64_encode(const unsigned char* data, size_t len) {
         encoded += (i + 2 < len) ? base64_chars[enc4] : '=';
     }
 
+    std::cout << encoded << std::endl;
+
     return encoded;
 }
 

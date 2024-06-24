@@ -167,21 +167,8 @@ unsigned char *Metatileset::print_rgb(const Map &map) const {
  * @return Base64-encoded PNG image data
  */
 std::string Metatileset::draw_metatile(int x, int y, uint8_t id, bool zoom) const {
-
-  // setting x and y to 0 does... something good??
-  // actually makes it work
-  x = 0;
-  y = 0;
-
-  // Tile size = 8
-  // METATILE_SIZE = 4
-  // IMAGE_SIZE = 32, assuming 32x32. probably needs to be bigger.
-  //
-  // current status: creates a 32x32 image that represents a 2x2 metatile. we need a 4x4
   std::cout << "drawing metatile " << (int)id << " at " << x << ", " << y << std::endl;
     int s = TILE_SIZE * (zoom ? ZOOM_FACTOR : 1);
-    std::cout << "s: " << s << std::endl;
-    std::cout << "Tile size: " << TILE_SIZE << std::endl;
     int k = zoom ? 1 : ZOOM_FACTOR;
     int d = NUM_CHANNELS * k;
     int ld = LINE_BYTES * k;
@@ -190,57 +177,30 @@ std::string Metatileset::draw_metatile(int x, int y, uint8_t id, bool zoom) cons
     std::cout << "drawing metatile " << (int)id << " at " << x << ", " << y << std::endl;
     std::cout << "METATILE_SIZE: " << METATILE_SIZE << std::endl;
 
-    std::cout << "num channels: " << NUM_CHANNELS << std::endl;
-
     // Create a vector to hold the pixel data
-    std::vector<unsigned char> image_data(32*32* NUM_CHANNELS, 255); // Initialize with white background
+    std::vector<unsigned char> image_data(s * s * NUM_CHANNELS, 255); // Initialize with white background
 
     std::cout << "created image data" << std::endl;
-    for (int ty = 0; ty < 4; ty++) {
-        //int ay = y + ty * s;
-        for (int tx = 0; tx < 4; tx++) {
-            //std::cout << "drawing tile " << tx << ", " << ty << std::endl;
-            //int ax = x + tx * s;
-
-            int src_x = x + tx * TILE_SIZE;
-            int src_y = y + ty * TILE_SIZE;
-
-            // Grab the first tile in the metatile
+    for (int ty = 0; ty < METATILE_SIZE; ty++) {
+        int ay = y + ty * s;
+        for (int tx = 0; tx < METATILE_SIZE; tx++) {
+            std::cout << "drawing tile " << tx << ", " << ty << std::endl;
+            int ax = x + tx * s;
             const Tile *tile = mt->tile(tx, ty);
-            //std::cout << "tile index: " << tile->index() << std::endl;
-
-            // Get the deep tile info (from the tileset png)
+            std::cout << "tile index: " << tile->index() << std::endl;
             const Deep_Tile *deepTile = _tileset.const_tile_or_roof(tile->index());
-
-            // Get the deeptile with palette applied
+            std::cout << "palette: " << tile->palette() << std::endl;
             const unsigned char *buffer = deepTile->rgb(tile->palette());
 
             // Calculate starting position in image_data for this tile
-            //int start_pos = (ay * s + ax) * NUM_CHANNELS;
-            //int start_pos = (ty * 8 * 32 + tx * 8) * NUM_CHANNELS;
-
-            //std::cout << "start_pos: " << start_pos << std::endl;
+            int start_pos = (ay * s + ax) * NUM_CHANNELS;
 
             // Copy tile data into image_data
-            for (int dy = 0; dy < 8; dy++) {
-                for (int dx = 0; dx < 8; dx++) {
+            for (int dy = 0; dy < s; dy++) {
+                for (int dx = 0; dx < s; dx++) {
                     std::cout << "copying pixel " << dx << ", " << dy << std::endl;
-
-                    // Calculate position in image_data for this pixel
-                    int dest_x = tx * TILE_SIZE + dx;
-                    int dest_y = ty * TILE_SIZE + dy;
-
-                    int dest_pos = (dest_y * 32+ dest_x) * NUM_CHANNELS;
-                    int src_pos = ((src_y + dy) * LINE_BYTES + (src_x + dx) * NUM_CHANNELS);
-
-                      // Debugging output
-                    std::cout << "Copying pixel: (" << dx << ", " << dy << ") ";
-                    std::cout << "from (" << src_x + dx << ", " << src_y + dy << ") ";
-                    std::cout << "to (" << dest_x << ", " << dest_y << ") ";
-                    std::cout << "src_pos: " << src_pos << " dest_pos: " << dest_pos << std::endl;
-
-
-                    std::memcpy(&image_data[dest_pos], &buffer[src_pos], NUM_CHANNELS);
+                    int src_pos = ((dy / k) * LINE_BYTES + (dx / k) * NUM_CHANNELS);
+                    std::memcpy(&image_data[start_pos + (dy * s + dx) * NUM_CHANNELS], buffer + src_pos, NUM_CHANNELS);
                 }
             }
         }
@@ -248,10 +208,8 @@ std::string Metatileset::draw_metatile(int x, int y, uint8_t id, bool zoom) cons
 
     std::cout << "copied tile data into image data" << std::endl;
 
-    int imageHeight = 32; // need, or similar
-    int imageWidth = 32; // need, or similar
-    //int imageHeight = s; 
-    //int imageWidth = s; 
+    int imageHeight = s;
+    int imageWidth = s;
     // Encode image data as PNG and return base64-encoded string
     std::vector<unsigned char> png_buffer;
     bool result = Png::encode_png(png_buffer, image_data.data(), imageWidth, imageHeight, NUM_CHANNELS == 4);
