@@ -74,8 +74,9 @@ bool FileProcessor::processMetatiles(const uint8_t* fileDataPtr, size_t bufferSi
 
   Metatileset:: Result result = metatileset->read_metatiles(fileDataPtr, bufferSize);
   std::cout << "Metatileset Size after " << metatileset->size() << std::endl;
+  std::cout << "Metatileset Result " << (bool)result << std::endl;
 
-  return (bool)result;
+  return result == Metatileset::Result::META_OK;
 }
 
 extern "C" {

@@ -112,3 +112,20 @@ export function loadTilesetData(
 
   return success;
 }
+
+export function getMetatilesetSize(): number {
+  // @ts-ignore
+  return window._getMetatilesetSize();
+}
+
+export function getMetatileImage(index: number): string {
+  // @ts-ignore
+  const imageContentsPtr: int = window._drawMetatile(index);
+
+  const base64Image: string = UTF8ToString(imageContentsPtr);
+
+  // @ts-ignore
+  window._free(imageContentsPtr);
+
+  return base64Image;
+}

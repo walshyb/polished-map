@@ -9,7 +9,9 @@ export default function Map() {
     rows = 0;
 
   if (file) {
+    // @ts-ignore
     cols = calculateMapSizes(file.size).width;
+    // @ts-ignore
     rows = calculateMapSizes(file.size).height;
   }
 

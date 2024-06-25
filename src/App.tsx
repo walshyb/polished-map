@@ -13,6 +13,8 @@ function App() {
   const [fileProcessed, setFileProcessed] = useState(false);
   const fileExplorerOpen = useAppSelector((state) => state.file.explorerOpen);
 
+  const metatiles = useAppSelector((state) => state.editor.metatileset);
+
   return (
     <div
       className="App"
@@ -46,7 +48,7 @@ function App() {
         >
           <Segment basic>
             Content
-            <Editor fileProcessed={fileProcessed} />
+            <Editor metatiles={metatiles} />
           </Segment>
         </SidebarPusher>
       </SidebarPushable>

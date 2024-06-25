@@ -961,7 +961,7 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  100300: () => { Module['print'] = function(text) { console.log(text); }; }
+  100316: () => { Module['print'] = function(text) { console.log(text); }; }
 };
 
 
@@ -5418,6 +5418,7 @@ var wasmExports = createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors');
 var _main = Module['_main'] = createExportWrapper('__main_argc_argv');
 var _drawMetatile = Module['_drawMetatile'] = createExportWrapper('drawMetatile');
+var _getMetatilesetSize = Module['_getMetatilesetSize'] = createExportWrapper('getMetatilesetSize');
 var _getBlocks = Module['_getBlocks'] = createExportWrapper('getBlocks');
 var _readMetatileData = Module['_readMetatileData'] = createExportWrapper('readMetatileData');
 var _processFile = Module['_processFile'] = createExportWrapper('processFile');
