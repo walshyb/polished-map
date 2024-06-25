@@ -172,23 +172,15 @@ std::string Metatileset::draw_metatile(uint8_t id) const {
   // IMAGE_SIZE = 32, assuming 32x32. probably needs to be bigger.
   //
   // current status: creates a 32x32 image that represents a 2x2 metatile. we need a 4x4
-    std::cout << "Tile size: " << TILE_SIZE << std::endl;
     Metatile *mt = _metatiles[id];
-
-    std::cout << "METATILE_SIZE: " << METATILE_SIZE << std::endl;
-    std::cout << "num channels: " << NUM_CHANNELS << std::endl;
-
 
     // Create a vector to hold the pixel data
     // metatile final images are 32px x 32px in size. but each metatile is 4x4 tiles, so we need to draw 4 tiles in each direction
     std::vector<unsigned char> image_data(32*32* NUM_CHANNELS, 255); // Initialize with white background
 
-    std::cout << "created image data" << std::endl;
-
     // loop through each tile in the metatile
     for (int ty = 0; ty < 4; ty++) {
         for (int tx = 0; tx < 4; tx++) {
-            std::cout << "drawing tile " << tx << ", " << ty << std::endl;
 
             int src_x = tx * TILE_SIZE;
             int src_y = ty * TILE_SIZE;
@@ -228,8 +220,6 @@ std::string Metatileset::draw_metatile(uint8_t id) const {
             }
         }
     }
-
-    std::cout << "copied tile data into image data" << std::endl;
 
     int imageHeight = 32; // need, or similar
     int imageWidth = 32; // need, or similar

@@ -34,11 +34,9 @@ extern "C" {
   char* drawMetatile(int id) {
     AppState *appState = &AppState::getInstance();
     Metatileset *metatileset = appState->getMetatileset();
-    std::cout << "Metatileset: " << metatileset << std::endl;
-    std::string image = metatileset->draw_metatile(id);
-    std::cout << "Image: " << image << std::endl;
+    std::string image = metatileset->draw_metatile(id); // base64 encoded image
 
-
+    // Save encoded image to char[]
     char* imageArr = new char[image.length() + 1];
     std::strcpy(imageArr, image.c_str());
     return imageArr;

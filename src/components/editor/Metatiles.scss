@@ -1,0 +1,12 @@
+.metatiles {
+  display: flex;
+  flex-wrap: wrap;
+  width: 150px;
+  overflow-y: scroll;
+
+  div {
+    flex-basis: 25%;
+    height: 32px;
+    width: 32px;
+  }
+}

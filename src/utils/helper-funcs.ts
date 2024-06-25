@@ -6,7 +6,11 @@ interface Size {
   height: number;
 }
 // TODO: put in map helpers file?
+/**
+ * Calculate the width and height of the map based on the size (number of blocks) of the file
+ */
 export function calculateMapSizes(size: number): Size {
+  console.log("size", size);
   // Idk, we might want to save this
   const validSizes: Size[] = [];
 
@@ -18,8 +22,16 @@ export function calculateMapSizes(size: number): Size {
     }
   }
 
+  let i = Math.floor((validSizes.length - 1) / 2);
+
   // Prefer size multiples of 10x9, the typical unit size
-  return validSizes[Math.floor((validSizes.length - 1) / 2)];
+  for (let j = i; j >= 0; j--) {
+    const { width, height } = validSizes[j];
+    if (width % 10 === 0 && height % 9 === 0) {
+      return validSizes[j];
+    }
+  }
+  return validSizes[i];
 }
 
 const validFileTypes = [

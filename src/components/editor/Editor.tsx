@@ -1,5 +1,6 @@
 import Metatiles from "./Metatiles";
 import Map from "./map/Map";
+import "./Editor.scss";
 
 interface EditorProps {
   metatiles: any;
@@ -7,9 +8,9 @@ interface EditorProps {
 
 export default function Editor({ metatiles }: EditorProps) {
   return (
-    <div>
+    <div className="editor">
       <Metatiles metatiles={metatiles} />
-      <Map />
+      <Map metatiles={metatiles} />
     </div>
   );
 }

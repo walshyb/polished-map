@@ -1,8 +1,13 @@
 import Block from "./Block";
 import { useAppSelector } from "../../../hooks";
 import { calculateMapSizes } from "../../../utils/helper-funcs";
+import "./Map.scss";
 
-export default function Map() {
+interface MapProps {
+  metatiles: any;
+}
+
+export default function Map({ metatiles }: MapProps) {
   const blocks = useAppSelector((state) => state.editor.blocks);
   const file = useAppSelector((state) => state.file.activeFile);
   let cols = 0,
@@ -28,7 +33,12 @@ export default function Map() {
       // we shouldn't need this
       if (block && block.id !== null && block.id !== undefined) {
         row.push(
-          <Block key={index} id={block.id} row={block.row} col={block.col} />,
+          <Block
+            id={block.id}
+            row={block.row}
+            col={block.col}
+            metatileImage={metatiles[block.id]}
+          />,
         );
       }
     }

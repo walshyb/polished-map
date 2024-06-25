@@ -69,12 +69,9 @@ bool FileProcessor::processMetatiles(const uint8_t* fileDataPtr, size_t bufferSi
   Metatileset *metatileset = state->getMetatileset();
   Tileset &tileset = metatileset->tileset();
 
-  std::cout << "Process metatiles buffer size: " << bufferSize << std::endl;
-  std::cout << "Metatileset Size before" << metatileset->size() << std::endl;
 
   Metatileset:: Result result = metatileset->read_metatiles(fileDataPtr, bufferSize);
-  std::cout << "Metatileset Size after " << metatileset->size() << std::endl;
-  std::cout << "Metatileset Result " << (bool)result << std::endl;
+  std::cout << "Metatileset Size" << metatileset->size() << std::endl;
 
   return result == Metatileset::Result::META_OK;
 }

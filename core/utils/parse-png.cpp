@@ -5,9 +5,7 @@
 
 Png::Png(PngData pngData) : _valid(false), _size(0) {
 
-  std::cout << "In PNG" << std::endl;
   _valid = parsePng(pngData.buf, pngData.size);
-  std::cout << "valid: " << _valid << std::endl;
 
   if (_valid) {
     _bufferPtr = pngData.buf;
@@ -104,16 +102,11 @@ bool Png::parsePng(uint8_t* bufferPtr, size_t bufferSize) {
   _width = png_get_image_width(png_ptr, info_ptr);
   _height = png_get_image_height(png_ptr, info_ptr);
 
-  std::cout << "Width: " << _width << ", Height: " << _height << std::endl;
-
   // Get bit depth
   _depth = png_get_bit_depth(png_ptr, info_ptr);
-  std::cout << "Depth: " << _depth << std::endl;
-
 
   // If image is already grayscale
   bool isGrayscale = png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_GRAY;
-  std::cout << "Grayscale: " << isGrayscale << "color type: " << (int) png_get_color_type(png_ptr, info_ptr) << std::endl;
 
   // If image is not grayscale, desaturate it
   if (!isGrayscale) {
@@ -246,8 +239,6 @@ std::string Png::base64_encode(const unsigned char* data, size_t len) {
         encoded += (i + 1 < len) ? base64_chars[enc3] : '=';
         encoded += (i + 2 < len) ? base64_chars[enc4] : '=';
     }
-
-    std::cout << encoded << std::endl;
 
     return encoded;
 }

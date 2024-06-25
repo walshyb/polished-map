@@ -56,7 +56,6 @@ export const loadMetatilesetAction = createAsyncThunk(
       "johto_overcast_metatiles.bin",
     );
 
-    console.log(handler);
     if (!handler) {
       throw new Error("Couldn't open metatile file");
     }
@@ -185,7 +184,6 @@ export const editorSlice = createSlice({
         state.activePalette = action.payload.activePalette;
       })
       .addCase("saveMetatileImage", (state, action: any) => {
-        console.log("Saving metatile image", action);
         state.metatileset[action.payload.id] = action.payload.image;
       })
       .addCase(loadPaletteAction.rejected, (state, action) => {
