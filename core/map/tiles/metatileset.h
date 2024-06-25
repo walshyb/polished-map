@@ -38,7 +38,7 @@ public:
 	bool uses_tile(int idx) const;
 	void trim_tileset(void);
 	void clear(void);
-  std::string draw_metatile(int x, int y, uint8_t id, bool zoom) const;
+  std::string draw_metatile(uint8_t id) const;
 	unsigned char *print_rgb(const Map &map) const;
 	Result read_metatiles(const uint8_t* fileDataPtr, size_t bufferSize);
 	bool write_metatiles(const char *f);

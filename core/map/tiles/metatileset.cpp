@@ -166,30 +166,16 @@ unsigned char *Metatileset::print_rgb(const Map &map) const {
  *
  * @return Base64-encoded PNG image data
  */
-std::string Metatileset::draw_metatile(int x, int y, uint8_t id, bool zoom) const {
-
-  // setting x and y to 0 does... something good??
-  // actually makes it work
-  x = 0;
-  y = 0;
-
+std::string Metatileset::draw_metatile(uint8_t id) const {
   // Tile size = 8
   // METATILE_SIZE = 4
   // IMAGE_SIZE = 32, assuming 32x32. probably needs to be bigger.
   //
   // current status: creates a 32x32 image that represents a 2x2 metatile. we need a 4x4
-  std::cout << "drawing metatile " << (int)id << " at " << x << ", " << y << std::endl;
-    int s = TILE_SIZE * (zoom ? ZOOM_FACTOR : 1);
-    std::cout << "s: " << s << std::endl;
     std::cout << "Tile size: " << TILE_SIZE << std::endl;
-    int k = zoom ? 1 : ZOOM_FACTOR;
-    int d = NUM_CHANNELS * k;
-    int ld = LINE_BYTES * k;
     Metatile *mt = _metatiles[id];
 
-    std::cout << "drawing metatile " << (int)id << " at " << x << ", " << y << std::endl;
     std::cout << "METATILE_SIZE: " << METATILE_SIZE << std::endl;
-
     std::cout << "num channels: " << NUM_CHANNELS << std::endl;
 
 
@@ -204,8 +190,8 @@ std::string Metatileset::draw_metatile(int x, int y, uint8_t id, bool zoom) cons
         for (int tx = 0; tx < 4; tx++) {
             std::cout << "drawing tile " << tx << ", " << ty << std::endl;
 
-            int src_x = x + tx * TILE_SIZE;
-            int src_y = y + ty * TILE_SIZE;
+            int src_x = tx * TILE_SIZE;
+            int src_y = ty * TILE_SIZE;
 
             // Grab the first tile in the metatile
             const Tile *tile = mt->tile(tx, ty);
@@ -231,10 +217,10 @@ std::string Metatileset::draw_metatile(int x, int y, uint8_t id, bool zoom) cons
                     int src_pos = (((src_y + dy)%8) * LINE_BYTES + ((src_x + dx)%8) * NUM_CHANNELS);
 
                       // Debugging output
-                    std::cout << "Copying pixel: (" << dx << ", " << dy << ") ";
-                    std::cout << "from (" << src_x + dx << ", " << src_y + dy << ") ";
-                    std::cout << "to (" << dest_x << ", " << dest_y << ") ";
-                    std::cout << "src_pos: " << src_pos << " dest_pos: " << dest_pos << std::endl;
+                    //std::cout << "Copying pixel: (" << dx << ", " << dy << ") ";
+                    //std::cout << "from (" << src_x + dx << ", " << src_y + dy << ") ";
+                    //std::cout << "to (" << dest_x << ", " << dest_y << ") ";
+                    //std::cout << "src_pos: " << src_pos << " dest_pos: " << dest_pos << std::endl;
 
 
                     std::memcpy(&image_data[dest_pos], &buffer[src_pos], NUM_CHANNELS);

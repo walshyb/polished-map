@@ -27,7 +27,7 @@ extern "C" {
     AppState *appState = &AppState::getInstance();
     Metatileset *metatileset = appState->getMetatileset();
     std::cout << "Metatileset: " << metatileset << std::endl;
-    std::string image = metatileset->draw_metatile(303, 143, 2, false);
+    std::string image = metatileset->draw_metatile(2);
     std::cout << "Image: " << image << std::endl;
     return image;
   }
