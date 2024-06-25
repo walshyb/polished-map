@@ -9,6 +9,7 @@ import {
   loadPaletteAction,
   loadMetatilesetAction,
   loadTilesetAction,
+  loadMapDataAction,
 } from "./editorSlice";
 
 export interface FileNode {
@@ -121,6 +122,7 @@ export const openProject = createAsyncThunk(
       }),
     );
     dispatch(loadPaletteAction({}));
+    dispatch(loadMapDataAction());
 
     return {
       fileTree,

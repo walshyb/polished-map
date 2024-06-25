@@ -20,11 +20,23 @@ interface MetatileImages {
   [key: string]: string;
 }
 
+interface MapData {
+  [mapName: string]: {
+    name: string;
+    tileset: string;
+    environment: string;
+    locationSign: string;
+    location: string;
+    palette: string;
+  };
+}
+
 interface Editor {
   blocks: Block[];
   activePalette?: string | null;
   status?: string;
   metatileset: MetatileImages;
+  mapData: MapData;
 }
 
 const initialState: Editor = {
@@ -32,6 +44,7 @@ const initialState: Editor = {
   activePalette: null,
   status: "initial",
   metatileset: {},
+  mapData: {},
 };
 
 interface LoadPaletteResult {
@@ -94,6 +107,47 @@ export const loadMetatilesetAction = createAsyncThunk(
 
     return {
       activeMetatileset: name,
+    };
+  },
+);
+
+export const loadMapDataAction = createAsyncThunk(
+  "editor/loadMapData",
+  async () => {
+    const mapsDataHandler = await getFileHandlerByPath("data/maps", "maps.asm");
+    console.log(mapsDataHandler);
+
+    if (!mapsDataHandler) {
+      throw new Error("Couldn't open maps data file");
+    }
+
+    const mapsData: File = await mapsDataHandler.getFile();
+    const mapsDataFileContents: string = await mapsData.text();
+
+    const lines = mapsDataFileContents.split("\n");
+
+    const data: MapData = {};
+    lines.forEach((line) => {
+      // Skip if not relevant map data line
+      if (!line.trim().startsWith("map ")) return;
+
+      const tokens = line.split(" ");
+      const mapName = tokens[1];
+
+      data[mapName] = {
+        name: mapName,
+        tileset: tokens[2],
+        environment: tokens[3],
+        locationSign: tokens[4],
+        location: tokens[5],
+        palette: tokens[8],
+      };
+    });
+
+    // TODO throw if no map data
+
+    return {
+      data,
     };
   },
 );
@@ -169,6 +223,9 @@ export const editorSlice = createSlice({
       .addCase("file/openFileByName/fulfilled", (state) => {
         // On file processing, fetch blocks
         state.blocks = getBlocks();
+      })
+      .addCase(loadMapDataAction.fulfilled, (state, action) => {
+        state.mapData = action.payload.data;
       })
       .addCase(loadPaletteAction.fulfilled, (state, action) => {
         state.activePalette = action.payload.activePalette;
