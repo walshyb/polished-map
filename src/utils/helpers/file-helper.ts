@@ -15,7 +15,7 @@ export async function loadPalette(
   const fileHandle: FileSystemFileHandle | undefined =
     await getFileHandlerByPath(palettePath, fileName);
 
-  console.log(palettePath, fileName);
+  console.log("pal", palettePath, fileName);
 
   if (!fileHandle) {
     console.error("Couldn't open file");
@@ -25,7 +25,10 @@ export async function loadPalette(
   const file: File = await fileHandle.getFile();
   const arrayBuffer: ArrayBuffer = await file.arrayBuffer();
 
+  console.log("pal call process file");
+
   const result: boolean = processFile(arrayBuffer, file.size, file.name);
+  console.log("pal, load pal bool", result);
 
   return result;
 }

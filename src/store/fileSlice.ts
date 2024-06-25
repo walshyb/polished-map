@@ -121,7 +121,6 @@ export const openProject = createAsyncThunk(
         name: "johto_overcast.johto_common.2bpp",
       }),
     );
-    dispatch(loadPaletteAction({}));
     dispatch(loadMapDataAction());
 
     return {

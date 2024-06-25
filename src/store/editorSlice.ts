@@ -87,6 +87,7 @@ export const loadMetatilesetAction = createAsyncThunk(
      * TODO: make this separate action?
      */
 
+    dispatch(loadPaletteAction({}));
     const metatilesetSize: number = getMetatilesetSize();
 
     if (!metatilesetSize) {
@@ -115,7 +116,6 @@ export const loadMapDataAction = createAsyncThunk(
   "editor/loadMapData",
   async () => {
     const mapsDataHandler = await getFileHandlerByPath("data/maps", "maps.asm");
-    console.log(mapsDataHandler);
 
     if (!mapsDataHandler) {
       throw new Error("Couldn't open maps data file");
@@ -124,10 +124,10 @@ export const loadMapDataAction = createAsyncThunk(
     const mapsData: File = await mapsDataHandler.getFile();
     const mapsDataFileContents: string = await mapsData.text();
 
-    const lines = mapsDataFileContents.split("\n");
+    const lines: string[] = mapsDataFileContents.split("\n");
 
     const data: MapData = {};
-    lines.forEach((line) => {
+    lines.forEach((line: string) => {
       // Skip if not relevant map data line
       if (!line.trim().startsWith("map ")) return;
 
@@ -154,7 +154,7 @@ export const loadMapDataAction = createAsyncThunk(
 
 export const loadTilesetAction = createAsyncThunk(
   "editor/loadTileset",
-  async (data: any) => {
+  async (data: any, { dispatch }) => {
     const { path, name } = data;
     const tilesetHandler = await getFileHandlerByPath(path, name);
     const beforeTilesetHandler = await getFileHandlerByPath(
