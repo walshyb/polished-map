@@ -51,10 +51,7 @@ export const loadMetatilesetAction = createAsyncThunk(
     /**
      * Process metatileset file
      */
-    const handler = await getFileHandlerByPath(
-      "data/tilesets/",
-      "johto_overcast_metatiles.bin",
-    );
+    const handler = await getFileHandlerByPath(path, name);
 
     if (!handler) {
       throw new Error("Couldn't open metatile file");
@@ -64,11 +61,7 @@ export const loadMetatilesetAction = createAsyncThunk(
     const metatilesetData = await metatilesetFile.arrayBuffer();
 
     // load metatileset
-    const result = processFile(
-      metatilesetData,
-      metatilesetFile.size,
-      "johto_overcast_metatiles.bin",
-    );
+    const result = processFile(metatilesetData, metatilesetFile.size, name);
 
     if (!result) {
       // Caught by thunk
@@ -109,12 +102,9 @@ export const loadTilesetAction = createAsyncThunk(
   "editor/loadTileset",
   async (data: any) => {
     const { path, name } = data;
-    const tilesetHandler = await getFileHandlerByPath(
-      "gfx/tilesets/",
-      "johto_overcast.johto_common.2bpp",
-    );
+    const tilesetHandler = await getFileHandlerByPath(path, name);
     const beforeTilesetHandler = await getFileHandlerByPath(
-      "gfx/tilesets/",
+      path,
       "johto_common.2bpp",
     );
 
@@ -135,7 +125,7 @@ export const loadTilesetAction = createAsyncThunk(
       tileset.size,
       beforeTilesetArrayBuffer,
       beforeTileset.size,
-      name || "johto_overcast.johto_common.2bpp",
+      name,
     );
 
     if (!result) {
