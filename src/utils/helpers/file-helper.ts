@@ -32,3 +32,18 @@ export async function loadPalette(
 
   return result;
 }
+
+export interface FileInfo {
+  path: string;
+  filename: string;
+}
+/**
+ * Take a file path and split it into the path and filename
+ */
+export function splitFilePath(filePath: string): FileInfo {
+  console.log(filePath);
+  return {
+    path: filePath.substring(0, filePath.lastIndexOf("/")),
+    filename: filePath.substring(filePath.lastIndexOf("/") + 1),
+  };
+}

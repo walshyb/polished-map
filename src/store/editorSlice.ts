@@ -23,9 +23,12 @@ interface TilesetReference {
 }
 
 // Tileset name to tileset filename
-interface TilesetLocation {
-  // ex: TILESET_ECRUTEAK_SHRINE: "gfx/tilesets/johto_traditional.johto_common.2bpp"
-  [tilesetName: string]: string;
+export interface TilesetData {
+  [tilesetName: string]: {
+    // TILESET_ECRUTEAK_SHRINE:
+    location: string; //gfx/tilesets/johto_traditional.johto_common.2bpp
+    metatileLocation: string;
+  };
 }
 
 interface MetatileImages {
@@ -50,7 +53,7 @@ interface Editor {
   status?: string;
   metatileset: MetatileImages;
   mapData: MapData;
-  tilesetLocation: TilesetLocation;
+  tilesetLocation: TilesetData;
 }
 
 const initialState: Editor = {
@@ -153,15 +156,15 @@ export const loadMapDataAction = createAsyncThunk(
       if (!line.trim().startsWith("map ")) return;
 
       const tokens = line.split(" ");
-      const mapName = tokens[1];
+      const mapName = tokens[1].replace(",", "");
 
       mapData[mapName] = {
         name: mapName,
-        tileset: tokens[2],
-        environment: tokens[3],
-        locationSign: tokens[4],
-        location: tokens[5],
-        palette: tokens[8],
+        tileset: tokens[2].replace(",", ""),
+        environment: tokens[3].replace(",", ""),
+        locationSign: tokens[4].replace(",", ""),
+        location: tokens[5].replace(",", ""),
+        palette: tokens[8].replace(",", ""),
       };
     });
 
@@ -219,7 +222,7 @@ export const loadMapDataAction = createAsyncThunk(
      * 	TilesetKanto1GFX1:: INCBIN "gfx/tilesets/kanto.kanto_common.2bpp.lz"
      * 	TilesetKanto2GFX1:: INCBIN "gfx/tilesets/indigo_plateau.kanto_common.2bpp.lz"
      */
-    const tilesetLocation: TilesetLocation = {};
+    const tilesetLocation: TilesetData = {};
 
     const symbolNamesHandler = await getFileHandlerByPath(
       "data/",
@@ -239,27 +242,48 @@ export const loadMapDataAction = createAsyncThunk(
     const symbolsData: any = {};
     let symbolIndex = 2;
     symbolsLines.forEach((line: string) => {
-      // Skip if not relevant tileset constant line
-      if (!line.trim().startsWith("tileset ") && !line.includes("GFX1::"))
-        return;
-
       const tokens = line.split(" ");
 
+      // Get tileset macro name and map to tileset constant name
       if (line.trim().startsWith("tileset ")) {
         const symbolName = tokens[1];
-        console.log(symbolName);
         tilesetData[symbolIndex].symbolName = symbolName;
         symbolsData[symbolName] = tilesetData[symbolIndex++].constantName;
       }
 
+      // Get tileset location from symbol name
+      // TODO:
+      // handle multi-line tileset definitions
+      // i.e.
+      //
+      // TilesetJohto1GFX1::
+      // TilesetJohto5GFX1:: INCBIN "gfx/tilesets/johto_traditional.johto_common.2bpp.vram0.lz"
       if (line.includes("GFX1::") && tokens.length > 1) {
         const symbolName = tokens[0].replace("GFX1::", "");
         const tilesetName = symbolsData[symbolName];
-        console.log("GFX", symbolName, tilesetName, tokens[2], line);
-        tilesetLocation[tilesetName] = tokens[2]
-          .replace(".lz", "")
-          .replace(".vram1", "")
-          .replace(".vram0", "");
+        tilesetLocation[tilesetName] = {
+          location: tokens[2]
+            .replace(/"/g, "")
+            .replace(".lz", "")
+            .replace(".vram1", "")
+            .replace(".vram0", ""),
+          metatileLocation: "",
+        };
+      }
+
+      // Save metatiles location
+      // TODO:
+      // handle multi-line metatileset definitions
+      if (line.includes("Meta::") && tokens.length > 1) {
+        const symbolName = tokens[0].replace("Meta::", "");
+        const tilesetName = symbolsData[symbolName];
+        // If tileset doesn't exist, skip
+        if (!tilesetLocation[tilesetName]) {
+          return;
+        }
+        tilesetLocation[tilesetName].metatileLocation = tokens[2]
+          .replace(/"/g, "")
+          .replace(".lz", "");
       }
     });
 
@@ -274,10 +298,17 @@ export const loadTilesetAction = createAsyncThunk(
   "editor/loadTileset",
   async (data: any, { dispatch }) => {
     const { path, name } = data;
+
+    let beforeTilesetName: string = "";
+    // If name contains two periods, there's a before tileset
+    if (name.split(".").length - 1 > 1) {
+      beforeTilesetName = name.substring(name.indexOf(".") + 1);
+    }
+
     const tilesetHandler = await getFileHandlerByPath(path, name);
     const beforeTilesetHandler = await getFileHandlerByPath(
       path,
-      "johto_common.2bpp",
+      beforeTilesetName || name,
     );
 
     if (!tilesetHandler || !beforeTilesetHandler) {
@@ -298,6 +329,7 @@ export const loadTilesetAction = createAsyncThunk(
       beforeTilesetArrayBuffer,
       beforeTileset.size,
       name,
+      beforeTilesetName,
     );
 
     if (!result) {

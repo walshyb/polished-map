@@ -4,8 +4,10 @@ import {
   readFilesInDirectory,
   getFileHandlerByPath,
 } from "../utils/helper-funcs";
+import { FileInfo, splitFilePath } from "../utils/helpers/file-helper";
 import FileHandlerManager from "./fileManagerSingleton";
 import {
+  TilesetData,
   loadPaletteAction,
   loadMetatilesetAction,
   loadTilesetAction,
@@ -43,7 +45,7 @@ const initialState: FileSlice = {
  */
 export const openFileByName = createAsyncThunk(
   "file/openFileByName",
-  async (data: any, { dispatch }) => {
+  async (data: any, { getState, dispatch }) => {
     const { path, name } = data;
     const fileHandler = await getFileHandlerByPath(path, name);
 
@@ -71,10 +73,38 @@ export const openFileByName = createAsyncThunk(
       throw new Error("Map (.ablk) opening failed");
     }
 
-    dispatch(
+    const state: any = await getState();
+
+    // TODO add to helper
+    // Get map tileset
+    if (!state?.editor?.mapData) {
+      throw new Error("Map data not loaded");
+    }
+
+    // TODO add defensive handling
+    const mapName = file.name.replace(".ablk", "");
+    const mapData = state.editor.mapData[mapName];
+    const tileset = mapData.tileset;
+    const tilesetLocation: any = state.editor.tilesetLocation[tileset];
+
+    const { path: tilesetPath, filename: tilesetFileName } = splitFilePath(
+      tilesetLocation.location,
+    );
+
+    const { path: metaTilesetPath, filename: metaTilesetFileName } =
+      splitFilePath(tilesetLocation.metatileLocation);
+
+    await dispatch(
+      loadTilesetAction({
+        path: tilesetPath,
+        name: tilesetFileName,
+      }),
+    );
+
+    await dispatch(
       loadMetatilesetAction({
-        path: "data/tilesets/",
-        name: "johto_overcast_metatiles.bin",
+        path: metaTilesetPath,
+        name: metaTilesetFileName,
       }),
     );
 
@@ -115,12 +145,6 @@ export const openProject = createAsyncThunk(
 
     // Load default palette
 
-    dispatch(
-      loadTilesetAction({
-        path: "gfx/tilesets/",
-        name: "johto_overcast.johto_common.2bpp",
-      }),
-    );
     dispatch(loadMapDataAction());
 
     return {
