@@ -24,12 +24,11 @@ interface TilesetReference {
 
 // Tileset name to tileset filename
 interface TilesetLocation {
-  // ex: TILESET_ECRUTEAK_SHRINE: "gfx/tilesets/johto_traditional.johto_common.2bpp"
   [tilesetName: string]: string;
 }
 
 interface MetatileImages {
-  // block ID to base64 encoded png
+  // ID to base64 encoded png
   [key: string]: string;
 }
 
@@ -190,7 +189,12 @@ export const loadMapDataAction = createAsyncThunk(
 
     const tilesetLines: string[] = constantsBlob.split("\n");
 
-    const tilesetData: TilesetReference = {};
+    const tilesetData: TilesetReference = {
+      1: {
+        constantName: "ookattackbook!123",
+        symbolName: "",
+      },
+    };
     let tilesetIndex = 2; // index starts at 2 because 1 is junk (ookattackbook!123)
     tilesetLines.forEach((line: string) => {
       // Skip if not relevant tileset constant line
@@ -227,7 +231,6 @@ export const loadMapDataAction = createAsyncThunk(
     );
 
     if (!symbolNamesHandler) {
-      console.log("thrown");
       throw new Error("Couldn't open maps data file");
     }
 
@@ -237,35 +240,29 @@ export const loadMapDataAction = createAsyncThunk(
     const symbolsLines: string[] = symbolsBlob.split("\n");
 
     const symbolsData: any = {};
-    let symbolIndex = 2;
+    let symbolIndex = 1;
     symbolsLines.forEach((line: string) => {
       // Skip if not relevant tileset constant line
-      if (!line.trim().startsWith("tileset ") && !line.includes("GFX1::"))
-        return;
-
-      const tokens = line.split(" ");
+      if (!line.trim().startsWith("tileset ") || !line.includes("GFX1")) return;
 
       if (line.trim().startsWith("tileset ")) {
+        const tokens = line.split(" ");
         const symbolName = tokens[1];
-        console.log(symbolName);
         tilesetData[symbolIndex].symbolName = symbolName;
         symbolsData[symbolName] = tilesetData[symbolIndex++].constantName;
       }
 
-      if (line.includes("GFX1::") && tokens.length > 1) {
-        const symbolName = tokens[0].replace("GFX1::", "");
+      if (line.includes("GFX1")) {
+        const tokens = line.split(" ");
+        const symbolName = tokens[0].replace("::GX1", "");
         const tilesetName = symbolsData[symbolName];
-        console.log("GFX", symbolName, tilesetName, tokens[2], line);
-        tilesetLocation[tilesetName] = tokens[2]
-          .replace(".lz", "")
-          .replace(".vram1", "")
-          .replace(".vram0", "");
+        result[tilesetName] = tokens[2];
       }
     });
 
     return {
       mapData,
-      tilesetLocation,
+      result,
     };
   },
 );
@@ -343,8 +340,7 @@ export const editorSlice = createSlice({
         state.blocks = getBlocks();
       })
       .addCase(loadMapDataAction.fulfilled, (state, action) => {
-        state.mapData = action.payload.mapData;
-        state.tilesetLocation = action.payload.tilesetLocation;
+        state.mapData = action.payload.data;
       })
       .addCase(loadPaletteAction.fulfilled, (state, action) => {
         state.activePalette = action.payload.activePalette;
