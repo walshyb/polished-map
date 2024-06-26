@@ -47,4 +47,9 @@ extern "C" {
     Metatileset *metatileset = appState->getMetatileset();
     return metatileset->size();
   }
+
+  void clearState() {
+    AppState *appState = &AppState::getInstance();
+    appState->destroy();
+  }
 }

@@ -1,5 +1,8 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import { processFile as processFileUtil } from "../utils/wasm-funcs";
+import {
+  processFile as processFileUtil,
+  clearState,
+} from "../utils/wasm-funcs";
 import {
   readFilesInDirectory,
   getFileHandlerByPath,
@@ -54,6 +57,9 @@ export const openFileByName = createAsyncThunk(
       // caught by thunk
       throw new Error("Couldn't open file");
     }
+
+    // Clear existing map and metatiles from C++ memory
+    await clearState();
 
     const file: File = await fileHandler.getFile();
     //const size = file.size;

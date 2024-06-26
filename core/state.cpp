@@ -4,6 +4,7 @@
 
 AppState::~AppState() {
   map->clear();
+  metatileset->clear();
 }
 
 AppState::AppState() {
@@ -17,6 +18,10 @@ Map* AppState::getMap() {
 
 Metatileset* AppState::getMetatileset() {
   return metatileset;
+}
+
+void AppState::destroy() {
+  delete this;
 }
 
 extern "C" {

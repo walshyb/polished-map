@@ -130,3 +130,8 @@ export function getMetatileImage(index: number): string {
 
   return base64Image;
 }
+
+export async function clearState(): Promise<void> {
+  // @ts-ignore
+  window._clearState();
+}

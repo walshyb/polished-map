@@ -14,6 +14,7 @@ public:
 
   Map *getMap();
   Metatileset *getMetatileset();
+  void destroy();
 private:
   AppState();
   ~AppState();
