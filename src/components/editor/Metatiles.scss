@@ -3,10 +3,17 @@
   flex-wrap: wrap;
   width: 150px;
   overflow-y: scroll;
+  max-height: 90vh;
+  position: relative;
 
-  div {
+  .metatile {
     flex-basis: 25%;
     height: 32px;
     width: 32px;
+
+    span {
+      position: absolute;
+      margin-left: -30px;
+    }
   }
 }
