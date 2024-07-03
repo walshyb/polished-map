@@ -10,6 +10,13 @@
     flex-basis: 25%;
     height: 32px;
     width: 32px;
+    margin-bottom: 2px;
+
+    &:hover {
+      cursor: pointer;
+      position: relative;
+      outline: 2px solid white;
+    }
 
     span {
       position: absolute;
