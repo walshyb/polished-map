@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Segment, SidebarPushable, SidebarPusher } from "semantic-ui-react";
 import FileExplorer from "./components/menus/FileExplorer";
 import { useAppSelector } from "./hooks";
+import MetatileModal from "./components/menus/MetatileModal";
 
 function App() {
   // Really this is a flag for .(a)blk processed
@@ -49,6 +50,7 @@ function App() {
           <Segment basic>
             Content
             <Editor metatiles={metatiles} />
+            <MetatileModal />
           </Segment>
         </SidebarPusher>
       </SidebarPushable>

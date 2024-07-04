@@ -20,6 +20,7 @@
     "@types/wicg-file-system-access": "^2023.10.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-draggable": "^4.4.6",
     "react-redux": "^9.1.0",
     "react-scripts": "5.0.1",
     "redux-thunk": "^3.1.0",
