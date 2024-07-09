@@ -33,7 +33,10 @@ export default function MetatileModal(props: MetatileModalProps) {
         {/* Need container div for draggable */}
         <div className="metatile-modal">
           {/* Draggable handle */}
-          <div className="modal-header">Edit Block</div>
+          <div className="modal-header">
+            <span>Edit Block</span>
+            <div className="close-button"></div>
+          </div>
           <div className="modal-content">
             <div className="tileset-container"></div>
             <div className="tile-container"></div>

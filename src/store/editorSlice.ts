@@ -36,6 +36,24 @@ interface MetatileImages {
   [key: string]: string;
 }
 
+interface ModalData {
+  paletteIndex: number;
+  paletteName: string;
+  collision: {
+    topLeft: string;
+    topRight: string;
+    bottomLeft: string;
+    bottomRight: string;
+  };
+
+  // tiles in hexadecimal, or maybe as ints and do conversion later?
+  tileIds: string[16]; // maybe number array?
+
+  priority: boolean;
+  xFlip: boolean;
+  yFlip: boolean;
+}
+
 interface MapData {
   [mapName: string]: {
     name: string;
@@ -54,6 +72,9 @@ interface Editor {
   metatileset: MetatileImages;
   mapData: MapData;
   tilesetLocation: TilesetData;
+
+  // TODO: remove the any when time to populate modal data
+  modalData: ModalData | any;
 }
 
 const initialState: Editor = {
@@ -63,6 +84,7 @@ const initialState: Editor = {
   metatileset: {},
   mapData: {},
   tilesetLocation: {},
+  modalData: {},
 };
 
 interface LoadPaletteResult {
